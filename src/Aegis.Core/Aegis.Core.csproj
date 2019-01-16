@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Authors>Alexandre Kerametlian</Authors>
+    <Description>Core library providing Aegis secure file storage functionality.</Description>
+    <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
