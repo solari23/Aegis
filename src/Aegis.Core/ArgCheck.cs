@@ -27,19 +27,74 @@
         }
 
         /// <summary>
-        /// Verifies the argument is not null.
+        /// Verifies the given string is not null or empty.
         /// </summary>
         /// <param name="arg">The argument to verify.</param>
         /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <param name="allowWhitespace">Whether or not to allow whitespace as a non-empty string. Default is false.</param>
+        /// <param name="allowWhitespace">Whether or not to consider whitespace as non-empty. Default is false.</param>
         /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NonEmptyString([ValidatedNotNull]string arg, string argName, bool allowWhitespace = false)
+        public static void NotEmpty([ValidatedNotNull]string arg, string argName, bool allowWhitespace = false)
         {
             if (allowWhitespace ? string.IsNullOrEmpty(arg) : string.IsNullOrWhiteSpace(arg))
             {
-                throw new ArgumentNullException(argName, "The string must not be empty!");
+                throw new ArgumentNullException(argName, "The input string must not be empty!");
+            }
+        }
+
+        /// <summary>
+        /// Verifies the argument is not empty.
+        /// </summary>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotEmpty<T>(Span<T> arg, string argName) => NotEmpty((ReadOnlySpan<T>)arg, argName);
+
+        /// <summary>
+        /// Verifies the argument is not empty.
+        /// </summary>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotEmpty<T>(ReadOnlySpan<T> arg, string argName)
+        {
+            if (arg.IsEmpty)
+            {
+                throw new ArgumentException("The input span must not be empty!", argName);
+            }
+        }
+
+        /// <summary>
+        /// Verifies the argument contains exactly a given number of elements.
+        /// </summary>
+        /// <param name="requiredLength">The exact number of elements required.</param>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void HasLength<T>(int requiredLength, Span<T> arg, string argName)
+            => HasLength(requiredLength, (ReadOnlySpan<T>)arg, argName);
+
+        /// <summary>
+        /// Verifies the argument contains exactly a given number of elements.
+        /// </summary>
+        /// <param name="requiredLength">The exact number of elements required.</param>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void HasLength<T>(int requiredLength, ReadOnlySpan<T> arg, string argName)
+        {
+            if (arg.Length != requiredLength)
+            {
+                throw new ArgumentException($"The input span must be of length {requiredLength}!", argName);
             }
         }
 
@@ -52,12 +107,29 @@
         /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IsNot<T>(T invalidValue, [ValidatedNotNull]T arg, string argName)
+        public static void IsNot<T>(T invalidValue, T arg, string argName)
             where T : IComparable
         {
+            // TODO: Bug here in the case when arg is null
             if (arg.CompareTo(invalidValue) == 0)
             {
                 throw new ArgumentException($"The input value must not be {invalidValue}!", argName);
+            }
+        }
+
+        /// <summary>
+        /// Verifies the argument is not negative.
+        /// </summary>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotNegative(long arg, string argName)
+        {
+            if (arg < 0)
+            {
+                throw new ArgumentOutOfRangeException(argName, "The input value must not be negative!");
             }
         }
 

@@ -9,6 +9,7 @@
 
   <PropertyGroup>
     <BondOptions>--readonly-properties --using="DateTime=System.DateTime" --using="Guid=System.Guid"</BondOptions>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

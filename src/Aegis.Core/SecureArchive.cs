@@ -33,7 +33,8 @@
                 LastModifiedTime = currentTime,
             };
 
-            // TODO: Need to:
+            // TODO: Complete implementation of SecureArchive creation
+            // Need to:
             //   - Take in a user secret
             //   - Generate the archive key
             //   - Create the auth canary

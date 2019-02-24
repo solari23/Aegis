@@ -39,8 +39,11 @@ struct AuthorizedUserKey
     // The type of the key.
     0: UserKeyType KeyType = Unknown;
 
-    // The base64url encoded SHA1 of the key, used solely as an identifier.
-    // Matching on this value should *never* be used to authenticate a user.
+    // IMPORTANT TODO: Need some research into how to securely generate key identifiers for symmetric keys.
+    //                 Sha1 of the derived key might potentially make it easier to brute force the key?
+    // ----------------------------------------------------------------------------------------------------
+    // The base64url encoded SHA1 of the derived key, used solely as an identifier.
+    // Matching on this value should *never* be used to positively authenticate a user.
     1: string KeyId;
 
     // Unix epoch timestamp of when the key was authorized.
@@ -56,7 +59,8 @@ struct AuthorizedUserKey
     5: EncryptedPacket EncryptedArchiveKey;
 }
 
-// Defines the format of Aegis SecureArchive files.
+// The core data structure that represents SecureArchive files. The SecureArchive is a
+// self-contained file that holds the user's encrypted documents.
 struct SecureArchive
 {
     // A unique identifier for the archive.
