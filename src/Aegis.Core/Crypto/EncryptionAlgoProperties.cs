@@ -40,7 +40,7 @@
         /// <param name="authTagSizeInBytes">The size of the authentication tag in bytes. Default is 0 for unauthenticated encryption.</param>
         private EncryptionAlgoProperties(EncryptionAlgo algo, int keySizeInBytes, int ivSizeInBytes = 0, int authTagSizeInBytes = 0)
         {
-            Debug.Assert(algo != EncryptionAlgo.Aes256Gcm);
+            Debug.Assert(algo != EncryptionAlgo.Unknown);
             Debug.Assert(keySizeInBytes > 0);
             Debug.Assert(IvSizeInBytes >= 0);
             Debug.Assert(authTagSizeInBytes >= 0);

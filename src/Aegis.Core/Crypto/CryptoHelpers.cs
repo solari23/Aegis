@@ -22,6 +22,11 @@
             return bytes;
         }
 
+        /// <summary>
+        /// Gets the <see cref="ICryptoStrategy"/> associated with the given cryptographic algorithm.
+        /// </summary>
+        /// <param name="algo">The cryptographic algorithm.</param>
+        /// <returns>The <see cref="ICryptoStrategy"/> associated with the algorithm.</returns>
         internal static ICryptoStrategy GetCryptoStrategy(EncryptionAlgo algo)
         {
             ArgCheck.IsNot(EncryptionAlgo.Unknown, algo, nameof(algo));
