@@ -1,6 +1,7 @@
 ﻿namespace Aegis.Core
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Helpers used by the Bond runtime to automatically convert types during serialization.
@@ -14,6 +15,7 @@
         /// <param name="value">The value to convert.</param>
         /// <param name="unused">Required by the Bond type conversion interface, but not used.</param>
         /// <returns>The converted value.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", Justification = "Signature is required by Bond.")]
         public static long Convert(DateTime value, long unused) => value.ToUnixTime();
 
         /// <summary>
@@ -22,6 +24,7 @@
         /// <param name="value">The value to convert.</param>
         /// <param name="unused">Required by the Bond type conversion interface, but not used.</param>
         /// <returns>The converted value.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", Justification = "Signature is required by Bond.")]
         public static DateTime Convert(long value, DateTime unused) => Helpers.ToDateTime(value);
     }
 }

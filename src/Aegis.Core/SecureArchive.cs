@@ -10,7 +10,7 @@
     /// <remarks>
     /// Data members for this class are defined in a Bond schema (see Aegis.bond).
     /// </remarks>
-    [SuppressMessage("Microsoft.Design", "CS0628:DoNotDeclareProtectedMembersInSealedTypes", Justification = "The protected ctor is code generated.")]
+    [SuppressMessage("Microsoft.Design", "CA1047:DoNotDeclareProtectedMembersInSealedTypes", Justification = "The protected ctor is code generated.")]
     public sealed partial class SecureArchive
     {
         /// <summary>
@@ -24,12 +24,14 @@
 
             var currentTime = DateTime.UtcNow;
 
-            var archive = new SecureArchive();
-            archive.Id = Guid.NewGuid();
-            archive.FileVersion = Constants.CurrentAegisSecureArchiveFileVersion;
-            archive.EncryptionAlgo = encryptionAlgo;
-            archive.CreateTime = currentTime;
-            archive.LastModifiedTime = currentTime;
+            var archive = new SecureArchive
+            {
+                Id = Guid.NewGuid(),
+                FileVersion = Constants.CurrentAegisSecureArchiveFileVersion,
+                EncryptionAlgo = encryptionAlgo,
+                CreateTime = currentTime,
+                LastModifiedTime = currentTime,
+            };
 
             // TODO: Need to:
             //   - Take in a user secret

@@ -11,9 +11,21 @@
     <BondOptions>--readonly-properties --using="DateTime=System.DateTime" --using="Guid=System.Guid"</BondOptions>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;0628</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;0628</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Bond.Compiler.CSharp" Version="8.0.0" />
     <PackageReference Include="Bond.Core.CSharp" Version="8.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
