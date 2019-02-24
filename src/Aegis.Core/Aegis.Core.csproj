@@ -7,4 +7,13 @@
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BondOptions>--readonly-properties --using="DateTime=System.DateTime" --using="Guid=System.Guid"</BondOptions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bond.Compiler.CSharp" Version="8.0.0" />
+    <PackageReference Include="Bond.Core.CSharp" Version="8.0.0" />
+  </ItemGroup>
+
 </Project>
