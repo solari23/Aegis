@@ -22,17 +22,14 @@ enum EncryptionAlgo
 // Container that packages encrypted data with an envelope describing the encryption used.
 struct EncryptedPacket
 {
-    // The algorithm used to encrypt the data.
-    0: EncryptionAlgo Algo = Unknown;
-
     // The initialization vector for the encryption.
-    1: vector<uint8> IV;
+    0: vector<uint8> IV;
 
     // The authentication tag, for when authenticated encryption algorithms are used.
-    2: vector<uint8> AuthTag;
+    1: vector<uint8> AuthTag;
 
     // The actual encrypted data.
-    3: vector<uint8> CipherText;
+    2: vector<uint8> CipherText;
 }
 
 // Metadata associated with user keys authorized to unlock the SecureArchive.
@@ -68,18 +65,21 @@ struct SecureArchive
     // The file version number for the archive.
     1: int32 FileVersion;
 
+    // The algorithm used to encrypt data in the archive.
+    2: EncryptionAlgo EncryptionAlgo = Unknown;
+
     // When the archive was created.
-    2: DateTime CreateTime;
+    3: DateTime CreateTime;
 
     // When the archive was last modified.
-    3: DateTime LastModifiedTime;
+    4: DateTime LastModifiedTime;
 
     // The archive's Id encrypted with the archive key. This field is used to
     // check if the presented user key is authorized to unlock the archive.
-    4: EncryptedPacket AuthCanary;
+    5: EncryptedPacket AuthCanary;
 
     // The list of keys that are authorized to unlock the archive.
-    5: vector<AuthorizedUserKey> AuthorizedUserKeys;
+    6: vector<AuthorizedUserKey> AuthorizedUserKeys;
 
     // TODO: The SecureArchive will also contain:
     //   - An EncryptedPacket index with metadata about the files. Files should have:

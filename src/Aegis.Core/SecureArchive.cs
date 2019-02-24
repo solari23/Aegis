@@ -1,29 +1,38 @@
 ﻿namespace Aegis.Core
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// The core data structure that represents SecureArchive files. The SecureArchive is a
-    /// self-contained file that holds the user's encrypted documents
+    /// self-contained file that holds the user's encrypted documents.
     /// </summary>
-    public partial class SecureArchive
+    /// <remarks>
+    /// Data members for this class are defined in a Bond schema (see Aegis.bond).
+    /// </remarks>
+    [SuppressMessage("Microsoft.Design", "CS0628:DoNotDeclareProtectedMembersInSealedTypes", Justification = "The protected ctor is code generated.")]
+    public sealed partial class SecureArchive
     {
         /// <summary>
         /// Creates a new <see cref="SecureArchive"/> that contains no files.
         /// </summary>
+        /// <param name="encryptionAlgo">The data encryption algorithm to use. Default is <see cref="Constants.DefaultEncryptionAlgorithm"/>.</param>
         /// <returns>A new <see cref="SecureArchive"/>.</returns>
-        public static SecureArchive CreateNew()
+        public static SecureArchive CreateNew(EncryptionAlgo encryptionAlgo = Constants.DefaultEncryptionAlgorithm)
         {
+            ArgCheck.IsNot(EncryptionAlgo.Unknown, encryptionAlgo, nameof(encryptionAlgo));
+
             var currentTime = DateTime.UtcNow;
 
             var archive = new SecureArchive();
             archive.Id = Guid.NewGuid();
             archive.FileVersion = Constants.CurrentAegisSecureArchiveFileVersion;
+            archive.EncryptionAlgo = encryptionAlgo;
             archive.CreateTime = currentTime;
             archive.LastModifiedTime = currentTime;
 
             // TODO: Need to:
-            //   - Take in a user secret and encryption algo
+            //   - Take in a user secret
             //   - Generate the archive key
             //   - Create the auth canary
             //   - Initialize the first authorized user key

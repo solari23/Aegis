@@ -14,14 +14,21 @@
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello world");
+            try
+            {
+                Console.WriteLine("Hello world");
 
-            var archive = SecureArchive.CreateNew();
-            Console.WriteLine($"Archive {(Guid)archive.Id} created on {archive.CreateTime}.");
+                var archive = SecureArchive.CreateNew();
+                Console.WriteLine($"Archive {(Guid)archive.Id} created on {archive.CreateTime}.");
 
-            var serialized = BondHelpers.Serialize(archive);
-            archive = BondHelpers.Deserialize<SecureArchive>(serialized);
-            Console.WriteLine($"Deserialized archive {(Guid)archive.Id} created on {archive.CreateTime}.");
+                var serialized = BondHelpers.Serialize(archive);
+                archive = BondHelpers.Deserialize<SecureArchive>(serialized);
+                Console.WriteLine($"Deserialized archive {(Guid)archive.Id} created on {archive.CreateTime}.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[FATAL ERROR] {e}");
+            }
         }
     }
 }
