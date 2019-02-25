@@ -1,7 +1,9 @@
 ﻿namespace Aegis.Core
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Runtime.CompilerServices;
 
     /// <summary>
@@ -48,6 +50,25 @@
         /// </summary>
         /// <param name="arg">The argument to verify.</param>
         /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotEmpty<T>(IEnumerable<T> arg, string argName)
+        {
+            var hasElements = arg?.Any() ?? throw new ArgumentNullException(argName, "The input must not be null or empty!");
+
+            if (!hasElements)
+            {
+                throw new ArgumentException("The input string must not be empty!", argName);
+            }
+        }
+
+        /// <summary>
+        /// Verifies the argument is not empty.
+        /// </summary>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
         /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -66,6 +87,27 @@
             if (arg.IsEmpty)
             {
                 throw new ArgumentException("The input span must not be empty!", argName);
+            }
+        }
+
+        /// <summary>
+        /// Verifies the argument contains exactly a given number of elements.
+        /// </summary>
+        /// <param name="requiredLength">The exact number of elements required.</param>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void HasLength<T>(int requiredLength, IEnumerable<T> arg, string argName)
+        {
+            var elementCount = arg?.Count() 
+                ?? throw new ArgumentNullException(argName, $"The input must not be null and must be of length {requiredLength}!");
+
+            if (elementCount != requiredLength)
+            {
+                throw new ArgumentException($"The input must be of length {requiredLength}!", argName);
             }
         }
 

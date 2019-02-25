@@ -33,9 +33,9 @@
         public Span<byte> Decrypt(EncryptedPacket encryptedData, ReadOnlySpan<byte> key, ReadOnlySpan<byte> optionalAssociatedData = default)
         {
             ArgCheck.NotNull(encryptedData, nameof(encryptedData));
+            ArgCheck.HasLength(this.AlgorithmProperties.IvSizeInBytes, encryptedData.IV, nameof(encryptedData.IV));
+            ArgCheck.HasLength(this.AlgorithmProperties.AuthTagSizeInBytes, encryptedData.AuthTag, nameof(encryptedData.AuthTag));
             ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key, nameof(key));
-
-            // TODO: Check IV and AuthTag lengths
 
             // Containers to hold crypto operation outputs.
             var plainText = new byte[encryptedData.CipherText.Count];
