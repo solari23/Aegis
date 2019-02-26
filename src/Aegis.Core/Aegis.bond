@@ -4,19 +4,16 @@ namespace Aegis.Core
 // SecureArchives store timestamps in unix epoch format.
 using DateTime = int64;
 
-enum UserKeyType
-{
-    Unknown = 0,
-
-    // The key is derived from a password entered by the user using the
-    // PBKDF2 algorithm described in RFC 2898.
-    PasswordDerivedKey,
-}
-
 enum EncryptionAlgo
 {
     Unknown = 0,
     Aes256Gcm,
+}
+
+enum KeyDerivationFunction
+{
+    Unknown = 0,
+    PBKDF2 = 1,
 }
 
 // Container that packages encrypted data with an envelope describing the encryption used.
@@ -36,27 +33,32 @@ struct EncryptedPacket
 // The actual key needs to be provided by user at runtime.
 struct AuthorizedUserKey
 {
-    // The type of the key.
-    0: UserKeyType KeyType = Unknown;
+    // A friendly name to help the user identify the key.
+    0: string FriendlyName;
 
-    // IMPORTANT TODO: Need some research into how to securely generate key identifiers for symmetric keys.
-    //                 Sha1 of the derived key might potentially make it easier to brute force the key?
-    // ----------------------------------------------------------------------------------------------------
-    // The base64url encoded SHA1 of the derived key, used solely as an identifier.
+    // An identifier derived from the key. It is the base64url encoding of some extra
+    // bytes produced by the key derivation function while deriving the user key.
     // Matching on this value should *never* be used to positively authenticate a user.
     1: string KeyId;
 
     // Unix epoch timestamp of when the key was authorized.
     2: DateTime TimeAdded;
 
-    // The salt used to generate derived key types.
-    3: nullable<vector<uint8>> Salt = nothing;
-
-    // The number of iterations used to generate derived key types.
-    4: nullable<int32> IterationCount = nothing;
-
     // The archive key, encrypted by the authorized key.
-    5: EncryptedPacket EncryptedArchiveKey;
+    3: EncryptedPacket EncryptedArchiveKey;
+}
+
+// Metadata that describes security settings (e.g. crypto algorithm choice) for the archive.
+struct SecuritySettings
+{
+    // The algorithm used to encrypt data in the archive.
+    0: EncryptionAlgo EncryptionAlgo = Unknown;
+
+    // The key derivation function (KDF) used to generate user keys.
+    1: KeyDerivationFunction KeyDerivationFunction = Unknown;
+
+    // The work factor parameter (e.g. iteration count) for the KDF.
+    2: int32 KeyDerivationWorkFactor;
 }
 
 // The core data structure that represents SecureArchive files. The SecureArchive is a
@@ -69,8 +71,8 @@ struct SecureArchive
     // The file version number for the archive.
     1: int32 FileVersion;
 
-    // The algorithm used to encrypt data in the archive.
-    2: EncryptionAlgo EncryptionAlgo = Unknown;
+    // The security settings for the archive.
+    2: SecuritySettings SecuritySettings;
 
     // When the archive was created.
     3: DateTime CreateTime;
@@ -78,18 +80,22 @@ struct SecureArchive
     // When the archive was last modified.
     4: DateTime LastModifiedTime;
 
-    // The archive's Id encrypted with the archive key. This field is used to
-    // check if the presented user key is authorized to unlock the archive.
-    5: EncryptedPacket AuthCanary;
+    // The salt used when deriving keys.
+    5: vector<uint8> KeyDerivationSalt;
+
+    // The archive ID encrypted with the archive key. This field is used to
+    // test if the presented user key is authorized to unlock the archive.
+    6: EncryptedPacket AuthCanary;
 
     // The list of keys that are authorized to unlock the archive.
-    6: vector<AuthorizedUserKey> AuthorizedUserKeys;
+    7: vector<AuthorizedUserKey> AuthorizedUserKeys;
 
     // TODO: The SecureArchive will also contain:
-    //   - An EncryptedPacket index with metadata about the files. Files should have:
+    //   - An encrypted index with metadata about the files. Files should have:
     //      - A friendly name (the original file name, may be extended to create virtual paths)
     //      - A Guid unique identifier
-    //      - Sha256 of the file contents
+    //      - A compression algorithm identifier, so we can compress files before encrypting
+    //      - Sha256 of the file contents (used to check if checked out copies on disk are modified)
     //   - A map<Guid, EncryptedPacket> of file IDs to the actual encrypted files. The encryption
     //     method should be authenticated (e.g. AES in GCM mode), and the encryption method should
     //     take the fileId into account to make sure it hasn't been tampered with as well.

@@ -28,14 +28,14 @@
             {
                 Id = Guid.NewGuid(),
                 FileVersion = Constants.CurrentAegisSecureArchiveFileVersion,
-                EncryptionAlgo = encryptionAlgo,
                 CreateTime = currentTime,
                 LastModifiedTime = currentTime,
             };
 
             // TODO: Complete implementation of SecureArchive creation
             // Need to:
-            //   - Take in a user secret
+            //   - Create an input object SecureArchiveCreationDirectives
+            //   - Take in security settings, initial user secret, and salt size
             //   - Generate the archive key
             //   - Create the auth canary
             //   - Initialize the first authorized user key
