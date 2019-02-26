@@ -152,8 +152,7 @@
         public static void IsNot<T>(T invalidValue, T arg, string argName)
             where T : IComparable
         {
-            // TODO: Bug here in the case when arg is null
-            if (arg.CompareTo(invalidValue) == 0)
+            if (object.ReferenceEquals(arg, invalidValue) || arg.CompareTo(invalidValue) == 0)
             {
                 throw new ArgumentException($"The input value must not be {invalidValue}!", argName);
             }

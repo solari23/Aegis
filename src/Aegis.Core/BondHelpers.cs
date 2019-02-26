@@ -14,13 +14,13 @@
     public static class BondHelpers
     {
         /// <summary>
-        /// A cache of Bond serializers for types that we've seen.
+        /// A per-type cache of Bond serializers to avoid recreating them repeatedly.
         /// </summary>
         private static ConcurrentDictionary<Type, Serializer<CompactBinaryWriter<OutputBuffer>>> BondSerializers { get; }
             = new ConcurrentDictionary<Type, Serializer<CompactBinaryWriter<OutputBuffer>>>();
 
         /// <summary>
-        /// A cache of Bond deserializers for types that we've seen.
+        /// A per-type cache of Bond deserializers to avoid recreating them repeatedly.
         /// </summary>
         private static ConcurrentDictionary<Type, Deserializer<CompactBinaryReader<InputBuffer>>> BondDeserializers { get; }
             = new ConcurrentDictionary<Type, Deserializer<CompactBinaryReader<InputBuffer>>>();
@@ -39,9 +39,9 @@
         /// <returns>The deserialized object.</returns>
         public static T Deserialize<T>(byte[] data)
         {
-            if (data == null || data.Length == 0)
+            if (data is null || data.Length == 0)
             {
-                return default(T);
+                return default;
             }
 
             if (!BondDeserializers.TryGetValue(typeof(T), out var deserializer))
@@ -74,7 +74,7 @@
         /// <returns>The serialized bytes.</returns>
         public static byte[] Serialize<T>(T bondObject)
         {
-            if (bondObject == null)
+            if (bondObject is null)
             {
                 return null;
             }
