@@ -8,11 +8,14 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
         /// </summary>
-        /// <param name="userSecret">The secret entered by the user to encrypt the archive data.</param>
-        public SecureArchiveCreationParameters(byte[] userSecret)
+        /// <param name="userKeyFriendlyName">The friendly name for the first user key.</param>
+        /// <param name="userSecret">The secret entered by the user to create the first user key.</param>
+        public SecureArchiveCreationParameters(string userKeyFriendlyName, byte[] userSecret)
         {
+            ArgCheck.NotEmpty(userKeyFriendlyName, nameof(userKeyFriendlyName));
             ArgCheck.NotEmpty(userSecret, nameof(userSecret));
 
+            this.UserKeyFriendlyName = UserKeyFriendlyName;
             this.UserSecret = userSecret;
         }
 
@@ -27,7 +30,12 @@
         public int KeyDerivationSaltSizeInBytes { get; set; } = Constants.DefaultKeyDerivationSaltSizeInBytes;
 
         /// <summary>
-        /// Gets the secret entered by the user to encrypt the archive data.
+        /// Gets the friendly name for the first user key.
+        /// </summary>
+        public string UserKeyFriendlyName { get; set; }
+
+        /// <summary>
+        /// Gets the secret entered by the user to create the first user key.
         /// </summary>
         internal byte[] UserSecret { get; }
     }

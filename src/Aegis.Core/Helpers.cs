@@ -2,7 +2,9 @@
 {
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
+    using System.Text;
 
     /// <summary>
     /// A collection of static helper utilities and extension methods.
@@ -34,5 +36,31 @@
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long GetCurrentUnixTime() => DateTime.UtcNow.ToUnixTime();
+
+        /// <summary>
+        /// Encodes the given data in Base64URL format.
+        /// </summary>
+        /// <param name="data">The data to encode.</param>
+        /// <returns>The Base64URL encoding of the data.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "False positive in analyzer.")]
+        public static string Base64UrlEncode(ReadOnlySpan<byte> data)
+        {
+            if (data.IsEmpty)
+            {
+                return string.Empty;
+            }
+
+            var base64String = new StringBuilder(Convert.ToBase64String(data));
+            base64String.Replace('+', '-');
+            base64String.Replace('/', '_');
+
+            // Figure out how many '=' are on the end and trim them.
+            int numEquals = 0;
+            for (int i = base64String.Length - 1; i >= 0 && base64String[i] == '='; i--, numEquals++);
+
+            base64String.Length -= numEquals;
+
+            return base64String.ToString();
+        }
     }
 }

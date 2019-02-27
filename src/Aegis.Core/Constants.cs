@@ -26,8 +26,13 @@
         public const int DefaultKeyDerivationWorkFactor = 100_000;
 
         /// <summary>
-        /// Specifies the default length (in bytes) of the salt used in key derivations.
+        /// Specifies the default size (in bytes) of the salt used in key derivations.
         /// </summary>
         public const int DefaultKeyDerivationSaltSizeInBytes = 16;
+
+        /// <summary>
+        /// Specifies the default size (in bytes) of KeyIds generated for user keys.
+        /// </summary>
+        public const int DefaultKeyIdSizeInBytes = 16;
     }
 }

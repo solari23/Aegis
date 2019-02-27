@@ -175,6 +175,22 @@
         }
 
         /// <summary>
+        /// Verifies the argument is greater than 0.
+        /// </summary>
+        /// <param name="arg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GreaterThanZero(long arg, string argName)
+        {
+            if (arg <= 0)
+            {
+                throw new ArgumentOutOfRangeException(argName, "The input value must be greater than zero!");
+            }
+        }
+
+        /// <summary>
         /// Marker that lets code analysis know that a method will ensure the argument is not null.
         /// </summary>
         [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]

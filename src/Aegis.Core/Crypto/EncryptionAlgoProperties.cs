@@ -45,6 +45,7 @@
             Debug.Assert(IvSizeInBytes >= 0);
             Debug.Assert(authTagSizeInBytes >= 0);
 
+            this.Algorithm = algo;
             this.KeySizeInBytes = keySizeInBytes;
             this.IvSizeInBytes = ivSizeInBytes;
             this.AuthTagSizeInBytes = authTagSizeInBytes;

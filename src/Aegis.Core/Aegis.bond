@@ -30,13 +30,20 @@ struct EncryptedPacket
 }
 
 // Metadata associated with user keys authorized to unlock the SecureArchive.
-// The actual key needs to be provided by user at runtime.
+// User keys are derived from secrets input by the user at runtime to unlock the archive.
+// The keys and their associated keyId are derived using key derivation functions.
+// The algorithm is:
+//   let N be the number of bytes for the key
+//   let M be the number of bytes for the keyId
+//   keyMatter := Derive N + M bytes from the secret using the KDF
+//   key := keyMatter[0..N-1]
+//   keyId := base64url(keyMatter[N..])
 struct AuthorizedUserKey
 {
     // A friendly name to help the user identify the key.
     0: string FriendlyName;
 
-    // An identifier derived from the key. It is the base64url encoding of some extra
+    // An identifier derived along with the key. It is the base64url encoding of some extra
     // bytes produced by the key derivation function while deriving the user key.
     // Matching on this value should *never* be used to positively authenticate a user.
     1: string KeyId;
@@ -59,6 +66,9 @@ struct SecuritySettings
 
     // The work factor parameter (e.g. iteration count) for the KDF.
     2: int32 KeyDerivationWorkFactor;
+
+    // The size (in bytes) of KeyIds generated for user keys.
+    3: int32 KeyIdSizeInBytes;
 }
 
 // The core data structure that represents SecureArchive files. The SecureArchive is a

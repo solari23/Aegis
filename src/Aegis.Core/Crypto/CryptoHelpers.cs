@@ -40,5 +40,24 @@
                     throw new InvalidOperationException($"No CryptoStrategy defined for algorithm '{algo}'!");
             }
         }
+
+        /// <summary>
+        /// Gets the <see cref="IKeyDerivationStrategy"/> associated with the given key derivation function.
+        /// </summary>
+        /// <param name="keyDerivationFunction">The key derivation function.</param>
+        /// <returns>The <see cref="IKeyDerivationStrategy"/> associated with the key derivation function.</returns>
+        internal static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction keyDerivationFunction)
+        {
+            ArgCheck.IsNot(KeyDerivationFunction.Unknown, keyDerivationFunction, nameof(keyDerivationFunction));
+
+            switch (keyDerivationFunction)
+            {
+                case KeyDerivationFunction.PBKDF2:
+                    return new Pbkdf2KeyDerivationStrategy();
+
+                default:
+                    throw new InvalidOperationException($"No key derivation strategy defined for function '{keyDerivationFunction}'!");
+            }
+        }
     }
 }
