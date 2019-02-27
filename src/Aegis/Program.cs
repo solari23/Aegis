@@ -1,7 +1,7 @@
 ﻿namespace Aegis
 {
     using System;
-
+    using System.Text;
     using Aegis.Core;
 
     /// <summary>
@@ -18,7 +18,9 @@
             {
                 Console.WriteLine("Hello world");
 
-                var archive = SecureArchive.CreateNew();
+                var archiveCreationParams = new SecureArchiveCreationParameters(Encoding.UTF8.GetBytes("P@$sW3rd!"));
+
+                var archive = SecureArchive.CreateNew(archiveCreationParams);
                 Console.WriteLine($"Archive {(Guid)archive.Id} created on {archive.CreateTime}.");
 
                 var serialized = BondHelpers.Serialize(archive);

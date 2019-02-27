@@ -13,6 +13,21 @@
         /// <summary>
         /// Specifies the default encryption algorithm that Aegis will use.
         /// </summary>
-        public const EncryptionAlgo DefaultEncryptionAlgorithm = EncryptionAlgo.Aes256Gcm;
+        public const EncryptionAlgo DefaultEncryptionAlgo = EncryptionAlgo.Aes256Gcm;
+
+        /// <summary>
+        /// Specifies the default key derivation function that Aegis will use.
+        /// </summary>
+        public const KeyDerivationFunction DefaultKeyDerivationFunction = KeyDerivationFunction.PBKDF2;
+
+        /// <summary>
+        /// Species the default key derivation work factor that Aegis will use.
+        /// </summary>
+        public const int DefaultKeyDerivationWorkFactor = 100_000;
+
+        /// <summary>
+        /// Specifies the default length (in bytes) of the salt used in key derivations.
+        /// </summary>
+        public const int DefaultKeyDerivationSaltSizeInBytes = 16;
     }
 }

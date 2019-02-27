@@ -1,7 +1,10 @@
 ﻿namespace Aegis.Core
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+
+    using Aegis.Core.Crypto;
 
     /// <summary>
     /// The core data structure that represents SecureArchive files. The SecureArchive is a
@@ -16,29 +19,29 @@
         /// <summary>
         /// Creates a new <see cref="SecureArchive"/> that contains no files.
         /// </summary>
-        /// <param name="encryptionAlgo">The data encryption algorithm to use. Default is <see cref="Constants.DefaultEncryptionAlgorithm"/>.</param>
+        /// <param name="creationParameters">The <see cref="SecureArchiveCreationParameters"/> to use when creating the archive.</param>
         /// <returns>A new <see cref="SecureArchive"/>.</returns>
-        public static SecureArchive CreateNew(EncryptionAlgo encryptionAlgo = Constants.DefaultEncryptionAlgorithm)
+        public static SecureArchive CreateNew(SecureArchiveCreationParameters creationParameters)
         {
-            ArgCheck.IsNot(EncryptionAlgo.Unknown, encryptionAlgo, nameof(encryptionAlgo));
+            // TODO: Validate the input creation parameters
 
             var currentTime = DateTime.UtcNow;
+            var archiveId = Guid.NewGuid();
+            var keyDerivationSalt = CryptoHelpers.GetRandomBytes(creationParameters.KeyDerivationSaltSizeInBytes);
+
+            // TODO: Generate the archive key
+            // TOOD: Create the auth canary
+            // TODO: Derive and authorize the first user key
 
             var archive = new SecureArchive
             {
-                Id = Guid.NewGuid(),
+                Id = archiveId,
                 FileVersion = Constants.CurrentAegisSecureArchiveFileVersion,
+                SecuritySettings = creationParameters.SecuritySettings,
                 CreateTime = currentTime,
                 LastModifiedTime = currentTime,
+                KeyDerivationSalt = new List<byte>(keyDerivationSalt),
             };
-
-            // TODO: Complete implementation of SecureArchive creation
-            // Need to:
-            //   - Create an input object SecureArchiveCreationDirectives
-            //   - Take in security settings, initial user secret, and salt size
-            //   - Generate the archive key
-            //   - Create the auth canary
-            //   - Initialize the first authorized user key
 
             return archive;
         }
