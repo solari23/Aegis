@@ -54,7 +54,7 @@
                 LastModifiedTime = currentTime,
                 KeyDerivationSalt = new List<byte>(keyDerivationSalt),
                 AuthCanary = authCanary,
-                AuthorizedUserKeys = new List<AuthorizedUserKey> { firstUserKeyAuthorization },
+                UserKeyAuthorizations = new List<UserKeyAuthorization> { firstUserKeyAuthorization },
 
                 // Non-serialized properties.
                 ArchiveKey = archiveKey,

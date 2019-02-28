@@ -67,8 +67,8 @@
         /// <param name="friendlyName">A friendly name to help the user identify the key.</param>
         /// <param name="archiveKey">The key used to encrypt the archive that the user key is being authorized for.</param>
         /// <param name="securitySettings">The archive's <see cref="SecuritySettings"/>.</param>
-        /// <returns>The <see cref="AuthorizedUserKey"/> entry.</returns>
-        internal AuthorizedUserKey CreateAuthorization(
+        /// <returns>The <see cref="UserKeyAuthorization"/> entry.</returns>
+        internal UserKeyAuthorization CreateAuthorization(
             string friendlyName,
             ArchiveKey archiveKey,
             SecuritySettings securitySettings)
@@ -82,7 +82,7 @@
             var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
             var encryptedArchiveKey = cryptoStrategy.Encrypt(archiveKey.Key, this.Key, additionalData);
 
-            return new AuthorizedUserKey(friendlyName, this.KeyId, encryptedArchiveKey);
+            return new UserKeyAuthorization(friendlyName, this.KeyId, encryptedArchiveKey);
         }
     }
 }

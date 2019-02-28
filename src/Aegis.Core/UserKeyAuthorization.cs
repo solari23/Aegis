@@ -8,15 +8,15 @@
     /// <remarks>
     /// Data members for this class are defined in a Bond schema (see Aegis.bond).
     /// </remarks>
-    public partial class AuthorizedUserKey
+    public partial class UserKeyAuthorization
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorizedUserKey"/> class.
+        /// Initializes a new instance of the <see cref="UserKeyAuthorization"/> class.
         /// </summary>
         /// <param name="friendlyName">A friendly name to help the user identify the key.</param>
         /// <param name="keyId">An identifier derived along with the key.</param>
         /// <param name="encryptedArchiveKey">The archive key, encrypted by the authorized key.</param>
-        internal AuthorizedUserKey(
+        internal UserKeyAuthorization(
             string friendlyName,
             string keyId,
             EncryptedPacket encryptedArchiveKey)

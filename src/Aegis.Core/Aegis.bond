@@ -38,7 +38,7 @@ struct EncryptedPacket
 //   keyMatter := Derive N + M bytes from the secret using the KDF
 //   key := keyMatter[0..N-1]
 //   keyId := base64url(keyMatter[N..])
-struct AuthorizedUserKey
+struct UserKeyAuthorization
 {
     // A friendly name to help the user identify the key.
     0: string FriendlyName;
@@ -99,7 +99,7 @@ struct SecureArchive
     6: EncryptedPacket AuthCanary;
 
     // The list of keys that are authorized to unlock the archive.
-    7: vector<AuthorizedUserKey> AuthorizedUserKeys;
+    7: vector<UserKeyAuthorization> UserKeyAuthorizations;
 
     // TODO: The SecureArchive will also contain:
     //   - An encrypted index with metadata about the files. Files should have:
