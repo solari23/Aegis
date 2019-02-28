@@ -80,7 +80,7 @@
             var additionalData = Encoding.UTF8.GetBytes(friendlyName + this.KeyId);
 
             var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
-            var encryptedArchiveKey = cryptoStrategy.Encrypt(archiveKey.Key, this.Key, additionalData);
+            var encryptedArchiveKey = this.EncryptSecret(cryptoStrategy, archiveKey);
 
             return new UserKeyAuthorization(friendlyName, this.KeyId, encryptedArchiveKey);
         }

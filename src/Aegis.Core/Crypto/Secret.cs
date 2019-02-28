@@ -19,12 +19,21 @@
         /// <summary>
         /// Gets the underlying secret key as a read-only data structure.
         /// </summary>
-        internal ReadOnlySpan<byte> Key => this.InternalKeyData;
+        protected ReadOnlySpan<byte> Key => this.InternalKeyData;
 
         /// <summary>
         /// Gets the underlying secret key data.
         /// </summary>
         private byte[] InternalKeyData { get; }
+
+        /// <summary>
+        /// Encrypts the given <see cref="Secret"/>.
+        /// </summary>
+        /// <param name="cryptoStrategy">The cryptographic strategy to use.</param>
+        /// <param name="otherSecret">The <see cref="Secret"/> to encrypt.</param>
+        /// <returns>The encrypted <see cref="Secret"/>.</returns>
+        internal EncryptedPacket EncryptSecret(ICryptoStrategy cryptoStrategy, Secret otherSecret)
+            => this.Encrypt(cryptoStrategy, otherSecret.Key);
 
         /// <summary>
         /// Encrypts the given data using the secret.
