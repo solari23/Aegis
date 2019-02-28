@@ -36,6 +36,8 @@
                     archive.KeyDerivationSalt.ToArray(),
                     archive.SecuritySettings);
                 Console.WriteLine($"UserKey keyId: {userKey.KeyId}");
+
+                archive.Unlock(Encoding.UTF8.GetBytes("P@$sW3rd!"));
             }
             catch (Exception e)
             {

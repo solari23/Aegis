@@ -31,9 +31,10 @@
         /// </summary>
         /// <param name="cryptoStrategy">The cryptographic strategy to use.</param>
         /// <param name="otherSecret">The <see cref="Secret"/> to encrypt.</param>
+        /// <param name="optionalAssociatedData">Unencrypted data that can optionally be checked for tampering when using authenticated ciphers.</param>
         /// <returns>The encrypted <see cref="Secret"/>.</returns>
-        internal EncryptedPacket EncryptSecret(ICryptoStrategy cryptoStrategy, Secret otherSecret)
-            => this.Encrypt(cryptoStrategy, otherSecret.Key);
+        internal EncryptedPacket EncryptSecret(ICryptoStrategy cryptoStrategy, Secret otherSecret, ReadOnlySpan<byte> optionalAssociatedData = default)
+            => this.Encrypt(cryptoStrategy, otherSecret.Key, optionalAssociatedData);
 
         /// <summary>
         /// Encrypts the given data using the secret.

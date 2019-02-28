@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
 
     using Aegis.Core.Crypto;
 
@@ -36,8 +37,9 @@
                 creationParameters.UserSecret,
                 keyDerivationSalt,
                 creationParameters.SecuritySettings);
-            var firstUserKeyAuthorization = firstUserKey.CreateAuthorization(
+            var firstUserKeyAuthorization = UserKeyAuthorization.CreateNewAuthorization(
                 creationParameters.UserKeyFriendlyName,
+                firstUserKey,
                 archiveKey,
                 creationParameters.SecuritySettings);
 
@@ -64,9 +66,83 @@
         }
 
         /// <summary>
+        /// Gets the <see cref="ICryptoStrategy"/> configured for the archive.
+        /// </summary>
+        internal ICryptoStrategy CryptoStrategy => CryptoHelpers.GetCryptoStrategy(this.SecuritySettings.EncryptionAlgo);
+
+        /// <summary>
         /// Gets the archive encryption key, or null if the archive is locked.
         /// </summary>
         private ArchiveKey ArchiveKey { get; set; }
+
+        /// <summary>
+        /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given raw user secret.
+        /// </summary>
+        /// <param name="userSecret">The user secret to use to unlock the archive.</param>
+        public void Unlock(ReadOnlySpan<byte> userSecret)
+        {
+            ArgCheck.NotEmpty(userSecret, nameof(userSecret));
+
+            using var userKey = UserKey.DeriveFrom(userSecret, this.KeyDerivationSalt.ToArray(), this.SecuritySettings);
+            this.Unlock(userKey);
+        }
+
+        /// <summary>
+        /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given <see cref="UserKey"/>.
+        /// </summary>
+        /// <param name="userKey">The <see cref="UserKey"/> to use to unlock the archive.</param>
+        public void Unlock(UserKey userKey)
+        {
+            ArgCheck.NotNull(userKey, nameof(userKey));
+
+            // Setting the ArchiveKey property puts the archive into the "unlocked" state.
+            // Wait to set the property until after everything is properly unlocked.
+            var archiveKey = this.DecryptArchiveKey(userKey);
+
+            // TODO: Decrypt the file index.
+            
+            this.ArchiveKey = archiveKey;
+        }
+
+        /// <summary>
+        /// Checks if the input <see cref="UserKey"/> is authorized to unlock the 
+        /// <see cref="SecureArchive"/> and uses it to decrypt the <see cref="ArchiveKey"/>.
+        /// </summary>
+        /// <param name="userKey">The <see cref="UserKey"/> to </param>
+        /// <returns>The data encryption key for the <see cref="SecureArchive"/>.</returns>
+        /// <exception cref="UnauthorizedException">Thrown when the input key is not authorized to unlock the archive.</exception>
+        private ArchiveKey DecryptArchiveKey(UserKey userKey)
+        {
+            const string error = "The user key is not authorized to unlock the archive!";
+
+            var keyAuthorizationRecord = this.UserKeyAuthorizations.FirstOrDefault(k => k.KeyId == userKey.KeyId);
+
+            if (keyAuthorizationRecord is null
+                || !keyAuthorizationRecord.TryAuthorize(userKey, this.SecuritySettings, out var archiveKey))
+            {
+                throw new UnauthorizedException(error);
+            }
+
+            // Check the auth canary.
+            Guid decryptedCanary;
+
+            try
+            {
+                decryptedCanary = new Guid(archiveKey.Decrypt(this.CryptoStrategy, this.AuthCanary));
+            }
+            catch
+            {
+                throw new UnauthorizedException(error);
+            }
+
+            if (decryptedCanary != this.Id)
+            {
+                throw new UnauthorizedException(error);
+            }
+
+            // Congrats, you're authorized!
+            return archiveKey;
+        }
 
         #region IDisposable Support
 
