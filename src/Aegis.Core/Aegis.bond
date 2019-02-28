@@ -52,6 +52,7 @@ struct AuthorizedUserKey
     2: DateTime TimeAdded;
 
     // The archive key, encrypted by the authorized key.
+    // Authenticated cyphers must also check integrity of Utf8Bytes(string.Concat(FriendlyName, KeyId))
     3: EncryptedPacket EncryptedArchiveKey;
 }
 

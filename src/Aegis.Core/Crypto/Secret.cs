@@ -19,7 +19,7 @@
         /// <summary>
         /// Gets the underlying secret key as a read-only data structure.
         /// </summary>
-        protected ReadOnlySpan<byte> Key => this.InternalKeyData;
+        internal ReadOnlySpan<byte> Key => this.InternalKeyData;
 
         /// <summary>
         /// Gets the underlying secret key data.

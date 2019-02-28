@@ -1,6 +1,7 @@
 ﻿namespace Aegis.Core.Crypto
 {
     using System;
+    using System.Text;
 
     /// <summary>
     /// An encryption key derived from a user secret used to decrypt the archive's <see cref="ArchiveKey"/>.
@@ -20,7 +21,7 @@
         {
             ArgCheck.NotEmpty(userSecret, nameof(userSecret));
             ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
-            // TODO: Validate the security settings
+            // TODO: Validate input securitySettings
 
             var cryptoAlgoProperties = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo);
 
@@ -59,5 +60,29 @@
         /// Gets an identifer for the user key.
         /// </summary>
         public string KeyId { get; }
+
+        /// <summary>
+        /// Creates an authorization entry for the current user key for a particular archive.
+        /// </summary>
+        /// <param name="friendlyName">A friendly name to help the user identify the key.</param>
+        /// <param name="archiveKey">The key used to encrypt the archive that the user key is being authorized for.</param>
+        /// <param name="securitySettings">The archive's <see cref="SecuritySettings"/>.</param>
+        /// <returns>The <see cref="AuthorizedUserKey"/> entry.</returns>
+        internal AuthorizedUserKey CreateAuthorization(
+            string friendlyName,
+            ArchiveKey archiveKey,
+            SecuritySettings securitySettings)
+        {
+            ArgCheck.NotEmpty(friendlyName, nameof(friendlyName));
+            ArgCheck.NotNull(archiveKey, nameof(archiveKey));
+            // TODO: Validate input securitySettings
+
+            var additionalData = Encoding.UTF8.GetBytes(friendlyName + this.KeyId);
+
+            var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
+            var encryptedArchiveKey = cryptoStrategy.Encrypt(archiveKey.Key, this.Key, additionalData);
+
+            return new AuthorizedUserKey(friendlyName, this.KeyId, encryptedArchiveKey);
+        }
     }
 }

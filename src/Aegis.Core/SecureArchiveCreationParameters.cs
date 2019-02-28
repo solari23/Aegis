@@ -15,7 +15,7 @@
             ArgCheck.NotEmpty(userKeyFriendlyName, nameof(userKeyFriendlyName));
             ArgCheck.NotEmpty(userSecret, nameof(userSecret));
 
-            this.UserKeyFriendlyName = UserKeyFriendlyName;
+            this.UserKeyFriendlyName = userKeyFriendlyName;
             this.UserSecret = userSecret;
         }
 
