@@ -27,37 +27,21 @@
         /// </summary>
         /// <param name="algo">The cryptographic algorithm.</param>
         /// <returns>The <see cref="ICryptoStrategy"/> associated with the algorithm.</returns>
-        internal static ICryptoStrategy GetCryptoStrategy(EncryptionAlgo algo)
+        internal static ICryptoStrategy GetCryptoStrategy(EncryptionAlgo algo) => algo switch
         {
-            ArgCheck.IsNot(EncryptionAlgo.Unknown, algo, nameof(algo));
-
-            switch (algo)
-            {
-                case EncryptionAlgo.Aes256Gcm:
-                    return new Aes256GcmCryptoStrategy();
-
-                default:
-                    throw new InvalidOperationException($"No CryptoStrategy defined for algorithm '{algo}'!");
-            }
-        }
+            EncryptionAlgo.Aes256Gcm => new Aes256GcmCryptoStrategy(),
+            _ => throw new InvalidOperationException($"No CryptoStrategy defined for algorithm '{algo}'!"),
+        };
 
         /// <summary>
         /// Gets the <see cref="IKeyDerivationStrategy"/> associated with the given key derivation function.
         /// </summary>
-        /// <param name="keyDerivationFunction">The key derivation function.</param>
+        /// <param name="function">The key derivation function.</param>
         /// <returns>The <see cref="IKeyDerivationStrategy"/> associated with the key derivation function.</returns>
-        internal static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction keyDerivationFunction)
+        internal static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction function) => function switch
         {
-            ArgCheck.IsNot(KeyDerivationFunction.Unknown, keyDerivationFunction, nameof(keyDerivationFunction));
-
-            switch (keyDerivationFunction)
-            {
-                case KeyDerivationFunction.PBKDF2:
-                    return new Pbkdf2KeyDerivationStrategy();
-
-                default:
-                    throw new InvalidOperationException($"No key derivation strategy defined for function '{keyDerivationFunction}'!");
-            }
-        }
+            KeyDerivationFunction.PBKDF2 => new Pbkdf2KeyDerivationStrategy(),
+            _ => throw new InvalidOperationException($"No key derivation strategy defined for function '{function}'!"),
+        };
     }
 }

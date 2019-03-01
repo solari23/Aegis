@@ -100,7 +100,7 @@
             var archiveKey = this.DecryptArchiveKey(userKey);
 
             // TODO: Decrypt the file index.
-            
+
             this.ArchiveKey = archiveKey;
         }
 

@@ -20,17 +20,11 @@
         /// </summary>
         /// <param name="algo">The <see cref="EncryptionAlgo"/> to get properties for.</param>
         /// <returns>The <see cref="EncryptionAlgoProperties"/>.</returns>
-        public static EncryptionAlgoProperties For(EncryptionAlgo algo)
+        public static EncryptionAlgoProperties For(EncryptionAlgo algo) => algo switch
         {
-            switch (algo)
-            {
-                case EncryptionAlgo.Aes256Gcm:
-                    return Aes256GcmAlgoProperties;
-
-                default:
-                    throw new InvalidOperationException($"No encryption properties defined for algorithm '{algo}'!");
-            }
-        }
+            EncryptionAlgo.Aes256Gcm => Aes256GcmAlgoProperties,
+            _ => throw new InvalidOperationException($"No encryption properties defined for algorithm '{algo}'!"),
+        };
 
         /// <summary>
         /// Creates a new instance of the <see cref="EncryptionAlgoProperties"/> class.

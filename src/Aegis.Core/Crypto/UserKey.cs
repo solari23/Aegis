@@ -1,7 +1,6 @@
 ﻿namespace Aegis.Core.Crypto
 {
     using System;
-    using System.Text;
 
     /// <summary>
     /// An encryption key derived from a user secret used to decrypt the archive's <see cref="ArchiveKey"/>.
