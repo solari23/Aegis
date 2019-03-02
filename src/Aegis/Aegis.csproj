@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyName>Aegis</AssemblyName>
@@ -8,6 +8,10 @@
     <Description>Aegis secure file storage utility.</Description>
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.4.3" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Aegis.Core\Aegis.Core.csproj" />

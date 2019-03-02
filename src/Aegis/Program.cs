@@ -12,36 +12,31 @@
     public class Program
     {
         /// <summary>
-        /// The entry point for the Aegis CLI.
+        /// The name of the program.
+        /// </summary>
+        public const string Name = "Aegis";
+
+        /// <summary>
+        /// The entry point for the Aegis application.
         /// </summary>
         public static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine("Hello world");
+                if (args is null || args.Length == 0)
+                {
+                    // No arguments -> signal to start REPL mode.
+                    args = new string[] { CommandLineHelpers.StartReplVerb };
+                }
 
-                var archiveCreationParams = new SecureArchiveCreationParameters(
-                    "Password",
-                    Encoding.UTF8.GetBytes("P@$sW3rd!"));
-
-                var archive = SecureArchive.CreateNew(archiveCreationParams);
-                Console.WriteLine($"Archive {(Guid)archive.Id} created on {archive.CreateTime}.");
-
-                var serialized = BondHelpers.Serialize(archive);
-                archive = BondHelpers.Deserialize<SecureArchive>(serialized);
-                Console.WriteLine($"Deserialized archive {(Guid)archive.Id} created on {archive.CreateTime}.");
-
-                var userKey = UserKey.DeriveFrom(
-                    Encoding.UTF8.GetBytes("P@$sW3rd!"),
-                    archive.KeyDerivationSalt.ToArray(),
-                    archive.SecuritySettings);
-                Console.WriteLine($"UserKey keyId: {userKey.KeyId}");
-
-                archive.Unlock(Encoding.UTF8.GetBytes("P@$sW3rd!"));
+                // If we ever implement a UI, we'll expect a single input argument with the
+                // path to the archive to open. For now we just have the CLI implementation :)
+                AegisInterface aegis = new AegisInterface();
+                aegis.Run(args);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[FATAL ERROR] {e}");
+                Console.Error.WriteLine($"[INTERNAL ERROR] {Name} ran into internal issues.{Environment.NewLine}Error details: {e}");
             }
         }
     }
