@@ -1,10 +1,6 @@
 ﻿namespace Aegis
 {
     using System;
-    using System.Text;
-
-    using Aegis.Core;
-    using Aegis.Core.Crypto;
 
     /// <summary>
     /// Contains the main entry point for the Aegis CLI.

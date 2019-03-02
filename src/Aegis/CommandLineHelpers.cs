@@ -2,7 +2,7 @@
 {
     using System;
 
-    using static AegisCommandLineVerbs;
+    using static CommandLineVerbs;
 
     /// <summary>
     /// A collection of static helper utilities for dealing with the command line.
@@ -28,12 +28,17 @@
             // TODO: Retrieve command line verb options types using reflection.
             return new Type[]
             {
+                // Aegis verbs.
                 typeof(CreateVerbOptions),
                 typeof(OpenVerbOptions),
+
+                // Meta (hidden) verbs.
                 typeof(StartReplVerbOptions),
                 typeof(CloseReplVerbOptions),
                 typeof(ExitReplVerbOptions),
                 typeof(QuitReplVerbOptions),
+                typeof(ClearVerbOptions),
+                typeof(ClsVerbOptions),
             };
         }
 
