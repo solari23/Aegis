@@ -2,6 +2,7 @@
 {
     using System;
     using System.Security.Cryptography;
+    using System.Text;
 
     /// <summary>
     /// A collection of static helper utilities to deal with crypto operations.
@@ -20,6 +21,57 @@
             var bytes = new byte[numBytes];
             RandomNumberGenerator.Fill(bytes);
             return bytes;
+        }
+
+        /// <summary>
+        /// Tests sequence equality of the two operands in a way that is resistant to timing attacks.
+        /// </summary>
+        /// <param name="left">The left hand operand.</param>
+        /// <param name="right">The right hand operand.</param>
+        /// <returns>True if the sequences in both operands are exactly the same, false otherwise.</returns>
+        /// <remarks>
+        /// This method returns 'false' if either operand is empty. For the purposes of this method,
+        /// empty operands can never match any other value.
+        /// </remarks>
+        public static bool SecureEquals(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right)
+        {
+            bool isMatch = true;
+
+            isMatch &= !left.IsEmpty;
+            isMatch &= !right.IsEmpty;
+            isMatch &= left.Length == right.Length;
+
+            for (int i = 0; i < Math.Min(left.Length, right.Length); i++)
+            {
+                isMatch &= left[i] == right[i];
+            }
+
+            return isMatch;
+        }
+
+        /// <summary>
+        /// Tests if two strings are equal in a way that is resistant to timing attacks.
+        /// </summary>
+        /// <param name="left">The left hand operand.</param>
+        /// <param name="right">The right hand operand.</param>
+        /// <returns>True if the strings are exactly the same, false otherwise.</returns>
+        /// <remarks>
+        /// This method returns 'false' if either string is null or empty. For the purposes of
+        /// this method, empty operands can never match any other value.
+        /// </remarks>
+        public static bool SecureEquals(string left, string right)
+        {
+            // Use the single-pipe logical OR operator since it does not short-circuit
+            // if the first operand resolves to 'true'.
+            if (left == null | right == null)
+            {
+                return false;
+            }
+
+            var leftBytes = Encoding.UTF8.GetBytes(left);
+            var rightBytes = Encoding.UTF8.GetBytes(right);
+
+            return SecureEquals(leftBytes, rightBytes);
         }
 
         /// <summary>

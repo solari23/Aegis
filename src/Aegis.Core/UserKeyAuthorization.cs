@@ -51,19 +51,22 @@
         }
 
         /// <summary>
-        /// Checks if the input <see cref="UserKey"/> is authorized to decrypt the archive.
+        /// Attempts to use the given <see cref="UserKey"/> to decrypt the <see cref="ArchiveKey"/>.
         /// </summary>
-        /// <param name="userKey">The <see cref="UserKey"/> to authorize.</param>
+        /// <param name="userKey">The <see cref="UserKey"/> to use.</param>
         /// <param name="securitySettings">The archive's <see cref="SecuritySettings"/>.</param>
         /// <param name="archiveKey">The decrypted <see cref="ArchiveKey"/>, or null if the input <see cref="UserKey"/> is not authorized.</param>
-        /// <returns>True if the <see cref="UserKey"/> is authorized to decrypt the archive and false otherwise.</returns>
-        internal bool TryAuthorize(UserKey userKey, SecuritySettings securitySettings, out ArchiveKey archiveKey)
+        /// <returns>True if the method was able to decrypt and false if decryption fails.</returns>
+        /// <remarks>
+        /// The decrypted <see cref="ArchiveKey"/> will still need to be tested to see if it can decrypt the <see cref="SecureArchive"/>.
+        /// </remarks>
+        internal bool TryDecryptArchiveKey(UserKey userKey, SecuritySettings securitySettings, out ArchiveKey archiveKey)
         {
             ArgCheck.NotNull(userKey, nameof(userKey));
 
             archiveKey = null;
 
-            if (userKey.KeyId != this.KeyId)
+            if (!CryptoHelpers.SecureEquals(userKey.KeyId, this.KeyId))
             {
                 return false;
             }

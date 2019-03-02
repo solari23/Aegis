@@ -115,10 +115,11 @@
         {
             const string error = "The user key is not authorized to unlock the archive!";
 
-            var keyAuthorizationRecord = this.UserKeyAuthorizations.FirstOrDefault(k => k.KeyId == userKey.KeyId);
+            var keyAuthorizationRecord = this.UserKeyAuthorizations.FirstOrDefault(
+                k => CryptoHelpers.SecureEquals(k.KeyId, userKey.KeyId));
 
             if (keyAuthorizationRecord is null
-                || !keyAuthorizationRecord.TryAuthorize(userKey, this.SecuritySettings, out var archiveKey))
+                || !keyAuthorizationRecord.TryDecryptArchiveKey(userKey, this.SecuritySettings, out var archiveKey))
             {
                 throw new UnauthorizedException(error);
             }
@@ -135,7 +136,7 @@
                 throw new UnauthorizedException(error);
             }
 
-            if (decryptedCanary != this.Id)
+            if (!CryptoHelpers.SecureEquals(decryptedCanary.ToByteArray(), ((Guid)this.Id).ToByteArray()))
             {
                 throw new UnauthorizedException(error);
             }
