@@ -130,10 +130,21 @@
         /// </returns>
         private bool ExecuteAegisVerb(Func<bool> operation)
         {
-            // TODO: Open/unlock an Aegis archive if none is yet opened.
-            // TODO: Define an exception of type AegisUserErrorException with field IsRecoverable.
-            // TODO: Catch AegisUserErrorException where IsRecoverable is true. Handle gracefully so execution continues.
-            return operation();
+            bool isHandled = true;
+
+            try
+            {
+                // TODO: Open/unlock an Aegis archive if none is yet opened.
+                isHandled = operation();
+            }
+            catch (AegisUserErrorException e) when (e.IsRecoverable)
+            {
+                // Only catch recoverable errors. Let unrecoverable errors bubble up
+                // to the top-level error handler.
+                Console.Error.WriteLine($"[Error] {e.Message}");
+            }
+
+            return isHandled;
         }
 
         /// <summary>

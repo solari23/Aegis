@@ -30,6 +30,10 @@
                 AegisInterface aegis = new AegisInterface();
                 aegis.Run(args);
             }
+            catch (AegisUserErrorException e)
+            {
+                Console.Error.WriteLine($"[Error] {e.Message}");
+            }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"[INTERNAL ERROR] {Name} ran into internal issues.{Environment.NewLine}Error details: {e}");
