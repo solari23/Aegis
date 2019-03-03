@@ -1,8 +1,11 @@
 ﻿namespace Aegis
 {
     using System;
+    using System.IO;
     using System.Linq;
+    using System.Text;
 
+    using Aegis.Core;
     using CommandLine;
 
     using static CommandLineVerbs;
@@ -13,12 +16,9 @@
     public class AegisInterface
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AegisInterface"/> class.
+        /// Gets the temporary directory where secured files can be checked out.
         /// </summary>
-        public AegisInterface()
-        {
-            // Empty?
-        }
+        private string TempDirectory { get; } = Path.GetTempPath();
 
         /// <summary>
         /// Flag to stop the program after the current command completes.
@@ -154,8 +154,46 @@
         /// <returns>Whether or not the operation was handled.</returns>
         private bool CreateVerb(CreateVerbOptions options)
         {
-            // TODO [Verb]: Implement the 'create' verb.
-            return false;
+            if (string.IsNullOrWhiteSpace(options.AegisArchivePath))
+            {
+                throw new AegisUserErrorException("The archive path parameter is required for this operation.");
+            }
+
+            if (File.Exists(options.AegisArchivePath) && !options.Force)
+            {
+                throw new AegisUserErrorException(
+                    "A file exists at the specified location. Use --force flag to overwrite.");
+            }
+
+            // TODO: Implement credential selection and input
+            var userKeyFriendlyName = "Password";
+            var rawUserSecret = Encoding.UTF8.GetBytes("P@$sW3rD!!1!");
+
+            var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
+            var fileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
+
+            using var archive = SecureArchive.CreateNew(fileSettings, createParameters);
+
+            try
+            {
+                // Create the output directory if it doesn't already exist.
+                var directoryPath = Path.GetDirectoryName(options.AegisArchivePath);
+                if (!string.IsNullOrWhiteSpace(directoryPath) && !Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                archive.Save();
+
+                var newArchiveFileInfo = new FileInfo(archive.FullFilePath);
+                Console.WriteLine($"Created new secure archive file '{newArchiveFileInfo.FullName}'.");
+            }
+            catch (IOException e)
+            {
+                throw new AegisUserErrorException($"Unable to write to {fileSettings.Path}!", innerException: e);
+            }
+
+            return true;
         }
 
         /// <summary>

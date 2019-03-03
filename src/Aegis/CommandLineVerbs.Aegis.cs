@@ -10,7 +10,8 @@
         [Verb("create", HelpText = "Creates a new Aegis archive.")]
         public class CreateVerbOptions : AegisVerbOptions
         {
-            // Empty -- verb only requires the default options for the archive path.
+            [Option('f', "force", Required = false, HelpText = "Forces the file to be created, even if overwriting an existing file.")]
+            public bool Force { get; set; }
         }
 
         [Verb("open", HelpText = "Unlocks an Aegis archive and enters a REPL mode to interact with it.")]
@@ -24,11 +25,11 @@
         /// </summary>
         public abstract class AegisVerbOptions
         {
-            [Option(
-                'a',
-                "archive",
+            [Value(
+                0,
                 Required = false,
-                HelpText = "The path to the target Aegis archive. This parameter is ignored in REPL mode, but required for other CLI modes.")]
+                MetaName = "Archive",
+                HelpText = "The path to the target Aegis archive.")]
             public string AegisArchivePath { get; set; }
 
             /// <summary>

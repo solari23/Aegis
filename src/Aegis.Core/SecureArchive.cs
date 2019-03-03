@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Linq;
 
     using Aegis.Core.Crypto;
@@ -20,11 +21,15 @@
         /// <summary>
         /// Creates a new <see cref="SecureArchive"/> that contains no files.
         /// </summary>
+        /// <param name="fileSettings">Settings for where the <see cref="SecureArchive"/> and related files are stored.</param>
         /// <param name="creationParameters">The <see cref="SecureArchiveCreationParameters"/> to use when creating the archive.</param>
         /// <returns>A new <see cref="SecureArchive"/>.</returns>
-        public static SecureArchive CreateNew(SecureArchiveCreationParameters creationParameters)
+        public static SecureArchive CreateNew(
+            SecureArchiveFileSettings fileSettings,
+            SecureArchiveCreationParameters creationParameters)
         {
-            // TODO: Validate the input creation parameters
+            // TODO: Validate input fileSettings 
+            // TODO: Validate input creationParameters
 
             var currentTime = DateTime.UtcNow;
             var archiveId = Guid.NewGuid();
@@ -60,10 +65,32 @@
 
                 // Non-serialized properties.
                 ArchiveKey = archiveKey,
+                FileSettings = fileSettings,
+                IsDirty = true,
             };
 
             return archive;
         }
+
+        /// <summary>
+        /// Gets the name of the <see cref="SecureArchive"/> file.
+        /// </summary>
+        public string FileName => Path.GetFileName(this.FileSettings?.Path ?? string.Empty);
+
+        /// <summary>
+        /// Gets the full path to the <see cref="SecureArchive"/> file.
+        /// </summary>
+        public string FullFilePath => this.FileSettings?.Path ?? string.Empty;
+
+        /// <summary>
+        /// Gets whether or not the <see cref="SecureArchive"/> is locked.
+        /// </summary>
+        public bool IsLocked => this.ArchiveKey == null;
+
+        /// <summary>
+        /// Gets whether or not the <see cref="SecureArchive"/> has been updated but not saved.
+        /// </summary>
+        public bool IsDirty { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="ICryptoStrategy"/> configured for the archive.
@@ -74,6 +101,11 @@
         /// Gets the archive encryption key, or null if the archive is locked.
         /// </summary>
         private ArchiveKey ArchiveKey { get; set; }
+
+        /// <summary>
+        /// Gets settings for where the <see cref="SecureArchive"/> and related files are stored.
+        /// </summary>
+        private SecureArchiveFileSettings FileSettings { get; set; }
 
         /// <summary>
         /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given raw user secret.
@@ -102,6 +134,23 @@
             // TODO: Decrypt the file index.
 
             this.ArchiveKey = archiveKey;
+        }
+
+        /// <summary>
+        /// Encrypts and saves the archive to disk.
+        /// </summary>
+        public void Save()
+        {
+            // TODO: Re-encrypt/serialize the file index.
+
+            var archiveBytes = BondHelpers.Serialize(this);
+
+            using (var fileStream = File.OpenWrite(this.FullFilePath))
+            {
+                fileStream.Write(archiveBytes);
+            }
+
+            this.IsDirty = false;
         }
 
         /// <summary>

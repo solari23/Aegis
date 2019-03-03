@@ -30,7 +30,7 @@
         public int KeyDerivationSaltSizeInBytes { get; set; } = Constants.DefaultKeyDerivationSaltSizeInBytes;
 
         /// <summary>
-        /// Gets the friendly name for the first user key.
+        /// Gets or sets the friendly name for the first user key.
         /// </summary>
         public string UserKeyFriendlyName { get; set; }
 
