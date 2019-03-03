@@ -116,7 +116,9 @@
             }
 
             archive.FileSettings = fileSettings;
-            archive.LoadedArchiveHash = archiveHash;
+
+            // Save the loaded data so the hash can be verified when the archive is unlocked.
+            archive.LoadedArchiveDataToBeVerified = (Hash: archiveHash, Data: archiveBytes);
 
             return archive;
         }
@@ -157,10 +159,10 @@
         private SecureArchiveFileSettings FileSettings { get; set; }
 
         /// <summary>
-        /// If loaded from disk, gets the HMAC-256 hash of the <see cref="SecureArchive"/>
-        /// that was stored in the file.
+        /// Raw archive data loaded from disk. We keep a reference so we can verify the HMAC-256 
+        /// hash of the <see cref="SecureArchive"/> on Unlock() to detect file tampering.
         /// </summary>
-        private byte[] LoadedArchiveHash { get; set; }
+        private (byte[] Hash, byte[] Data) LoadedArchiveDataToBeVerified { get; set; }
 
         /// <summary>
         /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given raw user secret.
@@ -186,6 +188,20 @@
             // Wait to set the property until after everything is properly unlocked.
             var archiveKey = this.DecryptArchiveKey(userKey);
 
+            // When the archive is loaded from disk, we also load an HMAC of the file data
+            // which needs to be validated with the archive key. Check that now.
+            if (this.LoadedArchiveDataToBeVerified.Hash != null
+                && this.LoadedArchiveDataToBeVerified.Data != null)
+            {
+                var actualHash = archiveKey.ComputeHmacSha256(this.LoadedArchiveDataToBeVerified.Data);
+
+                if (!CryptoHelpers.SecureEquals(actualHash, this.LoadedArchiveDataToBeVerified.Hash))
+                {
+                    throw new ArchiveCorruptedException(
+                        "The archive's hash does not match the loaded data. The archive may have been tampered with.");
+                }
+            }
+
             // TODO: Decrypt the file index.
 
             this.ArchiveKey = archiveKey;
@@ -198,7 +214,7 @@
         {
             if (this.IsLocked)
             {
-                throw new UnauthorizedException("Unable to save archive because it is locked!");
+                throw new UnauthorizedException("Unable to save archive because it is locked.");
             }
 
             this.ReserializeIndex();
@@ -239,7 +255,7 @@
         /// <exception cref="UnauthorizedException">Thrown when the input key is not authorized to unlock the archive.</exception>
         private ArchiveKey DecryptArchiveKey(UserKey userKey)
         {
-            const string error = "The user key is not authorized to unlock the archive!";
+            const string error = "The user key is not authorized to unlock the archive.";
 
             var keyAuthorizationRecord = this.UserKeyAuthorizations.FirstOrDefault(
                 k => CryptoHelpers.SecureEquals(k.KeyId, userKey.KeyId));
