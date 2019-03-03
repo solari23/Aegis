@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
@@ -9,8 +10,7 @@
     using Aegis.Core.Crypto;
 
     /// <summary>
-    /// The core data structure that represents SecureArchive files. The SecureArchive is a
-    /// self-contained file that holds the user's encrypted documents.
+    /// The core data structure that stores the user's encrypted documents and implements archive functionality.
     /// </summary>
     /// <remarks>
     /// Data members for this class are defined in a Bond schema (see Aegis.bond).
@@ -141,12 +141,30 @@
         /// </summary>
         public void Save()
         {
+            if (this.IsLocked)
+            {
+                throw new UnauthorizedException("Unable to save archive because it is locked!");
+            }
+
             // TODO: Re-encrypt/serialize the file index.
 
+            // See Aegis file format documentation in file Aegis.bond
+            var fileVersion = BitConverter.GetBytes(this.FileVersion);
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(fileVersion);
+            }
+
             var archiveBytes = BondHelpers.Serialize(this);
+            var hash = this.ArchiveKey.ComputeHmacSha256(archiveBytes);
+
+            Debug.Assert(fileVersion != null && fileVersion.Length == 4);
+            Debug.Assert(hash != null && hash.Length == 32);
 
             using (var fileStream = File.OpenWrite(this.FullFilePath))
             {
+                fileStream.Write(fileVersion);
+                fileStream.Write(hash);
                 fileStream.Write(archiveBytes);
             }
 

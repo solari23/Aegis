@@ -4,6 +4,16 @@ namespace Aegis.Core
 // SecureArchives store timestamps in unix epoch format.
 using DateTime = int64;
 
+// Aegis SecureArchive File Format (.ags)
+// --------------------------------------
+// Aegis SecureArchive files (extension: .ags) are binary files with contents in the format described below.
+//
+//  # | Bytes | Count    | Data Type | Contents
+// ---+-------+----------+-----------+------------------------------------------------------------------------------
+//  1 | 0..3  | 4 bytes  |   int32   | The little-endian file version. Currently always the constant value: 1
+//  2 | 4..35 | 32 bytes |   byte[]  | The HMAC-256 of the serialized SecureArchive (field 3) using the archive key.
+//  3 | 36..  | variable |   byte[]  | The serialized SecureArchive (bond) data structure (see schema below).
+
 enum EncryptionAlgo
 {
     Unknown = 0,
@@ -72,8 +82,7 @@ struct SecuritySettings
     3: int32 KeyIdSizeInBytes;
 }
 
-// The core data structure that represents SecureArchive files. The SecureArchive is a
-// self-contained file that holds the user's encrypted documents.
+// The core data structure that stores the user's encrypted documents and implements archive functionality.
 struct SecureArchive
 {
     // A unique identifier for the archive.

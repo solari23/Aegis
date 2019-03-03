@@ -1,6 +1,7 @@
 ﻿namespace Aegis.Core.Crypto
 {
     using System;
+    using System.Security.Cryptography;
 
     /// <summary>
     /// Base class for cryptographic secrets that need to be securely managed.
@@ -55,6 +56,17 @@
         /// <returns>The decrypted data.</returns>
         internal Span<byte> Decrypt(ICryptoStrategy cryptoStrategy, EncryptedPacket encryptedData, ReadOnlySpan<byte> optionalAssociatedData = default)
             => cryptoStrategy.Decrypt(encryptedData, this.Key, optionalAssociatedData);
+
+        /// <summary>
+        /// Computes the HMAC-SHA256 keyed hash of the given data.
+        /// </summary>
+        /// <param name="dataToHash">The data to hash.</param>
+        /// <returns>The HMAC-SHA256 hash of the data.</returns>
+        internal Span<byte> ComputeHmacSha256(ReadOnlySpan<byte> dataToHash)
+        {
+            using var hmacProvider = new HMACSHA256(this.InternalKeyData);
+            return hmacProvider.ComputeHash(dataToHash.ToArray());
+        }
 
         #region IDisposable Support
 
