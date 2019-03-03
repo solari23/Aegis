@@ -1,7 +1,9 @@
 ﻿namespace Aegis
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     using CommandLine;
 
@@ -44,8 +46,70 @@
             Console.Write(promptString);
             var rawInput = Console.ReadLine();
 
-            // TODO: Handle quoted strings input on command line as single arguments.
-            return rawInput.Split();
+            return ParseCommandLine(rawInput).ToArray();
+        }
+
+        /// <summary>
+        /// Implements a very basic state machine to parse a command line string into argument tokens.
+        /// </summary>
+        /// <param name="line">The line to parse.</param>
+        /// <returns>The argument tokens.</returns>
+        public static IEnumerable<string> ParseCommandLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                // Nothing in the string.
+                yield break;
+            }
+
+            var builder = new StringBuilder();
+            var inQuotes = false;
+            var stop = false;
+
+            for (int i = 0; i < line.Length && !stop; i++)
+            {
+                var curChar = line[i];
+                var nextChar = (i + 1) < line.Length ? line[i + 1] : '\0';
+
+                switch (curChar)
+                {
+                    case '\\' when nextChar == '"':
+                        // We found an escaped quote.
+                        builder.Append('"');
+                        i++;
+                        break;
+
+                    case '"':
+                        inQuotes = !inQuotes;
+                        break;
+
+                    case ' ' when !inQuotes:
+                        if (builder.Length > 0)
+                        {
+                            yield return builder.ToString();
+                            builder.Clear();
+                        }
+                        break;
+
+                    case '|' when !inQuotes:
+                    case '>' when !inQuotes:
+                    case '<' when !inQuotes:
+                        // We found an command pipe or stream redirect.
+                        // The command string we were parsing is done.
+                        stop = true;
+                        break;
+
+                    default:
+                        builder.Append(curChar);
+                        break;
+                }
+            }
+
+            // Flush anything left in the buffer.
+            if (builder.Length > 0)
+            {
+                yield return builder.ToString();
+            }
         }
     }
 }

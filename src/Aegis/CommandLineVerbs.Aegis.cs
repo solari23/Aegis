@@ -30,6 +30,12 @@
                 Required = false,
                 HelpText = "The path to the target Aegis archive. This parameter is ignored in REPL mode, but required for other CLI modes.")]
             public string AegisArchivePath { get; set; }
+
+            /// <summary>
+            /// Generates a string representation of the verb command.
+            /// </summary>
+            /// <returns>The string representation of the command.</returns>
+            public override string ToString() => Parser.Default.FormatCommandLine(this);
         }
     }
 }
