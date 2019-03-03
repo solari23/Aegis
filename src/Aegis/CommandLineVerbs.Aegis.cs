@@ -17,7 +17,15 @@
         [Verb("open", HelpText = "Unlocks an Aegis archive and enters a REPL mode to interact with it.")]
         public class OpenVerbOptions : AegisVerbOptions
         {
-            // Empty -- verb only requires the default options for the archive path.
+            [Option('f', "force", Required = false, HelpText = "Forces the archive to be opened, even if an unsaved archive is already open.")]
+            public bool Force { get; set; }
+        }
+
+        [Verb("close", HelpText = "Closes the opened archive when in REPL mode.")]
+        public class CloseVerbOptions : AegisVerbOptions
+        {
+            [Option('f', "force", Required = false, HelpText = "Force closes the archive, even if it has unsaved changes.")]
+            public bool Force { get; set; }
         }
 
         /// <summary>

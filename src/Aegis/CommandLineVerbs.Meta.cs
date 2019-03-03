@@ -13,12 +13,6 @@
             // Empty.
         }
 
-        [Verb("close", Hidden = true, HelpText = "Hidden verb that allows the user the exit REPL mode.")]
-        public class CloseReplVerbOptions
-        {
-            // Empty.
-        }
-
         [Verb("quit", Hidden = true, HelpText = "Hidden verb that allows the user the exit REPL mode.")]
         public class QuitReplVerbOptions
         {

@@ -21,6 +21,11 @@
         private string TempDirectory { get; } = Path.GetTempPath();
 
         /// <summary>
+        /// The reference to the <see cref="SecureArchive"/> that is opened.
+        /// </summary>
+        private SecureArchive SecureArchive { get; set; }
+
+        /// <summary>
         /// Flag to stop the program after the current command completes.
         /// Used to keep the program in a loop during REPL mode.
         /// </summary>
@@ -72,7 +77,6 @@
                 // First check handlers for Meta verbs.
                 isHandled = parserResult.MapResult(
                     (StartReplVerbOptions _) => this.StartRepl(),
-                    (CloseReplVerbOptions _) => this.ExitRepl(),
                     (ExitReplVerbOptions _) => this.ExitRepl(),
                     (QuitReplVerbOptions _) => this.ExitRepl(),
                     (ClearVerbOptions _) => this.ClearScreen(),
@@ -95,6 +99,7 @@
                 isHandled = parserResult.MapResult(
                     (CreateVerbOptions opts) => this.ExecuteAegisVerb(() => this.CreateVerb(opts)),
                     (OpenVerbOptions opts) => this.ExecuteAegisVerb(() => this.OpenVerb(opts)),
+                    (CloseVerbOptions opts) => this.ExecuteAegisVerb(() => this.CloseVerb(opts)),
 
                     // Default catch-all case. The command is just not implemented yet.
                     (object opts) => false,
@@ -190,7 +195,7 @@
             }
             catch (IOException e)
             {
-                throw new AegisUserErrorException($"Unable to write to {fileSettings.Path}!", innerException: e);
+                throw new AegisUserErrorException($"Unable to write to {fileSettings.Path}.", innerException: e);
             }
 
             return true;
@@ -203,9 +208,83 @@
         /// <returns>Whether or not the operation was handled.</returns>
         private bool OpenVerb(OpenVerbOptions options)
         {
-            // TODO [Verb]: Implement the 'open' verb.
-            this.StartRepl();
-            return false;
+            if (this.SecureArchive != null
+                && this.SecureArchive.IsDirty
+                && !options.Force)
+            {
+                throw new AegisUserErrorException(
+                    "An unsaved archive is already opened. Either save the opened archive or use the --force flag.");
+            }
+
+            // If we already have an archive opened, then any errors we encounter
+            // during this operation are recoverable (keep working on existing one).
+            // Otherwise, load errors should kill the app.
+            var areLoadErrorsRecoverable = this.SecureArchive != null;
+            SecureArchive archive = null;
+
+            try
+            {
+                var archiveFileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
+                archive = SecureArchive.Load(archiveFileSettings);
+
+                // TODO: Implement credential selection and input
+                var rawUserSecret = Encoding.UTF8.GetBytes("P@$sW3rD!!1!");
+
+                archive.Unlock(rawUserSecret);
+            }
+            catch (IOException e)
+            {
+                throw new AegisUserErrorException(
+                    $"Unable to read file at {options.AegisArchivePath}.",
+                    isRecoverable: areLoadErrorsRecoverable,
+                    innerException: e);
+            }
+            catch (ArchiveCorruptedException e)
+            {
+                throw new AegisUserErrorException(
+                    $"The archive file at {options.AegisArchivePath} is corrupted.",
+                    isRecoverable: areLoadErrorsRecoverable,
+                    innerException: e);
+            }
+            catch (UnauthorizedException e)
+            {
+                throw new AegisUserErrorException(
+                    $"The key was not able to unlock the archive.",
+                    isRecoverable: areLoadErrorsRecoverable,
+                    innerException: e);
+            }
+
+            // The new archive is fully loaded. Close out the previous one.
+            this.CloseVerb(new CloseVerbOptions());
+
+            this.SecureArchive = archive;
+            return this.StartRepl();
+        }
+
+        /// <summary>
+        /// Implements the Aegis 'close' verb.
+        /// </summary>
+        /// <param name="options">The verb options.</param>
+        /// <returns>Whether or not the operation was handled.</returns>
+        private bool CloseVerb(CloseVerbOptions options)
+        {
+            if (this.SecureArchive is null)
+            {
+                // There's no archive opened. Do nothing.
+                return true;
+            }
+
+            if (this.SecureArchive.IsDirty && !options.Force)
+            {
+                throw new AegisUserErrorException(
+                    "An archive contains unsaved content. Either save the opened archive or use the --force flag.");
+            }
+
+            this.SecureArchive?.Dispose();
+            this.SecureArchive = null;
+            this.SetWindowTitle();
+
+            return true;
         }
 
         /// <summary>
@@ -214,8 +293,7 @@
         /// <returns>'True' to indicate the operation was handled.</returns>
         private bool StartRepl()
         {
-            // TODO: In REPL mode, set the console title to contain the archive name if one is opened.
-            Console.Title = $"{Program.Name} <No Archive Selected>";
+            this.SetWindowTitle();
             this.ExitAfterCommand = false;
             return true;
         }
@@ -226,6 +304,14 @@
         /// <returns>'True' to indicate the operation was handled.</returns>
         private bool ExitRepl()
         {
+            // Safety check.
+            if (this.SecureArchive != null && this.SecureArchive.IsDirty)
+            {
+                Console.Error.WriteLine("[Error] There is an unsaved archive currently opened.");
+                Console.Error.WriteLine("Either save it or close it with the --force flag before exiting the REPL.");
+                return true;
+            }
+
             this.ExitAfterCommand = true;
             return true;
         }
@@ -238,6 +324,18 @@
         {
             Console.Clear();
             return true;
+        }
+
+        /// <summary>
+        /// Sets the title in the command line window.
+        /// </summary>
+        private void SetWindowTitle()
+        {
+            var archiveName = this.SecureArchive is null
+                ? "No Archive Selected"
+                : this.SecureArchive.FileName;
+
+            Console.Title = $"{Program.Name} <{archiveName}>";
         }
     }
 }

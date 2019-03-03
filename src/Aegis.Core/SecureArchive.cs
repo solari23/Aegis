@@ -28,7 +28,7 @@
             SecureArchiveFileSettings fileSettings,
             SecureArchiveCreationParameters creationParameters)
         {
-            // TODO: Validate input fileSettings 
+            // TODO: Validate input fileSettings
             // TODO: Validate input creationParameters
 
             var currentTime = DateTime.UtcNow;
@@ -73,6 +73,55 @@
         }
 
         /// <summary>
+        /// Loads a <see cref="SecureArchive"/> from disk. This operation does not unlock the archive.
+        /// </summary>
+        /// <param name="fileSettings">Settings for where the <see cref="SecureArchive"/> and related files are stored.</param>
+        /// <returns>The loaded <see cref="SecureArchive"/>.</returns>
+        public static SecureArchive Load(SecureArchiveFileSettings fileSettings)
+        {
+            // TODO: Validate input fileSettings
+
+            // See Aegis file format documentation in file Aegis.bond
+            using var fileStream = File.OpenRead(fileSettings.Path);
+
+            if (fileStream.Length < 36)
+            {
+                throw new ArchiveCorruptedException("The archive is too small to load.");
+            }
+
+            var fileVersion = new byte[4];
+            var archiveHash = new byte[32];
+            var archiveBytes = new byte[fileStream.Length - 4 - 32];
+
+            // Note: Eventually we may want to branch here if new file versions
+            // have a different format. For now, there's just the one format.
+            fileStream.Read(fileVersion);
+            fileStream.Read(archiveHash);
+            fileStream.Read(archiveBytes);
+
+            SecureArchive archive;
+
+            try
+            {
+                archive = BondHelpers.Deserialize<SecureArchive>(archiveBytes);
+
+                if (archive is null)
+                {
+                    throw new InvalidOperationException("The archive is corrupted and can't be deserialized.");
+                }
+            }
+            catch (Exception e)
+            {
+                throw new ArchiveCorruptedException("Unable to open the archive because it is corrupted.", e);
+            }
+
+            archive.FileSettings = fileSettings;
+            archive.LoadedArchiveHash = archiveHash;
+
+            return archive;
+        }
+
+        /// <summary>
         /// Gets the name of the <see cref="SecureArchive"/> file.
         /// </summary>
         public string FileName => Path.GetFileName(this.FileSettings?.Path ?? string.Empty);
@@ -106,6 +155,12 @@
         /// Gets settings for where the <see cref="SecureArchive"/> and related files are stored.
         /// </summary>
         private SecureArchiveFileSettings FileSettings { get; set; }
+
+        /// <summary>
+        /// If loaded from disk, gets the HMAC-256 hash of the <see cref="SecureArchive"/>
+        /// that was stored in the file.
+        /// </summary>
+        private byte[] LoadedArchiveHash { get; set; }
 
         /// <summary>
         /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given raw user secret.
@@ -146,7 +201,13 @@
                 throw new UnauthorizedException("Unable to save archive because it is locked!");
             }
 
-            // TODO: Re-encrypt/serialize the file index.
+            this.ReserializeIndex();
+
+            if (this.IsDirty)
+            {
+                // Record the last time the archive was modified.
+                this.LastModifiedTime = DateTime.UtcNow;
+            }
 
             // See Aegis file format documentation in file Aegis.bond
             var fileVersion = BitConverter.GetBytes(this.FileVersion);
@@ -156,17 +217,15 @@
             }
 
             var archiveBytes = BondHelpers.Serialize(this);
-            var hash = this.ArchiveKey.ComputeHmacSha256(archiveBytes);
+            var archiveHash = this.ArchiveKey.ComputeHmacSha256(archiveBytes);
 
-            Debug.Assert(fileVersion != null && fileVersion.Length == 4);
-            Debug.Assert(hash != null && hash.Length == 32);
+            Debug.Assert(fileVersion != null && fileVersion.Length == 4, "The fileVersion field size is wrong!");
+            Debug.Assert(archiveHash != null && archiveHash.Length == 32, "The aechiveHash size is wrong!");
 
-            using (var fileStream = File.OpenWrite(this.FullFilePath))
-            {
-                fileStream.Write(fileVersion);
-                fileStream.Write(hash);
-                fileStream.Write(archiveBytes);
-            }
+            using var fileStream = File.OpenWrite(this.FullFilePath);
+            fileStream.Write(fileVersion);
+            fileStream.Write(archiveHash);
+            fileStream.Write(archiveBytes);
 
             this.IsDirty = false;
         }
@@ -210,6 +269,20 @@
 
             // Congrats, you're authorized!
             return archiveKey;
+        }
+
+        /// <summary>
+        /// Encrypts and serializes the file index.
+        /// </summary>
+        private void ReserializeIndex()
+        {
+            // Be extra cautious to avoid corrupting existing archives.
+            if (this.IsLocked)
+            {
+                throw new InvalidOperationException("Attempted to reserialize index while archive is locked!");
+            }
+
+            // TODO: Re-encrypt/serialize the file index.
         }
 
         #region IDisposable Support
