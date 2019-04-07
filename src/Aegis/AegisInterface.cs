@@ -21,9 +21,9 @@
         private string TempDirectory { get; } = Path.GetTempPath();
 
         /// <summary>
-        /// The reference to the <see cref="SecureArchive"/> that is opened.
+        /// The reference to the <see cref="AegisArchive"/> that is opened.
         /// </summary>
-        private SecureArchive SecureArchive { get; set; }
+        private AegisArchive Archive { get; set; }
 
         /// <summary>
         /// Flag that indicates we're running in REPL mode.
@@ -176,7 +176,7 @@
             var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
             var fileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
 
-            using var archive = SecureArchive.CreateNew(fileSettings, createParameters);
+            using var archive = AegisArchive.CreateNew(fileSettings, createParameters);
 
             try
             {
@@ -207,8 +207,8 @@
         /// <returns>Whether or not the operation was handled.</returns>
         private bool OpenVerb(OpenVerbOptions options)
         {
-            if (this.SecureArchive != null
-                && this.SecureArchive.IsDirty
+            if (this.Archive != null
+                && this.Archive.IsDirty
                 && !options.Force)
             {
                 throw new AegisUserErrorException(
@@ -221,12 +221,12 @@
                     "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
             }
             
-            SecureArchive archive = null;
+            AegisArchive archive = null;
 
             try
             {
                 var archiveFileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
-                archive = SecureArchive.Load(archiveFileSettings);
+                archive = AegisArchive.Load(archiveFileSettings);
 
                 // TODO: Implement credential selection and input
                 var rawUserSecret = Encoding.UTF8.GetBytes("P@$sW3rD!!1!");
@@ -255,7 +255,7 @@
             // The new archive is fully loaded. Close out the previous one.
             this.CloseVerb(new CloseVerbOptions());
 
-            this.SecureArchive = archive;
+            this.Archive = archive;
             return this.StartRepl();
         }
 
@@ -266,20 +266,20 @@
         /// <returns>Whether or not the operation was handled.</returns>
         private bool CloseVerb(CloseVerbOptions options)
         {
-            if (this.SecureArchive is null)
+            if (this.Archive is null)
             {
                 // There's no archive opened. Do nothing.
                 return true;
             }
 
-            if (this.SecureArchive.IsDirty && !options.Force)
+            if (this.Archive.IsDirty && !options.Force)
             {
                 throw new AegisUserErrorException(
                     "An archive contains unsaved content. Either save the opened archive or use the --force flag.");
             }
 
-            this.SecureArchive?.Dispose();
-            this.SecureArchive = null;
+            this.Archive?.Dispose();
+            this.Archive = null;
             this.SetWindowTitle();
 
             return true;
@@ -303,7 +303,7 @@
         private bool ExitRepl()
         {
             // Safety check.
-            if (this.SecureArchive != null && this.SecureArchive.IsDirty)
+            if (this.Archive != null && this.Archive.IsDirty)
             {
                 Console.Error.WriteLine("[Error] There is an unsaved archive currently opened.");
                 Console.Error.WriteLine("Either save it or close it with the --force flag before exiting the REPL.");
@@ -329,9 +329,9 @@
         /// </summary>
         private void SetWindowTitle()
         {
-            var archiveName = this.SecureArchive is null
+            var archiveName = this.Archive is null
                 ? "No Archive Selected"
-                : this.SecureArchive.FileName;
+                : this.Archive.FileName;
 
             Console.Title = $"{Program.Name} <{archiveName}>";
         }

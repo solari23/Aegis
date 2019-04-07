@@ -3,28 +3,23 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
 
     using Aegis.Core.Crypto;
 
     /// <summary>
-    /// The core data structure that stores the user's encrypted documents and implements archive functionality.
+    /// The core data structure that implements archive functionality.
     /// </summary>
-    /// <remarks>
-    /// Data members for this class are defined in a Bond schema (see Aegis.bond).
-    /// </remarks>
-    [SuppressMessage("Microsoft.Design", "CA1047:DoNotDeclareProtectedMembersInSealedTypes", Justification = "The protected ctor is code generated.")]
-    public sealed partial class SecureArchive : IDisposable
+    public sealed class AegisArchive : IDisposable
     {
         /// <summary>
-        /// Creates a new <see cref="SecureArchive"/> that contains no files.
+        /// Creates a new <see cref="AegisArchive"/> that contains no files.
         /// </summary>
-        /// <param name="fileSettings">Settings for where the <see cref="SecureArchive"/> and related files are stored.</param>
+        /// <param name="fileSettings">Settings for where the archive and related files are stored.</param>
         /// <param name="creationParameters">The <see cref="SecureArchiveCreationParameters"/> to use when creating the archive.</param>
-        /// <returns>A new <see cref="SecureArchive"/>.</returns>
-        public static SecureArchive CreateNew(
+        /// <returns>A new <see cref="AegisArchive"/> that is opened but not yet persisted to disk.</returns>
+        public static AegisArchive CreateNew(
             SecureArchiveFileSettings fileSettings,
             SecureArchiveCreationParameters creationParameters)
         {
@@ -52,7 +47,7 @@
                 CryptoHelpers.GetCryptoStrategy(creationParameters.SecuritySettings.EncryptionAlgo),
                 archiveId.ToByteArray());
 
-            var archive = new SecureArchive
+            var archiveData = new SecureArchive
             {
                 Id = archiveId,
                 FileVersion = Constants.CurrentAegisSecureArchiveFileVersion,
@@ -62,8 +57,11 @@
                 KeyDerivationSalt = new List<byte>(keyDerivationSalt),
                 AuthCanary = authCanary,
                 UserKeyAuthorizations = new List<UserKeyAuthorization> { firstUserKeyAuthorization },
+            };
 
-                // Non-serialized properties.
+            var archive = new AegisArchive
+            {
+                ArchiveData = archiveData,
                 ArchiveKey = archiveKey,
                 FileSettings = fileSettings,
                 FileIndex = new FileIndex(),
@@ -74,11 +72,11 @@
         }
 
         /// <summary>
-        /// Loads a <see cref="SecureArchive"/> from disk. This operation does not unlock the archive.
+        /// Loads a <see cref="AegisArchive"/> from disk. This operation does not unlock the archive.
         /// </summary>
-        /// <param name="fileSettings">Settings for where the <see cref="SecureArchive"/> and related files are stored.</param>
-        /// <returns>The loaded <see cref="SecureArchive"/>.</returns>
-        public static SecureArchive Load(SecureArchiveFileSettings fileSettings)
+        /// <param name="fileSettings">Settings for where the archive and related files are stored.</param>
+        /// <returns>The loaded <see cref="AegisArchive"/>.</returns>
+        public static AegisArchive Load(SecureArchiveFileSettings fileSettings)
         {
             // TODO: Validate input fileSettings
 
@@ -100,13 +98,13 @@
             fileStream.Read(archiveHash);
             fileStream.Read(archiveBytes);
 
-            SecureArchive archive;
+            SecureArchive archiveData;
 
             try
             {
-                archive = BondHelpers.Deserialize<SecureArchive>(archiveBytes);
+                archiveData = BondHelpers.Deserialize<SecureArchive>(archiveBytes);
 
-                if (archive is null)
+                if (archiveData is null)
                 {
                     throw new InvalidOperationException("The archive is corrupted and can't be deserialized.");
                 }
@@ -116,38 +114,55 @@
                 throw new ArchiveCorruptedException("Unable to open the archive because it is corrupted.", e);
             }
 
-            archive.FileSettings = fileSettings;
+            var archive = new AegisArchive
+            {
+                ArchiveData = archiveData,
+                FileSettings = fileSettings,
 
-            // Save the loaded data so the hash can be verified when the archive is unlocked.
-            archive.LoadedArchiveDataToBeVerified = (Hash: archiveHash, Data: archiveBytes);
+                // Save the loaded data so the hash can be verified when the archive is unlocked.
+                LoadedArchiveDataToBeVerified = (Hash: archiveHash, Data: archiveBytes),
+            };
 
             return archive;
         }
 
         /// <summary>
-        /// Gets the name of the <see cref="SecureArchive"/> file.
+        /// Initializes a new instance of the <see cref="AegisArchive"/> class.
+        /// </summary>
+        private AegisArchive()
+        {
+            // Hidden ctor.
+        }
+
+        /// <summary>
+        /// Gets the name of the archive file.
         /// </summary>
         public string FileName => Path.GetFileName(this.FileSettings?.Path ?? string.Empty);
 
         /// <summary>
-        /// Gets the full path to the <see cref="SecureArchive"/> file.
+        /// Gets the full path to the archive file on disk.
         /// </summary>
         public string FullFilePath => this.FileSettings?.Path ?? string.Empty;
 
         /// <summary>
-        /// Gets whether or not the <see cref="SecureArchive"/> is locked.
+        /// Gets whether or not the archive is locked.
         /// </summary>
         public bool IsLocked => this.ArchiveKey == null;
 
         /// <summary>
-        /// Gets whether or not the <see cref="SecureArchive"/> has been updated but not saved.
+        /// Gets whether or not the archive has been updated but not saved.
         /// </summary>
         public bool IsDirty { get; private set; }
 
         /// <summary>
+        /// Gets the underlying archive data.
+        /// </summary>
+        private SecureArchive ArchiveData { get; set; }
+
+        /// <summary>
         /// Gets the <see cref="ICryptoStrategy"/> configured for the archive.
         /// </summary>
-        internal ICryptoStrategy CryptoStrategy => CryptoHelpers.GetCryptoStrategy(this.SecuritySettings.EncryptionAlgo);
+        private ICryptoStrategy CryptoStrategy => CryptoHelpers.GetCryptoStrategy(this.ArchiveData.SecuritySettings.EncryptionAlgo);
 
         /// <summary>
         /// Gets the archive encryption key, or null if the archive is locked.
@@ -155,38 +170,43 @@
         private ArchiveKey ArchiveKey { get; set; }
 
         /// <summary>
-        /// Gets settings for where the <see cref="SecureArchive"/> and related files are stored.
+        /// Gets settings for where the archive and related files are stored.
         /// </summary>
         private SecureArchiveFileSettings FileSettings { get; set; }
 
         /// <summary>
-        /// Gets the index of files stored in the <see cref="SecureArchive"/>.
+        /// Gets the index of files stored in the archive.
         /// </summary>
         private FileIndex FileIndex { get; set; }
 
         /// <summary>
         /// Raw archive data loaded from disk. We keep a reference so we can verify the HMAC-256 
-        /// hash of the <see cref="SecureArchive"/> on Unlock() to detect file tampering.
+        /// hash of <see cref="ArchiveData"/> on Unlock() to detect file tampering.
         /// </summary>
         private (byte[] Hash, byte[] Data) LoadedArchiveDataToBeVerified { get; set; }
 
         /// <summary>
-        /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given raw user secret.
+        /// Unlocks (i.e. decrypts) the archive with the given raw user secret.
         /// </summary>
         /// <param name="userSecret">The user secret to use to unlock the archive.</param>
-        public void Unlock(ReadOnlySpan<byte> userSecret)
+        /// <param name="checkTampering">Whether or not to check the saved archive hash to guard against tampering. Default: true.</param>
+        public void Unlock(ReadOnlySpan<byte> userSecret, bool checkTampering = true)
         {
             ArgCheck.NotEmpty(userSecret, nameof(userSecret));
 
-            using var userKey = UserKey.DeriveFrom(userSecret, this.KeyDerivationSalt.ToArray(), this.SecuritySettings);
-            this.Unlock(userKey);
+            using var userKey = UserKey.DeriveFrom(
+                userSecret,
+                this.ArchiveData.KeyDerivationSalt.ToArray(),
+                this.ArchiveData.SecuritySettings);
+            this.Unlock(userKey, checkTampering);
         }
 
         /// <summary>
-        /// Unlocks (i.e. decrypts) the <see cref="SecureArchive"/> with the given <see cref="UserKey"/>.
+        /// Unlocks (i.e. decrypts) the archive with the given <see cref="UserKey"/>.
         /// </summary>
         /// <param name="userKey">The <see cref="UserKey"/> to use to unlock the archive.</param>
-        public void Unlock(UserKey userKey)
+        /// <param name="checkTampering">Whether or not to check the saved archive hash to guard against tampering. Default: true.</param>
+        public void Unlock(UserKey userKey, bool checkTampering = true)
         {
             ArgCheck.NotNull(userKey, nameof(userKey));
 
@@ -197,7 +217,8 @@
             // When the archive is loaded from disk, we also load an HMAC of the file data
             // which needs to be validated with the archive key. Check that now.
             if (this.LoadedArchiveDataToBeVerified.Hash != null
-                && this.LoadedArchiveDataToBeVerified.Data != null)
+                && this.LoadedArchiveDataToBeVerified.Data != null
+                && checkTampering)
             {
                 var actualHash = archiveKey.ComputeHmacSha256(this.LoadedArchiveDataToBeVerified.Data);
 
@@ -208,9 +229,12 @@
                 }
             }
 
-            this.FileIndex = this.EncryptedFileIndex is null || this.EncryptedFileIndex.IsEmpty
+            this.FileIndex = this.ArchiveData.EncryptedFileIndex is null || this.ArchiveData.EncryptedFileIndex.IsEmpty
                 ? new FileIndex()
-                : BondHelpers.DecryptAndDeserialize<FileIndex>(this.EncryptedFileIndex, archiveKey, this.SecuritySettings);
+                : BondHelpers.DecryptAndDeserialize<FileIndex>(
+                    this.ArchiveData.EncryptedFileIndex,
+                    archiveKey,
+                    this.ArchiveData.SecuritySettings);
 
             this.ArchiveKey = archiveKey;
         }
@@ -230,17 +254,17 @@
             if (this.IsDirty)
             {
                 // Record the last time the archive was modified.
-                this.LastModifiedTime = DateTime.UtcNow;
+                this.ArchiveData.LastModifiedTime = DateTime.UtcNow;
             }
 
             // See Aegis file format documentation in file Aegis.bond
-            var fileVersion = BitConverter.GetBytes(this.FileVersion);
+            var fileVersion = BitConverter.GetBytes(this.ArchiveData.FileVersion);
             if (!BitConverter.IsLittleEndian)
             {
                 Array.Reverse(fileVersion);
             }
 
-            var archiveBytes = BondHelpers.Serialize(this);
+            var archiveBytes = BondHelpers.Serialize(this.ArchiveData);
             var archiveHash = this.ArchiveKey.ComputeHmacSha256(archiveBytes);
 
             Debug.Assert(fileVersion != null && fileVersion.Length == 4, "The fileVersion field size is wrong!");
@@ -265,11 +289,11 @@
         {
             const string error = "The user key is not authorized to unlock the archive.";
 
-            var keyAuthorizationRecord = this.UserKeyAuthorizations.FirstOrDefault(
+            var keyAuthorizationRecord = this.ArchiveData.UserKeyAuthorizations.FirstOrDefault(
                 k => CryptoHelpers.SecureEquals(k.KeyId, userKey.KeyId));
 
             if (keyAuthorizationRecord is null
-                || !keyAuthorizationRecord.TryDecryptArchiveKey(userKey, this.SecuritySettings, out var archiveKey))
+                || !keyAuthorizationRecord.TryDecryptArchiveKey(userKey, this.ArchiveData.SecuritySettings, out var archiveKey))
             {
                 throw new UnauthorizedException(error);
             }
@@ -279,14 +303,14 @@
 
             try
             {
-                decryptedCanary = new Guid(archiveKey.Decrypt(this.CryptoStrategy, this.AuthCanary));
+                decryptedCanary = new Guid(archiveKey.Decrypt(this.CryptoStrategy, this.ArchiveData.AuthCanary));
             }
             catch
             {
                 throw new UnauthorizedException(error);
             }
 
-            if (!CryptoHelpers.SecureEquals(decryptedCanary.ToByteArray(), ((Guid)this.Id).ToByteArray()))
+            if (!CryptoHelpers.SecureEquals(decryptedCanary.ToByteArray(), ((Guid)this.ArchiveData.Id).ToByteArray()))
             {
                 throw new UnauthorizedException(error);
             }
@@ -306,7 +330,10 @@
                 throw new InvalidOperationException("Attempted to reserialize index while archive is locked!");
             }
 
-            this.EncryptedFileIndex = BondHelpers.SerializeAndEncrypt(this.FileIndex, this.ArchiveKey, this.SecuritySettings);
+            this.ArchiveData.EncryptedFileIndex = BondHelpers.SerializeAndEncrypt(
+                this.FileIndex,
+                this.ArchiveKey,
+                this.ArchiveData.SecuritySettings);
         }
 
         #region IDisposable Support
