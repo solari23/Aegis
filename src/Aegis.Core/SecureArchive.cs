@@ -66,6 +66,7 @@
                 // Non-serialized properties.
                 ArchiveKey = archiveKey,
                 FileSettings = fileSettings,
+                FileIndex = new FileIndex(),
                 IsDirty = true,
             };
 
@@ -159,6 +160,11 @@
         private SecureArchiveFileSettings FileSettings { get; set; }
 
         /// <summary>
+        /// Gets the index of files stored in the <see cref="SecureArchive"/>.
+        /// </summary>
+        private FileIndex FileIndex { get; set; }
+
+        /// <summary>
         /// Raw archive data loaded from disk. We keep a reference so we can verify the HMAC-256 
         /// hash of the <see cref="SecureArchive"/> on Unlock() to detect file tampering.
         /// </summary>
@@ -202,7 +208,9 @@
                 }
             }
 
-            // TODO: Decrypt the file index.
+            this.FileIndex = this.EncryptedFileIndex is null || this.EncryptedFileIndex.IsEmpty
+                ? new FileIndex()
+                : BondHelpers.DecryptAndDeserialize<FileIndex>(this.EncryptedFileIndex, archiveKey, this.SecuritySettings);
 
             this.ArchiveKey = archiveKey;
         }
@@ -298,7 +306,7 @@
                 throw new InvalidOperationException("Attempted to reserialize index while archive is locked!");
             }
 
-            // TODO: Re-encrypt/serialize the file index.
+            this.EncryptedFileIndex = BondHelpers.SerializeAndEncrypt(this.FileIndex, this.ArchiveKey, this.SecuritySettings);
         }
 
         #region IDisposable Support

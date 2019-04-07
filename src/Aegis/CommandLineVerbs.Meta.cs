@@ -3,7 +3,7 @@
     using CommandLine;
 
     /// <summary>
-    /// Container for options types of Meta verbs (i.e. verbs that basic command line functionality).
+    /// Container for options types of Meta verbs (i.e. verbs that implement basic command line functionality).
     /// </summary>
     public static partial class CommandLineVerbs
     {

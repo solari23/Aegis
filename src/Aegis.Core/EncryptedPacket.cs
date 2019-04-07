@@ -35,5 +35,10 @@
                 ? new List<byte>()
                 : new List<byte>(authTag.ToArray());
         }
+
+        /// <summary>
+        /// Gets whether or the <see cref="EncryptedPacket"/> is empty.
+        /// </summary>
+        public bool IsEmpty => this.CipherText?.Count == 0;
     }
 }

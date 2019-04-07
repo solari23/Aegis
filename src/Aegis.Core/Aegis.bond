@@ -82,6 +82,32 @@ struct SecuritySettings
     3: int32 KeyIdSizeInBytes;
 }
 
+// Metadata about a file stored in the SecureArchive
+struct FileIndexEntry
+{
+    // A unique identifier for the archive.
+    0: bond.GUID FileId;
+
+    // A virtual file name. These must be unique within the archive.
+    1: string FileName;
+
+    // When the file was added to the archive.
+    3: DateTime AddedTime;
+
+    // When the archived file was last modified.
+    4: DateTime LastModifiedTime;
+
+    // TODO: Store a SHA256 of the original file.
+    // TODO: Implement file compression.
+}
+
+// The index of files stored in the SecureArchive.
+struct FileIndex
+{
+    // The actual index entries, one entry per file stored in the SecureArchive.
+    0: vector<FileIndexEntry> Entries;
+}
+
 // The core data structure that stores the user's encrypted documents and implements archive functionality.
 struct SecureArchive
 {
@@ -110,13 +136,9 @@ struct SecureArchive
     // The list of keys that are authorized to unlock the archive.
     7: vector<UserKeyAuthorization> UserKeyAuthorizations;
 
+    // The encrypted file index. The encrypted data's schema is of type FileIndex.
+    8: EncryptedPacket EncryptedFileIndex;
+
     // TODO: The SecureArchive will also contain:
-    //   - An encrypted index with metadata about the files. Files should have:
-    //      - A friendly name (the original file name, may be extended to create virtual paths)
-    //      - A Guid unique identifier
-    //      - A compression algorithm identifier, so we can compress files before encrypting
-    //      - Sha256 of the file contents (used to check if checked out copies on disk are modified)
-    //   - A map<Guid, EncryptedPacket> of file IDs to the actual encrypted files. The encryption
-    //     method should be authenticated (e.g. AES in GCM mode), and the encryption method should
-    //     take the fileId into account to make sure it hasn't been tampered with as well.
+    //   - A map<Guid, EncryptedPacket> of file IDs to the actual encrypted files.
 }

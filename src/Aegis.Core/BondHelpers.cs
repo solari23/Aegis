@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using System.Threading;
 
+    using Aegis.Core.Crypto;
     using Bond;
     using Bond.IO.Safe;
     using Bond.Protocols;
@@ -97,6 +98,42 @@
             {
                 throw new InvalidOperationException($"Serializing object of type {typeof(T)} failed.", ex);
             }
+        }
+
+        /// <summary>
+        /// Decrypts and deserializes a Bond object.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to deserialize.</typeparam>
+        /// <param name="encryptedData">The encrypted object data.</param>
+        /// <param name="key">The archive's decryption key to use.</param>
+        /// <param name="securitySettings">The archive's security settings.</param>
+        /// <returns>The requested deserialized object.</returns>
+        internal static T DecryptAndDeserialize<T>(
+            EncryptedPacket encryptedData,
+            ArchiveKey key,
+            SecuritySettings securitySettings)
+        {
+            var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
+            var rawData = key.Decrypt(cryptoStrategy, encryptedData);
+            return Deserialize<T>(rawData.ToArray());
+        }
+
+        /// <summary>
+        /// Serializes a given Bond object and encrypts it
+        /// </summary>
+        /// <typeparam name="T">The type of the object to serialize.</typeparam>
+        /// <param name="bondObject">The object to serialize.</param>
+        /// <param name="key">The archive's ecryption key to use.</param>
+        /// <param name="securitySettings">The archive's security settings.</param>
+        /// <returns>The serialized and encrypted data.</returns>
+        internal static EncryptedPacket SerializeAndEncrypt<T>(
+            T bondObject,
+            ArchiveKey key,
+            SecuritySettings securitySettings)
+        {
+            var rawData = Serialize<T>(bondObject);
+            var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
+            return key.Encrypt(cryptoStrategy, rawData);
         }
     }
 }

@@ -26,10 +26,9 @@
         private SecureArchive SecureArchive { get; set; }
 
         /// <summary>
-        /// Flag to stop the program after the current command completes.
-        /// Used to keep the program in a loop during REPL mode.
+        /// Flag that indicates we're running in REPL mode.
         /// </summary>
-        private bool ExitAfterCommand { get; set; } = true;
+        private bool InReplMode { get; set; } = true;
 
         /// <summary>
         /// Runs the Aegis command line interface.
@@ -50,7 +49,7 @@
 
             do
             {
-                if (!this.ExitAfterCommand)
+                if (this.InReplMode)
                 {
                     // In REPL mode -> Prompt for the next command.
                     args = CommandLineHelpers.Prompt();
@@ -122,7 +121,7 @@
                     Console.WriteLine($"The requested '{verbName}' operation is not yet implemented.");
                 }
             }
-            while (!this.ExitAfterCommand);
+            while (this.InReplMode);
         }
 
         /// <summary>
@@ -142,10 +141,10 @@
                 // TODO: Open/unlock an Aegis archive if none is yet opened.
                 isHandled = operation();
             }
-            catch (AegisUserErrorException e) when (e.IsRecoverable)
+            catch (AegisUserErrorException e) when (e.IsRecoverable && this.InReplMode)
             {
-                // Only catch recoverable errors. Let unrecoverable errors bubble up
-                // to the top-level error handler.
+                // Only catch recoverable errors while in REPL mode.
+                // Let unrecoverable errors bubble up to the top-level error handler.
                 Console.Error.WriteLine($"[Error] {e.Message}");
             }
 
@@ -216,10 +215,12 @@
                     "An unsaved archive is already opened. Either save the opened archive or use the --force flag.");
             }
 
-            // If we already have an archive opened, then any errors we encounter
-            // during this operation are recoverable (keep working on existing one).
-            // Otherwise, load errors should kill the app.
-            var areLoadErrorsRecoverable = this.SecureArchive != null;
+            if (string.IsNullOrWhiteSpace(options.AegisArchivePath))
+            {
+                throw new AegisUserErrorException(
+                    "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
+            }
+            
             SecureArchive archive = null;
 
             try
@@ -236,21 +237,18 @@
             {
                 throw new AegisUserErrorException(
                     $"Unable to read file at {options.AegisArchivePath}.",
-                    isRecoverable: areLoadErrorsRecoverable,
                     innerException: e);
             }
             catch (ArchiveCorruptedException e)
             {
                 throw new AegisUserErrorException(
                     $"The archive file at {options.AegisArchivePath} is corrupted.",
-                    isRecoverable: areLoadErrorsRecoverable,
                     innerException: e);
             }
             catch (UnauthorizedException e)
             {
                 throw new AegisUserErrorException(
                     $"The key was not able to unlock the archive.",
-                    isRecoverable: areLoadErrorsRecoverable,
                     innerException: e);
             }
 
@@ -294,7 +292,7 @@
         private bool StartRepl()
         {
             this.SetWindowTitle();
-            this.ExitAfterCommand = false;
+            this.InReplMode = true;
             return true;
         }
 
@@ -312,7 +310,7 @@
                 return true;
             }
 
-            this.ExitAfterCommand = true;
+            this.InReplMode = false;
             return true;
         }
 

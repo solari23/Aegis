@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>Aegis.Core</AssemblyName>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Authors>Alexandre Kerametlian</Authors>
     <Description>Core library providing Aegis secure file storage functionality.</Description>
