@@ -1,9 +1,9 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
-    using System.Security.Cryptography;
-    using System.Text;
+﻿using System;
+using System.Security.Cryptography;
+using System.Text;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// A collection of static helper utilities to deal with crypto operations.
     /// </summary>

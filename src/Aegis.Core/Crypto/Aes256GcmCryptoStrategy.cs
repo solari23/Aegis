@@ -1,8 +1,8 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
-    using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// Implements encryption using the AES algorithm in GCM mode with a 256-bit key.
     /// </summary>

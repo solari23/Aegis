@@ -1,9 +1,9 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
-    using System.ComponentModel;
-    using System.Diagnostics;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// Encapsulates constant properties about the available encryption algorithms.
     /// </summary>

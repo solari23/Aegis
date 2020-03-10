@@ -1,14 +1,14 @@
-﻿namespace Aegis.Core
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
+
+using Aegis.Core.Crypto;
+using Bond;
+using Bond.IO.Safe;
+using Bond.Protocols;
+
+namespace Aegis.Core
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Threading;
-
-    using Aegis.Core.Crypto;
-    using Bond;
-    using Bond.IO.Safe;
-    using Bond.Protocols;
-
     /// <summary>
     /// A collection of static helper utilities for dealing with Bond (de)serialization.
     /// </summary>

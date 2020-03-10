@@ -1,13 +1,13 @@
-﻿namespace Aegis.Core
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+
+using Aegis.Core.Crypto;
+
+namespace Aegis.Core
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-
-    using Aegis.Core.Crypto;
-
     /// <summary>
     /// The core data structure that implements archive functionality.
     /// </summary>

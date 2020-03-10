@@ -1,8 +1,8 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
-    using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// Base class for cryptographic secrets that need to be securely managed.
     /// </summary>

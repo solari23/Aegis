@@ -1,7 +1,7 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
+﻿using System;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// Standardized interface for key derivation function usage in Aegis.
     /// </summary>

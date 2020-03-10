@@ -1,8 +1,8 @@
-﻿namespace Aegis.Core.Crypto
-{
-    using System;
-    using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
+namespace Aegis.Core.Crypto
+{
     /// <summary>
     /// Implements key derivation using the PBKDF2 algorithm descibed in RFC 2898.
     /// </summary>

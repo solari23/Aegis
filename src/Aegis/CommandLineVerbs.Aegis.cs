@@ -1,7 +1,7 @@
-﻿namespace Aegis
-{
-    using CommandLine;
+﻿using CommandLine;
 
+namespace Aegis
+{
     /// <summary>
     /// Container for options types of Aegis verbs (i.e. verbs that implement Aegis functionality).
     /// </summary>

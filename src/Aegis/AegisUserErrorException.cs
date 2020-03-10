@@ -1,7 +1,7 @@
-﻿namespace Aegis
-{
-    using System;
+﻿using System;
 
+namespace Aegis
+{
     /// <summary>
     /// Exception thrown to indicate a user error.
     /// </summary>

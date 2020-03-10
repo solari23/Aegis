@@ -1,11 +1,11 @@
-﻿namespace Aegis.Core
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
+namespace Aegis.Core
+{
     /// <summary>
     /// A collection of argument checking helpers.
     /// </summary>

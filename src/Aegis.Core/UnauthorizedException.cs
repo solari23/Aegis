@@ -1,10 +1,10 @@
-﻿namespace Aegis.Core
-{
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
+namespace Aegis.Core
+{
     /// <summary>
     /// Exception thrown when an unauthorized user tries to access the <see cref="SecureArchive"/>.
     /// </summary>

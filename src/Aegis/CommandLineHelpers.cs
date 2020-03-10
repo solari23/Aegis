@@ -1,12 +1,12 @@
-﻿namespace Aegis
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using CommandLine;
+
+namespace Aegis
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
-    using CommandLine;
-
     /// <summary>
     /// A collection of static helper utilities for dealing with the command line.
     /// </summary>

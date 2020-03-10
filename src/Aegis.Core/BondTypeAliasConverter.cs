@@ -1,8 +1,8 @@
-﻿namespace Aegis.Core
-{
-    using System;
-    using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
+namespace Aegis.Core
+{
     /// <summary>
     /// Helpers used by the Bond runtime to automatically convert types during serialization.
     /// These allow for more C# idiomatic usage of the code generated types.

@@ -1,11 +1,11 @@
-﻿namespace Aegis.Core
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+
+using Aegis.Core.Crypto;
+
+namespace Aegis.Core
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Text;
-
-    using Aegis.Core.Crypto;
-
     /// <summary>
     /// Metadata associated with user keys authorized to unlock the SecureArchive.
     /// </summary>

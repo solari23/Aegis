@@ -1,7 +1,7 @@
-﻿namespace Aegis
-{
-    using System;
+﻿using System;
 
+namespace Aegis
+{
     /// <summary>
     /// Contains the main entry point for the Aegis CLI.
     /// </summary>

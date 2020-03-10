@@ -1,9 +1,9 @@
-﻿namespace Aegis.Core
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
+namespace Aegis.Core
+{
     /// <summary>
     /// Container that packages encrypted data with an envelope describing the encryption used.
     /// </summary>

@@ -1,15 +1,15 @@
-﻿namespace Aegis
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+using Aegis.Core;
+using CommandLine;
+
+using static Aegis.CommandLineVerbs;
+
+namespace Aegis
 {
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-
-    using Aegis.Core;
-    using CommandLine;
-
-    using static CommandLineVerbs;
-
     /// <summary>
     /// Implements the Aegis command line interface.
     /// </summary>

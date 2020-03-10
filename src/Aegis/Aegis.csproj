@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Aegis</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Alexandre Kerametlian</Authors>
     <Description>Aegis secure file storage utility.</Description>
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
