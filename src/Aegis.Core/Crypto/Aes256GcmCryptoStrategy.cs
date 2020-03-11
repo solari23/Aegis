@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Security.Cryptography;
 
+using Aegis.Models;
+
 namespace Aegis.Core.Crypto
 {
     /// <summary>
@@ -26,7 +28,7 @@ namespace Aegis.Core.Crypto
             using var algo = new AesGcm(key);
             algo.Encrypt(iv, plainText, cipherText, authTag, optionalAssociatedData);
 
-            return new EncryptedPacket(cipherText, iv, authTag);
+            return EncryptedPacketExtensions.CreateNewEncryptedPacket(cipherText, iv, authTag);
         }
 
         /// <inheritdoc />

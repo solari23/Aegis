@@ -14,6 +14,6 @@ namespace Aegis.Models.JsonConverters
             => new List<byte>(reader.GetBytesFromBase64());
 
         public override void Write(Utf8JsonWriter writer, List<byte> value, JsonSerializerOptions options)
-            => writer.WriteBase64StringValue(new ReadOnlySpan<byte>(value.ToArray()));
+            => writer.WriteBase64StringValue(value.ToArray());
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Security.Cryptography;
 
+using Aegis.Models;
+
 namespace Aegis.Core.Crypto
 {
     /// <summary>

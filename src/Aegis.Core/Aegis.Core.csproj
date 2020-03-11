@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BondOptions>--using="DateTime=System.DateTime" --using="Guid=System.Guid"</BondOptions>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
@@ -22,12 +21,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bond.Compiler.CSharp" Version="8.0.0" />
-    <PackageReference Include="Bond.Core.CSharp" Version="8.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aegis.Models\Aegis.Models.csproj" />
   </ItemGroup>
 
 </Project>

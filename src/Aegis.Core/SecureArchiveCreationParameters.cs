@@ -1,4 +1,6 @@
-﻿namespace Aegis.Core
+﻿using Aegis.Models;
+
+namespace Aegis.Core
 {
     /// <summary>
     /// Encapsulates the parameters required to create a new <see cref="SecureArchive"/>.
@@ -22,7 +24,7 @@
         /// <summary>
         /// Gets or sets the security settings for the new archive.
         /// </summary>
-        public SecuritySettings SecuritySettings { get; set; } = SecuritySettings.Default;
+        public SecuritySettings SecuritySettings { get; set; } = SecuritySettingsFactory.Default;
 
         /// <summary>
         /// Gets or sets the size (in bytes) of the salt to generate and used in key derivations.

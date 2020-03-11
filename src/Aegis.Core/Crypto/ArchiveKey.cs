@@ -1,4 +1,6 @@
-﻿namespace Aegis.Core.Crypto
+﻿using Aegis.Models;
+
+namespace Aegis.Core.Crypto
 {
     /// <summary>
     /// An encryption key used to encrypt data in the <see cref="SecureArchive"/>.
