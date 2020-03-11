@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Diagnostics;
 
+using Aegis.Models;
+
 namespace Aegis.Core.Crypto
 {
     /// <summary>

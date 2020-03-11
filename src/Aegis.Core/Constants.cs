@@ -1,4 +1,6 @@
-﻿namespace Aegis.Core
+﻿using Aegis.Models;
+
+namespace Aegis.Core
 {
     /// <summary>
     /// A collection of Aegis constants.
@@ -34,5 +36,10 @@
         /// Specifies the default size (in bytes) of KeyIds generated for user keys.
         /// </summary>
         public const int DefaultKeyIdSizeInBytes = 16;
+
+        /// <summary>
+        /// The name of the entry in the SecureArchive zip file containin the archive's metadata.
+        /// </summary>
+        public const string SecureArchiveMetadataEntryName = ".meta";
     }
 }

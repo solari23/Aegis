@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Aegis.Models;
+
 namespace Aegis.Core.Crypto
 {
     /// <summary>

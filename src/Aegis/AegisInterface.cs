@@ -16,6 +16,12 @@ namespace Aegis
     public class AegisInterface
     {
         /// <summary>
+        /// The password used for all archives.
+        /// Important: This is a temporary placeholder for development.
+        /// </summary>
+        private const string TEMP_Password = "P@$sW3rD!!1!";
+
+        /// <summary>
         /// Gets the temporary directory where secured files can be checked out.
         /// </summary>
         private string TempDirectory { get; } = Path.GetTempPath();
@@ -171,23 +177,14 @@ namespace Aegis
 
             // TODO: Implement credential selection and input
             var userKeyFriendlyName = "Password";
-            var rawUserSecret = Encoding.UTF8.GetBytes("P@$sW3rD!!1!");
+            var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
 
             var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
             var fileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
 
-            using var archive = AegisArchive.CreateNew(fileSettings, createParameters);
-
             try
             {
-                // Create the output directory if it doesn't already exist.
-                var directoryPath = Path.GetDirectoryName(options.AegisArchivePath);
-                if (!string.IsNullOrWhiteSpace(directoryPath) && !Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-
-                archive.Save();
+                using var archive = AegisArchive.CreateNew(fileSettings, createParameters);
 
                 var newArchiveFileInfo = new FileInfo(archive.FullFilePath);
                 Console.WriteLine($"Created new secure archive file '{newArchiveFileInfo.FullName}'.");
@@ -208,11 +205,10 @@ namespace Aegis
         private bool OpenVerb(OpenVerbOptions options)
         {
             if (this.Archive != null
-                && this.Archive.IsDirty
                 && !options.Force)
             {
                 throw new AegisUserErrorException(
-                    "An unsaved archive is already opened. Either save the opened archive or use the --force flag.");
+                    "Another archive is already opened. Either close the opened archive or use the --force flag.");
             }
 
             if (string.IsNullOrWhiteSpace(options.AegisArchivePath))
@@ -229,7 +225,7 @@ namespace Aegis
                 archive = AegisArchive.Load(archiveFileSettings);
 
                 // TODO: Implement credential selection and input
-                var rawUserSecret = Encoding.UTF8.GetBytes("P@$sW3rD!!1!");
+                var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
 
                 archive.Unlock(rawUserSecret);
             }
@@ -272,12 +268,6 @@ namespace Aegis
                 return true;
             }
 
-            if (this.Archive.IsDirty && !options.Force)
-            {
-                throw new AegisUserErrorException(
-                    "An archive contains unsaved content. Either save the opened archive or use the --force flag.");
-            }
-
             this.Archive?.Dispose();
             this.Archive = null;
             this.SetWindowTitle();
@@ -302,14 +292,6 @@ namespace Aegis
         /// <returns>'True' to indicate the operation was handled.</returns>
         private bool ExitRepl()
         {
-            // Safety check.
-            if (this.Archive != null && this.Archive.IsDirty)
-            {
-                Console.Error.WriteLine("[Error] There is an unsaved archive currently opened.");
-                Console.Error.WriteLine("Either save it or close it with the --force flag before exiting the REPL.");
-                return true;
-            }
-
             this.InReplMode = false;
             return true;
         }
