@@ -13,7 +13,7 @@ namespace Aegis
     /// <summary>
     /// Implements the Aegis command line interface.
     /// </summary>
-    public class AegisInterface
+    public partial class AegisInterface
     {
         /// <summary>
         /// The password used for all archives.
@@ -34,7 +34,7 @@ namespace Aegis
         /// <summary>
         /// Flag that indicates we're running in REPL mode.
         /// </summary>
-        private bool InReplMode { get; set; } = true;
+        private bool InReplMode { get; set; }
 
         /// <summary>
         /// Runs the Aegis command line interface.
@@ -52,6 +52,9 @@ namespace Aegis
                 settings.IgnoreUnknownArguments = false;
                 settings.HelpWriter = Parser.Default.Settings.HelpWriter;
             });
+
+            // No arguments given -> enter REPL mode.
+            this.InReplMode = args is null || args.Length == 0;
 
             do
             {
@@ -102,9 +105,12 @@ namespace Aegis
 
                 // Check handlers for Aegis verbs.
                 isHandled = parserResult.MapResult(
-                    (CreateVerbOptions opts) => this.ExecuteAegisVerb(() => this.CreateVerb(opts)),
-                    (OpenVerbOptions opts) => this.ExecuteAegisVerb(() => this.OpenVerb(opts)),
-                    (CloseVerbOptions opts) => this.ExecuteAegisVerb(() => this.CloseVerb(opts)),
+                    // Verbs that specifically handle dealing with archives in REPL mode.
+                    (OpenVerbOptions opts) => this.ExecuteAegisVerb(opts, this.OpenVerb, openArchiveIfNotOpened: false),
+                    (CloseVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CloseVerb, openArchiveIfNotOpened: false),
+
+                    // CRUD verbs available in either CLI or REPL mode.
+                    (CreateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CreateVerb, openArchiveIfNotOpened: false),
 
                     // Default catch-all case. The command is just not implemented yet.
                     (object opts) => false,
@@ -133,19 +139,29 @@ namespace Aegis
         /// <summary>
         /// Internal wrapper to execute an Aegis verbs.
         /// </summary>
-        /// <param name="operation">The operation to execute.</param>
+        /// <param name="options">The options to pass to the verb.</param>
+        /// <param name="operation">The verb operation to execute.</param>
+        /// <param name="openArchiveIfNotOpened">Whether or not to open/unlock the archive if one is not already opened.</param>
         /// <returns>
         /// Whether or not the operation was fully handled.
         /// It may be that some options for some verbs are not yet implemented.
         /// </returns>
-        private bool ExecuteAegisVerb(Func<bool> operation)
+        private bool ExecuteAegisVerb<TOptions>(
+            TOptions options,
+            Func<TOptions, bool> operation,
+            bool openArchiveIfNotOpened = true)
+            where TOptions : AegisVerbOptions
         {
             bool isHandled = true;
 
             try
             {
-                // TODO: Open/unlock an Aegis archive if none is yet opened.
-                isHandled = operation();
+                if (this.Archive is null && openArchiveIfNotOpened)
+                {
+                    this.Archive = OpenArchive(options.AegisArchivePath, this.TempDirectory);
+                }
+
+                isHandled = operation(options);
             }
             catch (AegisUserErrorException e) when (e.IsRecoverable && this.InReplMode)
             {
@@ -158,70 +174,24 @@ namespace Aegis
         }
 
         /// <summary>
-        /// Implements the Aegis 'create' verb.
+        /// Helper that opens (loads and unlocks) an <see cref="AegisArchive"/> from disk.
         /// </summary>
-        /// <param name="options">The verb options.</param>
-        /// <returns>Whether or not the operation was handled.</returns>
-        private bool CreateVerb(CreateVerbOptions options)
+        /// <param name="archivePath">The path to the <see cref="AegisArchive"/> on disk.</param>
+        /// <param name="tempDirectory">The temp directory that the archive can use for operations.</param>
+        /// <returns>The opened <see cref="AegisArchive"/>.</returns>
+        private static AegisArchive OpenArchive(string archivePath, string tempDirectory)
         {
-            if (string.IsNullOrWhiteSpace(options.AegisArchivePath))
-            {
-                throw new AegisUserErrorException("The archive path parameter is required for this operation.");
-            }
-
-            if (File.Exists(options.AegisArchivePath) && !options.Force)
-            {
-                throw new AegisUserErrorException(
-                    "A file exists at the specified location. Use --force flag to overwrite.");
-            }
-
-            // TODO: Implement credential selection and input
-            var userKeyFriendlyName = "Password";
-            var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
-
-            var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
-            var fileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
-
-            try
-            {
-                using var archive = AegisArchive.CreateNew(fileSettings, createParameters);
-
-                var newArchiveFileInfo = new FileInfo(archive.FullFilePath);
-                Console.WriteLine($"Created new secure archive file '{newArchiveFileInfo.FullName}'.");
-            }
-            catch (IOException e)
-            {
-                throw new AegisUserErrorException($"Unable to write to {fileSettings.Path}.", innerException: e);
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Implements the Aegis 'open' verb.
-        /// </summary>
-        /// <param name="options">The verb options.</param>
-        /// <returns>Whether or not the operation was handled.</returns>
-        private bool OpenVerb(OpenVerbOptions options)
-        {
-            if (this.Archive != null
-                && !options.Force)
-            {
-                throw new AegisUserErrorException(
-                    "Another archive is already opened. Either close the opened archive or use the --force flag.");
-            }
-
-            if (string.IsNullOrWhiteSpace(options.AegisArchivePath))
+            if (string.IsNullOrWhiteSpace(archivePath))
             {
                 throw new AegisUserErrorException(
                     "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
             }
 
-            AegisArchive archive = null;
+            AegisArchive archive;
 
             try
             {
-                var archiveFileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
+                var archiveFileSettings = new SecureArchiveFileSettings(archivePath, tempDirectory);
                 archive = AegisArchive.Load(archiveFileSettings);
 
                 // TODO: Implement credential selection and input
@@ -232,13 +202,13 @@ namespace Aegis
             catch (IOException e)
             {
                 throw new AegisUserErrorException(
-                    $"Unable to read file at {options.AegisArchivePath}.",
+                    $"Unable to read file at {archivePath}.",
                     innerException: e);
             }
             catch (ArchiveCorruptedException e)
             {
                 throw new AegisUserErrorException(
-                    $"The archive file at {options.AegisArchivePath} is corrupted: {e.Message}",
+                    $"The archive file at {archivePath} is corrupted: {e.Message}",
                     innerException: e);
             }
             catch (UnauthorizedException e)
@@ -248,74 +218,7 @@ namespace Aegis
                     innerException: e);
             }
 
-            // The new archive is fully loaded. Close out the previous one.
-            this.CloseVerb(new CloseVerbOptions());
-
-            this.Archive = archive;
-            return this.StartRepl();
-        }
-
-        /// <summary>
-        /// Implements the Aegis 'close' verb.
-        /// </summary>
-        /// <param name="options">The verb options.</param>
-        /// <returns>Whether or not the operation was handled.</returns>
-        private bool CloseVerb(CloseVerbOptions options)
-        {
-            if (this.Archive is null)
-            {
-                // There's no archive opened. Do nothing.
-                return true;
-            }
-
-            this.Archive?.Dispose();
-            this.Archive = null;
-            this.SetWindowTitle();
-
-            return true;
-        }
-
-        /// <summary>
-        /// Puts the interface into REPL (Read-Execute-Print-Loop) mode.
-        /// </summary>
-        /// <returns>'True' to indicate the operation was handled.</returns>
-        private bool StartRepl()
-        {
-            this.SetWindowTitle();
-            this.InReplMode = true;
-            return true;
-        }
-
-        /// <summary>
-        /// Signals the exit flag to leave REPL mode.
-        /// </summary>
-        /// <returns>'True' to indicate the operation was handled.</returns>
-        private bool ExitRepl()
-        {
-            this.InReplMode = false;
-            return true;
-        }
-
-        /// <summary>
-        /// Clears the console screen.
-        /// </summary>
-        /// <returns>'True' to indicate the operation was handled.</returns>
-        private bool ClearScreen()
-        {
-            Console.Clear();
-            return true;
-        }
-
-        /// <summary>
-        /// Sets the title in the command line window.
-        /// </summary>
-        private void SetWindowTitle()
-        {
-            var archiveName = this.Archive is null
-                ? "No Archive Selected"
-                : this.Archive.FileName;
-
-            Console.Title = $"{Program.Name} <{archiveName}>";
+            return archive;
         }
     }
 }

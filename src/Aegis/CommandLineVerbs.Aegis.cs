@@ -27,7 +27,7 @@ namespace Aegis
             [Value(0, Required = false, MetaName = "Archive", HelpText = "The path to the target Aegis archive.")]
             new public string AegisArchivePath { get; set; }
 
-            [Option('f', "force", Required = false, HelpText = "Forces the archive to be opened, even if another archive is already open.")]
+            [Option('f', "force", Required = false, HelpText = "Forces the archive to be opened, even if another archive is already open (REPL mode only).")]
             public bool Force { get; set; }
         }
 
