@@ -75,7 +75,7 @@ namespace Aegis
                 // Note: The CommandLine library has a limit to how many handlers can be passed to the MapResult
                 //       method so we split out "Aegis" and "Meta" verbs into two MapResult calls.
                 //       "Aegis verbs" are verbs that implement functionality around Aegis archives.
-                //       "Meta verbs" are hidden verbs that implement basic command line functionality (like clear screen).
+                //       "Meta verbs" are hidden verbs that implement basic command line functionality for REPL mode (like clear screen).
 
                 var isHandled = false;
 
@@ -216,7 +216,7 @@ namespace Aegis
                 throw new AegisUserErrorException(
                     "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
             }
-            
+
             AegisArchive archive = null;
 
             try
@@ -238,7 +238,7 @@ namespace Aegis
             catch (ArchiveCorruptedException e)
             {
                 throw new AegisUserErrorException(
-                    $"The archive file at {options.AegisArchivePath} is corrupted.",
+                    $"The archive file at {options.AegisArchivePath} is corrupted: {e.Message}",
                     innerException: e);
             }
             catch (UnauthorizedException e)

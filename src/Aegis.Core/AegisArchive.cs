@@ -88,6 +88,12 @@ namespace Aegis.Core
             var secureArchive = OpenSecureArchiveFile(fileSettings);
 
             var metadataEntry = secureArchive.GetEntry(Constants.SecureArchiveMetadataEntryName);
+
+            if (metadataEntry is null)
+            {
+                throw new ArchiveCorruptedException("The secure archive does not contain any internal metadata!");
+            }
+
             using var metadataReader = new StreamReader(metadataEntry.Open());
 
             var metadataJson = metadataReader.ReadToEnd();
@@ -205,6 +211,10 @@ namespace Aegis.Core
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
+            }
+            else if (!File.Exists(fileSettings.Path))
+            {
+                throw new FileNotFoundException($"No archive file was found at {fileSettings.Path}", fileSettings.Path);
             }
 
             return ZipFile.Open(fileSettings.Path, ZipArchiveMode.Update);

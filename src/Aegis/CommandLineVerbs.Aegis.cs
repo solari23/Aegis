@@ -10,6 +10,11 @@ namespace Aegis
         [Verb("create", HelpText = "Creates a new Aegis archive.")]
         public class CreateVerbOptions : AegisVerbOptions
         {
+            // Hide the default '-a' parameter for the archive path; make it positional instead.
+            // That way the user can just type "create foo.ags".
+            [Value(0, Required = false, MetaName = "Archive", HelpText = "The path to the target Aegis archive.")]
+            new public string AegisArchivePath { get; set; }
+
             [Option('f', "force", Required = false, HelpText = "Forces the file to be created, even if overwriting an existing file.")]
             public bool Force { get; set; }
         }
@@ -17,6 +22,11 @@ namespace Aegis
         [Verb("open", HelpText = "Unlocks an Aegis archive and enters a REPL mode to interact with it.")]
         public class OpenVerbOptions : AegisVerbOptions
         {
+            // Hide the default '-a' parameter for the archive path; make it positional instead.
+            // That way the user can just type "open foo.ags".
+            [Value(0, Required = false, MetaName = "Archive", HelpText = "The path to the target Aegis archive.")]
+            new public string AegisArchivePath { get; set; }
+
             [Option('f', "force", Required = false, HelpText = "Forces the archive to be opened, even if another archive is already open.")]
             public bool Force { get; set; }
         }
@@ -32,11 +42,7 @@ namespace Aegis
         /// </summary>
         public abstract class AegisVerbOptions
         {
-            [Value(
-                0,
-                Required = false,
-                MetaName = "Archive",
-                HelpText = "The path to the target Aegis archive.")]
+            [Option('a', "archive", Required = false, HelpText = "The path to the target Aegis archive.")]
             public string AegisArchivePath { get; set; }
 
             /// <summary>
