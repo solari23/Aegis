@@ -187,7 +187,8 @@ namespace Aegis
                     "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
             }
 
-            AegisArchive archive;
+            AegisArchive archive = null;
+            var openSuccess = false;
 
             try
             {
@@ -198,6 +199,7 @@ namespace Aegis
                 var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
 
                 archive.Unlock(rawUserSecret);
+                openSuccess = true;
             }
             catch (IOException e)
             {
@@ -216,6 +218,14 @@ namespace Aegis
                 throw new AegisUserErrorException(
                     $"The key was not able to unlock the archive.",
                     innerException: e);
+            }
+            finally
+            {
+                if (!openSuccess)
+                {
+                    // Make sure to release any holds if we couldn't successfully open the archive.
+                    archive?.Dispose();
+                }
             }
 
             return archive;

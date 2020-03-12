@@ -84,29 +84,44 @@ namespace Aegis.Core
         {
             // TODO: Validate input fileSettings
 
-            // Open the secure archive and read the metadata entry.
-            var secureArchive = OpenSecureArchiveFile(fileSettings);
+            ZipArchive secureArchive = null;
 
-            var metadataEntry = secureArchive.GetEntry(Constants.SecureArchiveMetadataEntryName);
-
-            if (metadataEntry is null)
+            try
             {
-                throw new ArchiveCorruptedException("The secure archive does not contain any internal metadata!");
+                // Open the secure archive and read the metadata entry.
+                secureArchive = OpenSecureArchiveFile(fileSettings);
+
+                var metadataEntry = secureArchive.GetEntry(Constants.SecureArchiveMetadataEntryName);
+
+                if (metadataEntry is null)
+                {
+                    throw new ArchiveCorruptedException("The secure archive does not contain any internal metadata!");
+                }
+
+                using var metadataReader = new StreamReader(metadataEntry.Open());
+
+                var metadataJson = metadataReader.ReadToEnd();
+                var metadata = JsonSerializer.Deserialize<SecureArchiveMetadata>(metadataJson);
+
+                if (metadata is null)
+                {
+                    throw new ArchiveCorruptedException("Unable to parse the archive internal metadata!");
+                }
+
+                return new AegisArchive
+                {
+                    ArchiveMetadata = metadata,
+                    FileSettings = fileSettings,
+                    SecureArchive = secureArchive,
+                };
             }
-
-            using var metadataReader = new StreamReader(metadataEntry.Open());
-
-            var metadataJson = metadataReader.ReadToEnd();
-            var metadata = JsonSerializer.Deserialize<SecureArchiveMetadata>(metadataJson);
-
-            var archive = new AegisArchive
+            catch
             {
-                ArchiveMetadata = metadata,
-                FileSettings = fileSettings,
-                SecureArchive = secureArchive,
-            };
-
-            return archive;
+                // If we failed to open the archive for any reason, make sure we release the
+                // hold on the underlying ZIP file.
+                secureArchive?.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
