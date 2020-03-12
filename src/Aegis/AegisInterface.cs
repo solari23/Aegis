@@ -111,6 +111,12 @@ namespace Aegis
 
                     // CRUD verbs available in either CLI or REPL mode.
                     (CreateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CreateVerb, openArchiveIfNotOpened: false),
+                    (AddVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AddVerb),
+                    (RemoveVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RemoveVerb),
+                    (UpdateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.UpdateVerb),
+                    (ListVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ListVerb),
+                    (AuthorizeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AuthorizeVerb),
+                    (RevokeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RevokeVerb),
 
                     // Default catch-all case. The command is just not implemented yet.
                     (object opts) => false,

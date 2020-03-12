@@ -7,18 +7,6 @@ namespace Aegis
     /// </summary>
     public static partial class CommandLineVerbs
     {
-        [Verb("create", HelpText = "Creates a new Aegis archive.")]
-        public class CreateVerbOptions : AegisVerbOptions
-        {
-            // Hide the default '-a' parameter for the archive path; make it positional instead.
-            // That way the user can just type "create foo.ags".
-            [Value(0, Required = false, MetaName = "Archive", HelpText = "The path to the target Aegis archive.")]
-            new public string AegisArchivePath { get; set; }
-
-            [Option('f', "force", Required = false, HelpText = "Forces the file to be created, even if overwriting an existing file.")]
-            public bool Force { get; set; }
-        }
-
         [Verb("open", HelpText = "Unlocks an Aegis archive and enters a REPL mode to interact with it.")]
         public class OpenVerbOptions : AegisVerbOptions
         {
@@ -35,6 +23,59 @@ namespace Aegis
         public class CloseVerbOptions : AegisVerbOptions
         {
             // No specific options.
+        }
+
+        [Verb("create", HelpText = "Creates a new Aegis archive.")]
+        public class CreateVerbOptions : AegisVerbOptions
+        {
+            // Hide the default '-a' parameter for the archive path; make it positional instead.
+            // That way the user can just type "create foo.ags".
+            [Value(0, Required = false, MetaName = "Archive", HelpText = "The path to the target Aegis archive.")]
+            new public string AegisArchivePath { get; set; }
+
+            [Option('f', "force", Required = false, HelpText = "Forces the file to be created, even if overwriting an existing file.")]
+            public bool Force { get; set; }
+        }
+
+        [Verb("add", HelpText = "Adds a file to the archive.")]
+        public class AddVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'add' verb.
+
+            [Option('f', "force", Required = false, HelpText = "Forces the file to be added, even if overwriting an existing file.")]
+            public bool Force { get; set; }
+        }
+
+        [Verb("remove", HelpText = "Removes a file from the archive.")]
+        public class RemoveVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'remove' verb.
+        }
+
+        [Verb("update", HelpText = "Updates a file from the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
+        public class UpdateVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'update' verb.
+        }
+
+        [Verb("list", HelpText = "Lists archive files or authorized keys.")]
+        public class ListVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'list' verb.
+        }
+
+        [Verb("authorize", HelpText = "Authorizes a new user key to access the archive.")]
+        public class AuthorizeVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'authorize' verb.
+            // This is pending fleshing out the user keys subsystem.
+        }
+
+        [Verb("revoke", HelpText = "Revokes a user key authorization.")]
+        public class RevokeVerbOptions : AegisVerbOptions
+        {
+            // TODO: Define options for the 'revoke' verb.
+            // This is pending fleshing out the user keys subsystem.
         }
 
         /// <summary>
