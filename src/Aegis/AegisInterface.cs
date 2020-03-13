@@ -165,6 +165,7 @@ namespace Aegis
                 if (this.Archive is null && openArchiveIfNotOpened)
                 {
                     this.Archive = OpenArchive(options.AegisArchivePath, this.TempDirectory);
+                    this.SetWindowTitle();
                 }
 
                 isHandled = operation(options);

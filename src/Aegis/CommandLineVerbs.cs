@@ -5,7 +5,7 @@ namespace Aegis
     /// <summary>
     /// Container for options types of Aegis verbs (i.e. verbs that implement Aegis functionality).
     /// </summary>
-    public static partial class CommandLineVerbs
+    public static class CommandLineVerbs
     {
         [Verb("open", HelpText = "Unlocks an Aegis archive and enters a REPL mode to interact with it.")]
         public class OpenVerbOptions : AegisVerbOptions
@@ -40,7 +40,11 @@ namespace Aegis
         [Verb("add", HelpText = "Adds a file to the archive.")]
         public class AddVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'add' verb.
+            [Value(0, Required = true, MetaName = "FilePath", HelpText = "The path to the file to add to the archive.")]
+            public string FilePath { get; set; }
+
+            [Option('v', "vpath", Required = false, HelpText = "The virtual path in the archive to add the file at. If not specified, the file will be added at the archive root with the same file name.")]
+            public string ArchiveVirtualPath { get; set; }
 
             [Option('f', "force", Required = false, HelpText = "Forces the file to be added, even if overwriting an existing file.")]
             public bool Force { get; set; }
@@ -49,19 +53,42 @@ namespace Aegis
         [Verb("remove", HelpText = "Removes a file from the archive.")]
         public class RemoveVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'remove' verb.
+            // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
+            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
+            // but with different "SetName" values (can't specify options from more than one set).
+
+            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            public string ArchiveVirtualPath { get; set; }
+
+            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "The ID of the archive file to update.")]
+            public string ArchiveFileId { get; set; }
         }
 
         [Verb("update", HelpText = "Updates a file from the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
         public class UpdateVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'update' verb.
+            [Value(0, Required = true, MetaName = "FilePath", HelpText = "The path to the file to add to the archive.")]
+            public string FilePath { get; set; }
+
+            // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
+            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
+            // but with different "SetName" values (can't specify options from more than one set).
+
+            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            public string ArchiveVirtualPath { get; set; }
+
+            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "The ID of the archive file to update.")]
+            public string ArchiveFileId { get; set; }
         }
 
         [Verb("list", HelpText = "Lists archive files or authorized keys.")]
         public class ListVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'list' verb.
+            [Value(0, Required = true, MetaName = "<Files | Keys>", HelpText = "Indicates whether to list files or authorized keys.")]
+            public string ListType { get; set; }
+
+            [Option("tree", Required = false, HelpText = "Displays files in a tree view (only applies to listing files).")]
+            public bool TreeView { get; set; }
         }
 
         [Verb("authorize", HelpText = "Authorizes a new user key to access the archive.")]
@@ -92,5 +119,39 @@ namespace Aegis
             /// <returns>The string representation of the command.</returns>
             public override string ToString() => Parser.Default.FormatCommandLine(this);
         }
+
+        #region REPL control verbs
+
+        [Verb(CommandLineHelpers.StartReplVerb, Hidden = true, HelpText = "Hidden verb that allows the user the start REPL mode.")]
+        public class StartReplVerbOptions
+        {
+            // Empty.
+        }
+
+        [Verb("quit", Hidden = true, HelpText = "Hidden verb that allows the user the exit REPL mode.")]
+        public class QuitReplVerbOptions
+        {
+            // Empty.
+        }
+
+        [Verb("exit", Hidden = true, HelpText = "Hidden verb that allows the user to exit REPL mode.")]
+        public class ExitReplVerbOptions
+        {
+            // Empty.
+        }
+
+        [Verb("clear", Hidden = true, HelpText = "Hidden verb that allows the user to clear the screen.")]
+        public class ClearVerbOptions
+        {
+            // Empty.
+        }
+
+        [Verb("cls", Hidden = true, HelpText = "Hidden verb that allows the user to clear the screen.")]
+        public class ClsVerbOptions
+        {
+            // Empty.
+        }
+
+        #endregion
     }
 }
