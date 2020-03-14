@@ -44,7 +44,14 @@ namespace Aegis
                 throw new AegisUserErrorException("The archive path parameter is required for this operation.");
             }
 
-            var archiveFileSettings = new SecureArchiveFileSettings(options.AegisArchivePath, this.TempDirectory);
+            // Add the canonical "ags" extension to the new archive, if it's not already part of the path.
+            var newArchivePath = options.AegisArchivePath.EndsWith(
+                $".{AegisConstants.CanonicalSecureArchiveFileExtension}",
+                StringComparison.OrdinalIgnoreCase)
+                    ? options.AegisArchivePath
+                    : $"{options.AegisArchivePath}.{AegisConstants.CanonicalSecureArchiveFileExtension}";
+
+            var archiveFileSettings = new SecureArchiveFileSettings(newArchivePath, this.TempDirectory);
 
             try
             {

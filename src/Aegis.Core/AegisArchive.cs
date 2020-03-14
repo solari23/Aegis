@@ -92,7 +92,7 @@ namespace Aegis.Core
                 // Open the secure archive and read the metadata entry.
                 secureArchive = OpenSecureArchiveFile(fileSettings);
 
-                var metadataEntry = secureArchive.GetEntry(Constants.SecureArchiveMetadataEntryName);
+                var metadataEntry = secureArchive.GetEntry(AegisConstants.SecureArchiveMetadataEntryName);
 
                 if (metadataEntry is null)
                 {
@@ -303,7 +303,7 @@ namespace Aegis.Core
             // Serialize the metadata to JSON and write it to the archive.
             var metadataJson = JsonSerializer.Serialize(this.ArchiveMetadata, JsonHelpers.DefaultSerializerOptions);
 
-            var metadataArchiveEntry = this.SecureArchive.CreateEntry(Constants.SecureArchiveMetadataEntryName);
+            var metadataArchiveEntry = this.SecureArchive.CreateEntry(AegisConstants.SecureArchiveMetadataEntryName);
             using var archiveWriter = new StreamWriter(metadataArchiveEntry.Open());
             archiveWriter.Write(metadataJson);
         }

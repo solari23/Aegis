@@ -5,7 +5,7 @@ namespace Aegis.Core
     /// <summary>
     /// A collection of Aegis constants.
     /// </summary>
-    public static class Constants
+    public static class AegisConstants
     {
         /// <summary>
         /// The current version number for Aegis <see cref="SecureArchive"/> files.
@@ -41,5 +41,10 @@ namespace Aegis.Core
         /// The name of the entry in the SecureArchive zip file containin the archive's metadata.
         /// </summary>
         public const string SecureArchiveMetadataEntryName = ".meta";
+
+        /// <summary>
+        /// The canonical filename extension for Aegis archives.
+        /// </summary>
+        public const string CanonicalSecureArchiveFileExtension = "ags";
     }
 }

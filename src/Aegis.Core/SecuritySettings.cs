@@ -14,10 +14,10 @@ namespace Aegis.Core
         /// Gets the default <see cref="SecuritySettings"/>.
         /// </summary>
         public static SecuritySettings Default => Create(
-            Constants.DefaultEncryptionAlgo,
-            Constants.DefaultKeyDerivationFunction,
-            Constants.DefaultKeyDerivationWorkFactor,
-            Constants.DefaultKeyIdSizeInBytes);
+            AegisConstants.DefaultEncryptionAlgo,
+            AegisConstants.DefaultKeyDerivationFunction,
+            AegisConstants.DefaultKeyDerivationWorkFactor,
+            AegisConstants.DefaultKeyIdSizeInBytes);
 
         /// <summary>
         /// Creates a new instance of the <see cref="SecuritySettings"/> class.

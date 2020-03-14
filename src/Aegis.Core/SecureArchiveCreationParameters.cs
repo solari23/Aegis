@@ -29,7 +29,7 @@ namespace Aegis.Core
         /// <summary>
         /// Gets or sets the size (in bytes) of the salt to generate and used in key derivations.
         /// </summary>
-        public int KeyDerivationSaltSizeInBytes { get; set; } = Constants.DefaultKeyDerivationSaltSizeInBytes;
+        public int KeyDerivationSaltSizeInBytes { get; set; } = AegisConstants.DefaultKeyDerivationSaltSizeInBytes;
 
         /// <summary>
         /// Gets or sets the friendly name for the first user key.
