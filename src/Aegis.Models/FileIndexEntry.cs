@@ -13,9 +13,12 @@ namespace Aegis.Models
         public Guid FileId { get; set; }
 
         /// <summary>
-        /// A virtual file name. These must be unique within the archive.
+        /// A virtual file path. These must be unique within the archive.
         /// </summary>
-        public string FileName { get; set; }
+        /// <remarks>
+        /// File paths/names in Aegis are case-insensitive.
+        /// </remarks>
+        public string FilePath { get; set; }
 
         /// <summary>
         /// When the file was added to the archive.

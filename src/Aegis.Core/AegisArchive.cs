@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 
 using Aegis.Core.Crypto;
+using Aegis.Core.FileSystem;
 using Aegis.Models;
 
 namespace Aegis.Core

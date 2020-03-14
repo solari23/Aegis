@@ -4,7 +4,7 @@ using System.Linq;
 using Aegis.Core.Crypto;
 using Aegis.Models;
 
-namespace Aegis.Core
+namespace Aegis.Core.FileSystem
 {
     /// <summary>
     /// Data structure that represents the index of files in the secure archive.
