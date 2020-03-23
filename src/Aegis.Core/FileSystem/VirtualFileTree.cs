@@ -7,6 +7,9 @@ namespace Aegis.Core.FileSystem
     /// <summary>
     /// Data structure representing the virtual tree of files contained in an archive.
     /// </summary>
+    /// <remarks>
+    /// This class is not thread safe.
+    /// </remarks>
     internal sealed class VirtualFileTree
     {
         /// <summary>
@@ -41,11 +44,17 @@ namespace Aegis.Core.FileSystem
         /// <returns>The <see cref="AegisFileInfo"/> of the file that was removed, or null if it wasn't found.</returns>
         public AegisFileInfo Remove(AegisVirtualFilePath filePath)
         {
+            var fileInfo = default(AegisFileInfo);
             var treeNode = this.GetNodeForDirectoryPath(filePath);
 
-            // TODO: Implement Remove() method on VirtualFileTreeNode.
-            // This method will need to prune "empty" directories *except* an empty root.
-            return null;
+            if (treeNode?.Files.ContainsKey(filePath.FileName) == true)
+            {
+                fileInfo = treeNode.Files[filePath.FileName];
+                treeNode.Files.Remove(filePath.FileName);
+                PruneNodeIfNeeded(treeNode);
+            }
+
+            return fileInfo;
         }
 
         /// <summary>
@@ -77,16 +86,29 @@ namespace Aegis.Core.FileSystem
             {
                 var curNode = traversal.Pop();
 
+                if (curNode.IsEmpty)
+                {
+                    continue;
+                }
+
                 if (visitedNodes.Contains(curNode))
                 {
                     // Pre-order traveral visit was previously done.
-                    visitorImplementation.OnPostOrderVisit(
-                        new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
+                    // Skip the post-order visit callback if the node has no files.
+                    if (curNode.Files.Count > 0)
+                    {
+                        visitorImplementation.OnPostOrderVisit(
+                            new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
+                    }
                 }
                 else
                 {
-                    visitorImplementation.OnPreOrderVisit(
-                        new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
+                    // Skip the pre-order visit callback if the node has no files.
+                    if (curNode.Files.Count > 0)
+                    {
+                        visitorImplementation.OnPreOrderVisit(
+                            new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
+                    }
                     visitedNodes.Add(curNode);
 
                     // We'll revisit this node when we're done with its children for the post-order traversal.
@@ -139,6 +161,25 @@ namespace Aegis.Core.FileSystem
         }
 
         /// <summary>
+        /// Prunes the node from its tree if it's an empty leaf (i.e. contains no files,
+        /// no children, and isn't the root). This method then recursively moves up the tree
+        /// to prune the entire subtree in case pruning <paramref name="node"/> made its parent
+        /// and empty leaf (and so on).
+        /// </summary>
+        /// <param name="node">The node to prune, if it's an empty leaf.</param>
+        private static void PruneNodeIfNeeded(VirtualFileTreeNode node)
+        {
+            while (node.Parent != null
+                && node.IsEmpty)
+            {
+                node.Parent.Children.Remove(node.DirectoryName);
+
+                // Move up one level and repeat the check.
+                node = node.Parent;
+            }
+        }
+
+        /// <summary>
         /// A node (basically a directory) in the virtual tree of files contained in the archive.
         /// </summary>
         private class VirtualFileTreeNode
@@ -175,6 +216,11 @@ namespace Aegis.Core.FileSystem
             /// </summary>
             public SortedList<string, AegisFileInfo> Files { get; }
                 = new SortedList<string, AegisFileInfo>(StringComparer.OrdinalIgnoreCase);
+
+            /// <summary>
+            /// Gets whether the node is empty (i.e. no children and no files).
+            /// </summary>
+            public bool IsEmpty => this.Children.Count == 0 && this.Files.Count == 0;
         }
     }
 }

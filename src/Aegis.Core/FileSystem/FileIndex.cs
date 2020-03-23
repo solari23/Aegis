@@ -121,14 +121,7 @@ namespace Aegis.Core.FileSystem
         /// <param name="fileId">The unique identifier of the file.</param>
         /// <returns>The <see cref="AegisFileInfo"/> about the file, or null if it isn't found.</returns>
         public AegisFileInfo GetFileInfo(Guid fileId)
-        {
-            if (this.FileEntriesById.TryGetValue(fileId, out var fileInfo))
-            {
-                return fileInfo;
-            }
-
-            return null;
-        }
+            => this.FileEntriesById.TryGetValue(fileId, out var fileInfo) ? fileInfo : null;
 
         /// <summary>
         /// Retrieves information about a file in the archive.
