@@ -13,14 +13,16 @@ namespace Aegis
     public static class CommandLineHelpers
     {
         /// <summary>
-        /// The default command line prompt string to use in REPL mode.
-        /// </summary>
-        public const string DefaultReplPrompt = Program.Name + "~>";
-
-        /// <summary>
         /// A hidden command line verb that starts the REPL (Read-Execute-Print-Loop) mode.
         /// </summary>
         public const string StartReplVerb = "repl";
+
+        /// <summary>
+        /// Makes a prompt string to be displayed on the command line out of the given prompt.
+        /// </summary>
+        /// <param name="prompt">The prompt message.</param>
+        /// <returns>The prompt string.</returns>
+        public static string MakePromptString(string prompt) => $"{prompt}->";
 
         /// <summary>
         /// Gets all defined command line verbs' options types.
@@ -41,8 +43,10 @@ namespace Aegis
         /// </summary>
         /// <param name="promptString">The prompt string to use.</param>
         /// <returns>The arguments entered by the user.</returns>
-        public static string[] Prompt(string promptString = DefaultReplPrompt)
+        public static string[] Prompt(string promptString = null)
         {
+            promptString = promptString ?? MakePromptString(Program.Name);
+
             Console.Write(promptString);
             var rawInput = Console.ReadLine();
 

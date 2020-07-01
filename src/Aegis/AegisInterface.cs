@@ -61,7 +61,10 @@ namespace Aegis
                 if (this.InReplMode)
                 {
                     // In REPL mode -> Prompt for the next command.
-                    args = CommandLineHelpers.Prompt();
+                    var prompt = this.Archive is null 
+                        ? null
+                        : CommandLineHelpers.MakePromptString(this.Archive.FileName);
+                    args = CommandLineHelpers.Prompt(prompt);
                 }
 
                 var parserResult = commandParser.ParseArguments(args, optionsClasses);
