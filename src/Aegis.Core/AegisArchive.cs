@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 using Aegis.Core.Crypto;
@@ -215,16 +217,24 @@ namespace Aegis.Core
         /// <summary>
         /// Retrieves information about a file in the archive.
         /// </summary>
+        /// <param name="fileId">The ID of the file.</param>
+        /// <returns>The <see cref="AegisFileInfo"/> about the file, or null if it isn't found.</returns>
+        public AegisFileInfo GetFileInfo(Guid fileId)
+        {
+            this.ThrowIfLocked();
+
+            return this.FileIndex.GetFileInfo(fileId);
+        }
+
+        /// <summary>
+        /// Retrieves information about a file in the archive.
+        /// </summary>
         /// <param name="filePath">The virual path to the file.</param>
         /// <returns>The <see cref="AegisFileInfo"/> about the file, or null if it isn't found.</returns>
         public AegisFileInfo GetFileInfo(AegisVirtualFilePath filePath)
         {
             ArgCheck.NotNull(filePath, nameof(filePath));
-
-            if (this.IsLocked)
-            {
-                throw new ArchiveLockedException();
-            }
+            this.ThrowIfLocked();
 
             return this.FileIndex.GetFileInfo(filePath);
         }
@@ -236,13 +246,134 @@ namespace Aegis.Core
         public void TraverseFileTree(IVirtualFileTreeVisitor visitorImplementation)
         {
             ArgCheck.NotNull(visitorImplementation, nameof(visitorImplementation));
-
-            if (this.IsLocked)
-            {
-                throw new ArchiveLockedException();
-            }
+            this.ThrowIfLocked();
 
             this.FileIndex.TraverseFileTree(visitorImplementation);
+        }
+
+        /// <summary>
+        /// Adds a file to the archive.
+        /// </summary>
+        /// <param name="virtualPath">The virtual path to add the file at.</param>
+        /// <param name="fileStream">The file data stream.</param>
+        /// <param name="overwriteIfExists">
+        ///     Whether or not to overwrite existing files at that path.
+        ///     If false, an <see cref="InvalidOperationException"/> is thrown if a file already exists at the path.
+        /// </param>
+        /// <returns>Metadata about the file added to the archive.</returns>
+        public AegisFileInfo PutFile(AegisVirtualFilePath virtualPath, Stream fileStream, bool overwriteIfExists = false)
+        {
+            ArgCheck.NotNull(virtualPath, nameof(virtualPath));
+            ArgCheck.NotNull(fileStream, nameof(fileStream));
+            this.ThrowIfLocked();
+
+            // Remove any existing files stored at the path, if we're allowed to.
+            var existingFileInfo = this.FileIndex.GetFileInfo(virtualPath);
+            if (existingFileInfo != null)
+            {
+                if (!overwriteIfExists)
+                {
+                    throw new InvalidOperationException(
+                        $"A file with ID '{existingFileInfo.FileId}' already exists at virtual path '{virtualPath}'!");
+                }
+
+                this.RemoveFile(existingFileInfo.FileId);
+            }
+
+            var fileInfo = new AegisFileInfo(
+                virtualPath,
+                new FileIndexEntry
+                {
+                    FileId = Guid.NewGuid(),
+                    FilePath = virtualPath.ToString(),
+                    AddedTime = DateTimeOffset.UtcNow,
+                    LastModifiedTime = DateTimeOffset.UtcNow,
+                });
+
+            // TODO: Read & encrypt the input file stream
+            // TODO: Push the encrypted stream into the ZIP archive
+
+            // -- Temp code --
+            var foo = this.SecureArchive.CreateEntry(fileInfo.ArchiveEntryName);
+            using var fooWriter = new StreamWriter(foo.Open());
+            fooWriter.Write("Hello world!");
+            fooWriter.Close();
+            // ---------------
+
+            try
+            {
+                this.FileIndex.Add(fileInfo);
+                this.PersistMetadata();
+            }
+            catch
+            {
+                // Creating file metadata failed.
+                // Revert adding file to keep the archive to keep it consistent.
+                var zipEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
+                if (zipEntry != null)
+                {
+                    zipEntry.Delete();
+                }
+
+                throw;
+            }
+
+            return fileInfo;
+        }
+
+        /// <summary>
+        /// Removes a file from the archive.
+        /// </summary>
+        /// <param name="filePath">The virtual path to the file.</param>
+        /// <remarks>If no file exists at that path, this operation is a silent no-op.</remarks>
+        public void RemoveFile(AegisVirtualFilePath filePath)
+        {
+            ArgCheck.NotNull(filePath, nameof(filePath));
+            this.ThrowIfLocked();
+
+            var fileInfo = this.GetFileInfo(filePath);
+            if (fileInfo != null)
+            {
+                this.RemoveFile(fileInfo.FileId);
+            }
+        }
+
+        /// <summary>
+        /// Removes a file from the archive.
+        /// </summary>
+        /// <param name="fileId">The ID of file.</param>
+        /// <remarks>If no file exists with the given ID, this operation is a silent no-op.</remarks>
+        public void RemoveFile(Guid fileId)
+        {
+            this.ThrowIfLocked();
+
+            var fileInfo = this.GetFileInfo(fileId);
+            if (fileInfo is null)
+            {
+                // No-op.
+                return;
+            }
+
+            this.FileIndex.Remove(fileInfo.FileId);
+            this.PersistMetadata();
+
+            try
+            {
+                var zipEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
+                if (zipEntry != null)
+                {
+                    zipEntry.Delete();
+                }
+            }
+            catch
+            {
+                // Deleting file data failed.
+                // To keep the archive consistent, attempt to recreate the index entry.
+                this.FileIndex.Add(fileInfo);
+                this.PersistMetadata();
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -318,6 +449,8 @@ namespace Aegis.Core
             // Be extra cautious to avoid corrupting existing archives.
             if (this.IsLocked)
             {
+                // In this case the fact that we're running this operation on a locked archive
+                // is an internal error. Do not throw ArchiveLockedException, which indicates user error.
                 throw new AegisInternalErrorException("Attempted to reserialize index/metadata while archive is locked!");
             }
 
@@ -339,6 +472,19 @@ namespace Aegis.Core
             var metadataArchiveEntry = this.SecureArchive.CreateEntry(AegisConstants.SecureArchiveMetadataEntryName);
             using var archiveWriter = new StreamWriter(metadataArchiveEntry.Open());
             archiveWriter.Write(metadataJson);
+        }
+
+        /// <summary>
+        /// Helper to throw an <see cref="ArchiveLockedException"/> if the archive is locked.
+        /// </summary>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ThrowIfLocked()
+        {
+            if (this.IsLocked)
+            {
+                throw new ArchiveLockedException();
+            }
         }
 
         #region IDisposable Support

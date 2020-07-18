@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Aegis.Core;
+﻿using Aegis.Core;
 using Aegis.Core.FileSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

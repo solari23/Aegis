@@ -44,5 +44,10 @@ namespace Aegis.Core.FileSystem
         /// Gets the underlying index entry for the file.
         /// </summary>
         internal FileIndexEntry IndexEntry { get; }
+
+        /// <summary>
+        /// Gets the name of the file as stored in the secured zip archive.
+        /// </summary>
+        internal string ArchiveEntryName => this.FileId.ToString();
     }
 }
