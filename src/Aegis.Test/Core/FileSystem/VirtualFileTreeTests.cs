@@ -16,8 +16,8 @@ namespace Aegis.Test.Core.FileSystem
             VirtualFileTreeTestVisitor visitor;
 
             var tree = new VirtualFileTree();
-            var rootFile1 = CreateFileInfo("foo.txt");
-            var rootFile2 = CreateFileInfo("bar.txt");
+            var rootFile1 = FileSystemTestingHelpers.CreateFileInfo("foo.txt");
+            var rootFile2 = FileSystemTestingHelpers.CreateFileInfo("bar.txt");
 
             // Initial state -- empty tree.
             visitor = new VirtualFileTreeTestVisitor();
@@ -81,10 +81,10 @@ namespace Aegis.Test.Core.FileSystem
             //  |                 `- d1nest.txt
             //  `- (dir2)
             //          `- d2.txt
-            var rootFile = CreateFileInfo("root.txt");
-            var dir1File = CreateFileInfo("/dir1/d1.txt");
-            var nestedDir1File = CreateFileInfo("/dir1/nested/d1nest.txt");
-            var dir2File = CreateFileInfo("/dir2/d2.txt");
+            var rootFile = FileSystemTestingHelpers.CreateFileInfo("root.txt");
+            var dir1File = FileSystemTestingHelpers.CreateFileInfo("/dir1/d1.txt");
+            var nestedDir1File = FileSystemTestingHelpers.CreateFileInfo("/dir1/nested/d1nest.txt");
+            var dir2File = FileSystemTestingHelpers.CreateFileInfo("/dir2/d2.txt");
 
             // Initial state -- empty tree.
             visitor = new VirtualFileTreeTestVisitor();
@@ -172,17 +172,6 @@ namespace Aegis.Test.Core.FileSystem
                 Assert.AreEqual(expectedFileOrder[i], fileList[i]);
             }
         }
-
-        private AegisFileInfo CreateFileInfo(string virtualFilePath)
-            => new AegisFileInfo(
-                new AegisVirtualFilePath(virtualFilePath),
-                new FileIndexEntry
-                {
-                    FileId = Guid.NewGuid(),
-                    FilePath = virtualFilePath,
-                    AddedTime = DateTimeOffset.UtcNow,
-                    LastModifiedTime = DateTimeOffset.UtcNow,
-                });
 
         private class VirtualFileTreeTestVisitor : IVirtualFileTreeVisitor
         {

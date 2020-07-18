@@ -84,6 +84,14 @@ namespace Aegis.Core.FileSystem
         /// <param name="fileInfo">The <see cref="AegisFileInfo"/> to add.</param>
         public void Add(AegisFileInfo fileInfo)
         {
+            var existingFileInfo = this.FileTree.Find(fileInfo.Path);
+
+            if (existingFileInfo != null
+                || this.FileEntriesById.ContainsKey(fileInfo.FileId))
+            {
+                throw new AegisInternalErrorException("File index entry already exists.");
+            }
+
             this.FileEntriesById.TryAdd(fileInfo.FileId, fileInfo);
             this.FileTree.Add(fileInfo);
         }
