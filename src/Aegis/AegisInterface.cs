@@ -116,6 +116,7 @@ namespace Aegis
                     (CreateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CreateVerb, openArchiveIfNotOpened: false),
                     (AddVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AddVerb),
                     (RemoveVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RemoveVerb),
+                    (ExtractVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ExtractVerb),
                     (UpdateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.UpdateVerb),
                     (ListVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ListVerb),
                     (AuthorizeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AuthorizeVerb),

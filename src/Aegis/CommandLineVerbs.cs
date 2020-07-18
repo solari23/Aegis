@@ -64,6 +64,23 @@ namespace Aegis
             public string ArchiveFileId { get; set; }
         }
 
+        [Verb("extract", HelpText = "Decrypts and extracts a file from the archive.")]
+        public class ExtractVerbOptions : AegisVerbOptions
+        {
+            // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
+            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
+            // but with different "SetName" values (can't specify options from more than one set).
+
+            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            public string ArchiveVirtualPath { get; set; }
+
+            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "The ID of the archive file to update.")]
+            public string ArchiveFileId { get; set; }
+
+            [Option('o', "out", Required = false, HelpText = "The path to which the file will be extracted. Defaults to current directory.")]
+            public string OutputFilePath { get; set; }
+        }
+
         [Verb("update", HelpText = "Updates a file from the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
         public class UpdateVerbOptions : AegisVerbOptions
         {

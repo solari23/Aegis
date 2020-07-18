@@ -113,6 +113,17 @@ namespace Aegis
         }
 
         /// <summary>
+        /// Implements the Aegis 'extract' verb.
+        /// </summary>
+        /// <param name="options">The verb options.</param>
+        /// <returns>Whether or not the operation was handled.</returns>
+        private bool ExtractVerb(ExtractVerbOptions options)
+        {
+            // TODO: Implement the 'extract' verb.
+            return false;
+        }
+
+        /// <summary>
         /// Implements the Aegis 'update' verb.
         /// </summary>
         /// <param name="options">The verb options.</param>
