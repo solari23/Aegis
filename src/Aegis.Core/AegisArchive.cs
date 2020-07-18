@@ -213,6 +213,39 @@ namespace Aegis.Core
         }
 
         /// <summary>
+        /// Retrieves information about a file in the archive.
+        /// </summary>
+        /// <param name="filePath">The virual path to the file.</param>
+        /// <returns>The <see cref="AegisFileInfo"/> about the file, or null if it isn't found.</returns>
+        public AegisFileInfo GetFileInfo(AegisVirtualFilePath filePath)
+        {
+            ArgCheck.NotNull(filePath, nameof(filePath));
+
+            if (this.IsLocked)
+            {
+                throw new ArchiveLockedException();
+            }
+
+            return this.FileIndex.GetFileInfo(filePath);
+        }
+
+        /// <summary>
+        /// Executes a traversal of the virtual tree of archived files.
+        /// </summary>
+        /// <param name="visitorImplementation">The visitor implementation to execute when visiting each node.</param>
+        public void TraverseFileTree(IVirtualFileTreeVisitor visitorImplementation)
+        {
+            ArgCheck.NotNull(visitorImplementation, nameof(visitorImplementation));
+
+            if (this.IsLocked)
+            {
+                throw new ArchiveLockedException();
+            }
+
+            this.FileIndex.TraverseFileTree(visitorImplementation);
+        }
+
+        /// <summary>
         /// Opens a secure archive (zip) file on disk.
         /// </summary>
         /// <param name="fileSettings">The <see cref="SecureArchiveFileSettings"/> for the archive to open.</param>
@@ -285,12 +318,12 @@ namespace Aegis.Core
             // Be extra cautious to avoid corrupting existing archives.
             if (this.IsLocked)
             {
-                throw new InvalidOperationException("Attempted to reserialize index/metadata while archive is locked!");
+                throw new AegisInternalErrorException("Attempted to reserialize index/metadata while archive is locked!");
             }
 
             if (this.FileIndex is null)
             {
-                throw new InvalidOperationException("FileIndex is null - unexpected when the archive is unlocked!");
+                throw new AegisInternalErrorException("FileIndex is null - unexpected when the archive is unlocked!");
             }
 
             // Flush the file index contents back into metadata, in case they've changed.
