@@ -195,7 +195,7 @@ namespace Aegis
             if (string.IsNullOrWhiteSpace(archivePath))
             {
                 throw new AegisUserErrorException(
-                    "Specify the path to the Aegis archive to open. Check the 'open' command help for details.");
+                    "Specify the path to the Aegis archive to open. Use the '-a' option or check the 'open' command help for details.");
             }
 
             AegisArchive archive = null;

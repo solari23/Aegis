@@ -280,22 +280,24 @@ namespace Aegis.Core
                 this.RemoveFile(existingFileInfo.FileId);
             }
 
-            var fileInfo = new AegisFileInfo(
+            var currentTime = DateTimeOffset.UtcNow;
+
+            var fileInfo = existingFileInfo ?? new AegisFileInfo(
                 virtualPath,
                 new FileIndexEntry
                 {
                     FileId = Guid.NewGuid(),
                     FilePath = virtualPath.ToString(),
-                    AddedTime = DateTimeOffset.UtcNow,
-                    LastModifiedTime = DateTimeOffset.UtcNow,
+                    AddedTime = currentTime,
+                    LastModifiedTime = currentTime,
                 });
+            fileInfo.IndexEntry.LastModifiedTime = currentTime;
 
             // TODO: Read & encrypt the input file stream
             // TODO: Push the encrypted stream into the ZIP archive
 
             // -- Temp code --
-            var foo = this.SecureArchive.CreateEntry(fileInfo.ArchiveEntryName);
-            using var fooWriter = new StreamWriter(foo.Open());
+            using var fooWriter = new StreamWriter(this.SecureArchive.GetEntryWriteStream(fileInfo.ArchiveEntryName));
             fooWriter.Write("Hello world!");
             fooWriter.Close();
             // ---------------
@@ -309,14 +311,12 @@ namespace Aegis.Core
             {
                 // Creating file metadata failed.
                 // Revert adding file to keep the archive to keep it consistent.
-                var zipEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
-                if (zipEntry != null)
-                {
-                    zipEntry.Delete();
-                }
+                this.SecureArchive.DeleteEntryIfExists(fileInfo.ArchiveEntryName);
 
                 throw;
             }
+
+            this.FlushArchive();
 
             return fileInfo;
         }
@@ -359,11 +359,7 @@ namespace Aegis.Core
 
             try
             {
-                var zipEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
-                if (zipEntry != null)
-                {
-                    zipEntry.Delete();
-                }
+                this.SecureArchive.DeleteEntryIfExists(fileInfo.ArchiveEntryName);
             }
             catch
             {
@@ -374,6 +370,8 @@ namespace Aegis.Core
 
                 throw;
             }
+
+            this.FlushArchive();
         }
 
         /// <summary>
@@ -444,6 +442,9 @@ namespace Aegis.Core
         /// <summary>
         /// Persists the <see cref="SecureArchiveMetadata"/> to the secure archive file.
         /// </summary>
+        /// <remarks>
+        /// The updates will still not be flushed to disk. To fully persist, also call <see cref="FlushArchive"/>.
+        /// </remarks>
         private void PersistMetadata()
         {
             // Be extra cautious to avoid corrupting existing archives.
@@ -468,10 +469,26 @@ namespace Aegis.Core
 
             // Serialize the metadata to JSON and write it to the archive.
             var metadataJson = JsonSerializer.Serialize(this.ArchiveMetadata, JsonHelpers.DefaultSerializerOptions);
-
-            var metadataArchiveEntry = this.SecureArchive.CreateEntry(AegisConstants.SecureArchiveMetadataEntryName);
-            using var archiveWriter = new StreamWriter(metadataArchiveEntry.Open());
+            using var archiveWriter = new StreamWriter(
+                this.SecureArchive.GetEntryWriteStream(AegisConstants.SecureArchiveMetadataEntryName));
             archiveWriter.Write(metadataJson);
+        }
+
+        /// <summary>
+        /// Flushes the <see cref="SecureArchive"/> ZIP file to disk by disposing and re-opening it.
+        /// </summary>
+        /// <remarks>
+        /// This is a workaround due to the .NET ZipArchive SDK not actually flushing data as you
+        /// write it and not providing a Flush() method. Without this method, if e.g. the user removes
+        /// a file and closes Aegis without properly closing the archive then the update will be lost.
+        /// </remarks>
+        private void FlushArchive()
+        {
+            if (this.SecureArchive != null)
+            {
+                this.SecureArchive.Dispose();
+                this.SecureArchive = ZipFile.Open(this.FileSettings.Path, ZipArchiveMode.Update);
+            }
         }
 
         /// <summary>

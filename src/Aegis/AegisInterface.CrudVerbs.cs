@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 
 using Aegis.Core;
+using Aegis.Core.FileSystem;
 
 using static Aegis.CommandLineVerbs;
 
@@ -96,9 +97,46 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool AddVerb(AddVerbOptions options)
         {
-            // TODO: Implement the 'add' verb.
-            Console.WriteLine($"[DEBUG] Command will attempt to add {options.FilePath} to the archive");
-            return false;
+            // If the virtual path isn't specified, the default is to add the file to
+            // the root of the archive with the same file name.
+            var addPath = string.IsNullOrWhiteSpace(options.ArchiveVirtualPath)
+                ? new AegisVirtualFilePath(Path.GetFileName(options.FilePath))
+                : new AegisVirtualFilePath(options.ArchiveVirtualPath);
+
+            var existingFileInfo = this.Archive.GetFileInfo(addPath);
+
+            if (existingFileInfo != null && !options.Force)
+            {
+                throw new AegisUserErrorException(
+                    $"Can't overwrite existing file at '{addPath}'. If you want to overwrite, use the --force flag or the 'update' verb instead.");
+            }
+
+            if (!File.Exists(options.FilePath))
+            {
+                throw new AegisUserErrorException($"No file found on local disk at location '{options.FilePath}'.");
+            }
+
+            try
+            {
+                var inputFileStream = File.OpenRead(options.FilePath);
+                var newFileInfo = this.Archive.PutFile(addPath, inputFileStream, options.Force);
+
+                if (existingFileInfo?.FileId == newFileInfo.FileId)
+                {
+                    Console.WriteLine($"Archive file ID '{newFileInfo.FileId}' at virtual path '{newFileInfo.Path}' was updated.");
+                }
+                else
+                {
+                    Console.WriteLine($"New file ID '{newFileInfo.FileId}' created at virtual path '{newFileInfo.Path}'.");
+                }
+            }
+            catch
+            {
+                // TODO: do a better job of differentiating issues reading the file from internal issues.
+                throw;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -108,8 +146,29 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool RemoveVerb(RemoveVerbOptions options)
         {
-            // TODO: Implement the 'remove' verb.
-            return false;
+            if (options.ArchiveFileId == Guid.Empty
+                && string.IsNullOrWhiteSpace(options.ArchiveVirtualPath))
+            {
+                throw new AegisUserErrorException($"Must specify either a file ID or a virtual path to remove.");
+            }
+
+            var existingFileInfo = options.ArchiveFileId != Guid.Empty
+                ? this.Archive.GetFileInfo(options.ArchiveFileId)
+                : this.Archive.GetFileInfo(new AegisVirtualFilePath(options.ArchiveVirtualPath));
+
+            if (existingFileInfo is null)
+            {
+                var errorMessage = "Can't remove file. ";
+                errorMessage += options.ArchiveFileId != Guid.Empty
+                    ? $"File with ID '{options.ArchiveFileId}' does not exist."
+                    : $"No file exists at path '{options.ArchiveVirtualPath}'.";
+                throw new AegisUserErrorException(errorMessage);
+            }
+
+            this.Archive.RemoveFile(existingFileInfo.FileId);
+            Console.WriteLine($"Removed file ID '{existingFileInfo.FileId}' from virtual path '{existingFileInfo.Path}'.");
+
+            return true;
         }
 
         /// <summary>
@@ -130,8 +189,33 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool UpdateVerb(UpdateVerbOptions options)
         {
-            // TODO: Implement the 'update' verb.
-            return false;
+            if (options.ArchiveFileId == Guid.Empty
+                && string.IsNullOrWhiteSpace(options.ArchiveVirtualPath))
+            {
+                throw new AegisUserErrorException($"Must specify either a file ID or a virtual path to update.");
+            }
+
+            var existingFileInfo = options.ArchiveFileId != Guid.Empty
+                ? this.Archive.GetFileInfo(options.ArchiveFileId)
+                : this.Archive.GetFileInfo(new AegisVirtualFilePath(options.ArchiveVirtualPath));
+
+            if (existingFileInfo is null)
+            {
+                var errorMessage = "Can't update file. ";
+                errorMessage += options.ArchiveFileId != Guid.Empty
+                    ? $"File with ID '{options.ArchiveFileId}' does not exist."
+                    : $"No file exists at path '{options.ArchiveVirtualPath}'.";
+                throw new AegisUserErrorException(errorMessage);
+            }
+
+            this.AddVerb(new AddVerbOptions
+            {
+                ArchiveVirtualPath = existingFileInfo.Path.ToString(),
+                FilePath = options.FilePath,
+                Force = true,
+            });
+
+            return true;
         }
 
         /// <summary>
