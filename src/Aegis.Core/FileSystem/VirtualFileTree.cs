@@ -18,7 +18,7 @@ namespace Aegis.Core.FileSystem
         public VirtualFileTree()
         {
             this.Root = new VirtualFileTreeNode(
-                directoryName: string.Empty,
+                directory: AegisVirtualDirectoryPath.RootDirectory,
                 parent: null);
         }
 
@@ -33,7 +33,7 @@ namespace Aegis.Core.FileSystem
         /// <param name="fileInfo">The file to add.</param>
         public void Add(AegisFileInfo fileInfo)
         {
-            var treeNode = this.GetNodeForDirectoryPath(fileInfo.Path, createIfNotExists: true);
+            var treeNode = this.GetNodeForDirectoryPath(fileInfo.Path.DirectoryPath, createIfNotExists: true);
             treeNode.Files.Add(fileInfo.Path.FileName, fileInfo);
         }
 
@@ -45,7 +45,7 @@ namespace Aegis.Core.FileSystem
         public AegisFileInfo Remove(AegisVirtualFilePath filePath)
         {
             var fileInfo = default(AegisFileInfo);
-            var treeNode = this.GetNodeForDirectoryPath(filePath);
+            var treeNode = this.GetNodeForDirectoryPath(filePath.DirectoryPath);
 
             if (treeNode?.Files.ContainsKey(filePath.FileName) == true)
             {
@@ -64,7 +64,7 @@ namespace Aegis.Core.FileSystem
         /// <returns>The <see cref="AegisFileInfo"/> associated with the file, or null if not found.</returns>
         public AegisFileInfo Find(AegisVirtualFilePath filePath)
         {
-            var node = this.GetNodeForDirectoryPath(filePath);
+            var node = this.GetNodeForDirectoryPath(filePath.DirectoryPath);
 
             return node?.Files.ContainsKey(filePath.FileName) == true
                 ? node.Files[filePath.FileName]
@@ -98,6 +98,7 @@ namespace Aegis.Core.FileSystem
                     if (curNode.Files.Count > 0)
                     {
                         visitorImplementation.OnPostOrderVisit(
+                            curNode.Directory,
                             new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
                     }
                 }
@@ -107,6 +108,7 @@ namespace Aegis.Core.FileSystem
                     if (curNode.Files.Count > 0)
                     {
                         visitorImplementation.OnPreOrderVisit(
+                            curNode.Directory,
                             new ReadOnlySpan<AegisFileInfo>(curNode.Files.Values.ToArray()));
                     }
                     visitedNodes.Add(curNode);
@@ -124,20 +126,20 @@ namespace Aegis.Core.FileSystem
         }
 
         /// <summary>
-        /// Retrieves the node at the directory path for the given <see cref="AegisVirtualFilePath"/>.
+        /// Retrieves the node at the directory path for the given <see cref="AegisVirtualDirectoryPath"/>.
         /// </summary>
-        /// <param name="filePath">The virtual file path information.</param>
+        /// <param name="directoryPath">The directory path to follow.</param>
         /// <param name="createIfNotExists">Flag indicating we should create the node (including all intermediate nodes) if it doesn't exist.</param>
         /// <returns>The node at the directory path specified, or null if it doesn't exist and <paramref name="createIfNotExists"/> is not specified.</returns>
         /// <remarks>The node may not actually contain the file.</remarks>
-        private VirtualFileTreeNode GetNodeForDirectoryPath(AegisVirtualFilePath filePath, bool createIfNotExists = false)
+        private VirtualFileTreeNode GetNodeForDirectoryPath(AegisVirtualDirectoryPath directoryPath, bool createIfNotExists = false)
         {
             var curNode = this.Root;
 
             int dirDepth;
-            for (dirDepth = 0; dirDepth < filePath.DirectoryPathComponents.Length; dirDepth++)
+            for (dirDepth = 0; dirDepth < directoryPath.Components.Length; dirDepth++)
             {
-                var dir = filePath.DirectoryPathComponents[dirDepth];
+                var dir = new AegisVirtualDirectoryPath(directoryPath.Components.Take(dirDepth + 1));
 
                 if (!curNode.Children.ContainsKey(dir))
                 {
@@ -155,7 +157,7 @@ namespace Aegis.Core.FileSystem
                 curNode = curNode.Children[dir];
             }
 
-            return dirDepth == filePath.DirectoryPathComponents.Length
+            return dirDepth == directoryPath.Components.Length
                 ? curNode
                 : null;
         }
@@ -172,7 +174,7 @@ namespace Aegis.Core.FileSystem
             while (node.Parent != null
                 && node.IsEmpty)
             {
-                node.Parent.Children.Remove(node.DirectoryName);
+                node.Parent.Children.Remove(node.Directory);
 
                 // Move up one level and repeat the check.
                 node = node.Parent;
@@ -187,18 +189,18 @@ namespace Aegis.Core.FileSystem
             /// <summary>
             /// Initializes a new instance of the <see cref="VirtualFileTreeNode"/> class.
             /// </summary>
-            /// <param name="directoryName">The name of the directory at this node.</param>
+            /// <param name="directory">The virtual directory at this node.</param>
             /// <param name="parent">The parent of this node.</param>
-            public VirtualFileTreeNode(string directoryName, VirtualFileTreeNode parent)
+            public VirtualFileTreeNode(AegisVirtualDirectoryPath directory, VirtualFileTreeNode parent)
             {
-                this.DirectoryName = directoryName;
+                this.Directory = directory;
                 this.Parent = parent;
             }
 
             /// <summary>
-            /// Gets the name of the directory at this node.
+            /// Gets the virtual directory at this node.
             /// </summary>
-            public string DirectoryName { get; }
+            public AegisVirtualDirectoryPath Directory { get; }
 
             /// <summary>
             /// Gets the parent of this node.
@@ -208,8 +210,8 @@ namespace Aegis.Core.FileSystem
             /// <summary>
             /// Gets the children of this node.
             /// </summary>
-            public SortedDictionary<string, VirtualFileTreeNode> Children { get; }
-                = new SortedDictionary<string, VirtualFileTreeNode>(StringComparer.OrdinalIgnoreCase);
+            public SortedDictionary<AegisVirtualDirectoryPath, VirtualFileTreeNode> Children { get; }
+                = new SortedDictionary<AegisVirtualDirectoryPath, VirtualFileTreeNode>();
 
             /// <summary>
             /// Gets the files at this node.

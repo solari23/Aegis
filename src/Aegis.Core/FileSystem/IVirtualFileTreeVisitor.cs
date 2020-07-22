@@ -12,14 +12,16 @@ namespace Aegis.Core.FileSystem
         /// Callback executed when a virtual directory node is visited in a
         /// pre-order traversal of the tree.
         /// </summary>
+        /// <param name="directory">The virtual directory that the node represents.</param>
         /// <param name="files">The files available at the node.</param>
-        void OnPreOrderVisit(ReadOnlySpan<AegisFileInfo> files);
+        void OnPreOrderVisit(AegisVirtualDirectoryPath directory, ReadOnlySpan<AegisFileInfo> files);
 
         /// <summary>
         /// Callback executed when a virtual directory node is visited in a
         /// post-order traversal of the tree.
         /// </summary>
+        /// <param name="directory">The virtual directory that the node represents.</param>
         /// <param name="files">The files available at the node.</param>
-        void OnPostOrderVisit(ReadOnlySpan<AegisFileInfo> files);
+        void OnPostOrderVisit(AegisVirtualDirectoryPath directory, ReadOnlySpan<AegisFileInfo> files);
     }
 }

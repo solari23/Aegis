@@ -26,6 +26,23 @@ namespace Aegis.Core.FileSystem
         private static readonly char[] parsablePathSeparators = new[] { '/', '\\' };
 
         /// <summary>
+        /// Splits a path string by path separators into it's individual components.
+        /// </summary>
+        /// <param name="path">The path to split.</param>
+        /// <returns>The split directory components.</returns>
+        /// <example>
+        /// SplitPathComponents("/foo/bar/baz.txt") -> ["foo", "bar", "baz.txt"]
+        /// </example>
+        public static ImmutableArray<string> SplitPathComponents(string path)
+        {
+            ArgCheck.NotEmpty(path, nameof(path));
+
+            return path
+                .Split(parsablePathSeparators, StringSplitOptions.RemoveEmptyEntries)
+                .ToImmutableArray();
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AegisVirtualFilePath"/> class.
         /// </summary>
         /// <param name="path">The string representation of the virtual path.</param>
@@ -33,28 +50,22 @@ namespace Aegis.Core.FileSystem
         {
             ArgCheck.NotEmpty(path, nameof(path));
 
-            this.FullPathComponents = path
-                .Split(parsablePathSeparators, StringSplitOptions.RemoveEmptyEntries)
-                .ToImmutableArray();
-            this.DirectoryPathComponents = this.FullPathComponents.SkipLast(1).ToImmutableArray();
+            var pathComponents = SplitPathComponents(path);
 
-            if (this.FullPathComponents.Length == 0)
+            if (pathComponents.Length == 0)
             {
                 throw new ArgumentException("The input path is not valid.", nameof(path));
             }
 
-            this.FullPath = PathSeparator + string.Join(PathSeparator, this.FullPathComponents);
+            this.FullPath = PathSeparator + string.Join(PathSeparator, pathComponents);
+            this.FileName = pathComponents.Last();
+            this.DirectoryPath = new AegisVirtualDirectoryPath(pathComponents.SkipLast(1));
         }
 
         /// <summary>
-        /// Gets the individual components making up the full virtual path (including the filename).
+        /// Gets the virtual directory path of the file.
         /// </summary>
-        public ImmutableArray<string> FullPathComponents { get; }
-
-        /// <summary>
-        /// Gets the individual components making the virtual directory path (without the filename).
-        /// </summary>
-        public ImmutableArray<string> DirectoryPathComponents { get; }
+        public AegisVirtualDirectoryPath DirectoryPath { get; }
 
         /// <summary>
         /// Gets the full string representation of the path.
@@ -64,7 +75,7 @@ namespace Aegis.Core.FileSystem
         /// <summary>
         /// Gets the name of the file at the end of the path.
         /// </summary>
-        public string FileName => this.FullPathComponents.Last();
+        public string FileName { get; }
 
         /// <inheritdoc/>
         public override string ToString() => this.FullPath;
@@ -78,7 +89,6 @@ namespace Aegis.Core.FileSystem
         public int CompareTo([AllowNull]AegisVirtualFilePath other)
         {
             const int BothEqual = 0;
-            const int ThisPreceedsOther = -1;
             const int ThisFollowsOther = 1;
 
             if (other is null)
@@ -86,30 +96,16 @@ namespace Aegis.Core.FileSystem
                 return ThisFollowsOther;
             }
 
-            var thisComponents = this.DirectoryPathComponents;
-            var otherComponents = other.DirectoryPathComponents;
-
-            // Compare as many components of directory paths as we can.
-            var numComponentsToCompare = Math.Min(thisComponents.Length, otherComponents.Length);
-
-            for (int i = 0; i < numComponentsToCompare; i++)
+            if (this.Equals(other))
             {
-                var componentComparisonResult = string.Compare(thisComponents[i], otherComponents[i], StringComparison.OrdinalIgnoreCase);
-
-                if (componentComparisonResult == BothEqual)
-                {
-                    continue;
-                }
-
-                return componentComparisonResult < 0 ? ThisPreceedsOther : ThisFollowsOther;
+                return BothEqual;
             }
 
-            // At this point, all the directory path components that we've compared are the same.
-            // Either both directories are the same (i.e. same number of components) -> order based on file names
-            // or one directory is a parent of the other (i.e. fewer components) -> parent preceeds other.
-            return thisComponents.Length == otherComponents.Length
+            // If the files are in the same directory, order is based on file name.
+            // Otherwise order is based on the directories that they are in.
+            return this.DirectoryPath == other.DirectoryPath
                 ? string.Compare(this.FileName, other.FileName, StringComparison.OrdinalIgnoreCase)
-                : thisComponents.Length - otherComponents.Length;
+                : this.DirectoryPath.CompareTo(other.DirectoryPath);
         }
 
         /// <inheritdoc/>

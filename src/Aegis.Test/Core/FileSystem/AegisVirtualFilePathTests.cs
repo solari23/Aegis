@@ -17,87 +17,80 @@ namespace Aegis.Test.Core.FileSystem
             vpath = new AegisVirtualFilePath(@"foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/foo.ags", vpath.FullPath);
-            Assert.AreEqual(1, vpath.FullPathComponents.Length);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[0]);
-            Assert.AreEqual(0, vpath.DirectoryPathComponents.Length);
+            Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
             // Rooted file name.
             vpath = new AegisVirtualFilePath(@"/foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/foo.ags", vpath.FullPath);
-            Assert.AreEqual(1, vpath.FullPathComponents.Length);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[0]);
-            Assert.AreEqual(0, vpath.DirectoryPathComponents.Length);
+            Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
             // Rooted file name using non-canonical path separator.
             vpath = new AegisVirtualFilePath(@"\foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/foo.ags", vpath.FullPath);
-            Assert.AreEqual(1, vpath.FullPathComponents.Length);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[0]);
-            Assert.AreEqual(0, vpath.DirectoryPathComponents.Length);
+            Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
             // File with a directory path.
             vpath = new AegisVirtualFilePath(@"dir/foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-            Assert.AreEqual(2, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir", vpath.FullPathComponents[0]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[1]);
-            Assert.AreEqual(1, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir", vpath.DirectoryPathComponents[0]);
+            Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
 
             // File with a rooted directory path.
             vpath = new AegisVirtualFilePath(@"/dir/foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-            Assert.AreEqual(2, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir", vpath.FullPathComponents[0]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[1]);
-            Assert.AreEqual(1, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir", vpath.DirectoryPathComponents[0]);
+            Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
 
             // File with a rooted directory path, using non-canonical path separator.
             vpath = new AegisVirtualFilePath(@"\dir\foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-            Assert.AreEqual(2, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir", vpath.FullPathComponents[0]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[1]);
-            Assert.AreEqual(1, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir", vpath.DirectoryPathComponents[0]);
+            Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
 
             // File with a rooted directory path, using mixed path separators (1).
             vpath = new AegisVirtualFilePath(@"/dir\foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-            Assert.AreEqual(2, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir", vpath.FullPathComponents[0]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[1]);
-            Assert.AreEqual(1, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir", vpath.DirectoryPathComponents[0]);
+            Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
 
             // File with a rooted directory path, using mixed path separators (2).
             vpath = new AegisVirtualFilePath(@"\dir/foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-            Assert.AreEqual(2, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir", vpath.FullPathComponents[0]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[1]);
-            Assert.AreEqual(1, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir", vpath.DirectoryPathComponents[0]);
+            Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
 
             // Longer path.
             vpath = new AegisVirtualFilePath(@"/dir1/dir2/foo.ags");
             Assert.AreEqual("foo.ags", vpath.FileName);
             Assert.AreEqual("/dir1/dir2/foo.ags", vpath.FullPath);
-            Assert.AreEqual(3, vpath.FullPathComponents.Length);
-            Assert.AreEqual("dir1", vpath.FullPathComponents[0]);
-            Assert.AreEqual("dir2", vpath.FullPathComponents[1]);
-            Assert.AreEqual("foo.ags", vpath.FullPathComponents[2]);
-            Assert.AreEqual(2, vpath.DirectoryPathComponents.Length);
-            Assert.AreEqual("dir1", vpath.DirectoryPathComponents[0]);
-            Assert.AreEqual("dir2", vpath.DirectoryPathComponents[1]);
+            Assert.AreEqual(2, vpath.DirectoryPath.Components.Length);
+            Assert.AreEqual("dir1", vpath.DirectoryPath.Components[0]);
+            Assert.AreEqual("dir2", vpath.DirectoryPath.Components[1]);
+            Assert.AreEqual("/dir1/dir2", vpath.DirectoryPath.FullPath);
+            Assert.AreEqual("dir2", vpath.DirectoryPath.DisplayName);
         }
 
         [TestMethod]

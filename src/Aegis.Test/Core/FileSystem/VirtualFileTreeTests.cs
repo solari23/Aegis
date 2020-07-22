@@ -183,13 +183,13 @@ namespace Aegis.Test.Core.FileSystem
 
             public List<AegisFileInfo> PostOrderVisitFiles { get; } = new List<AegisFileInfo>();
 
-            public void OnPreOrderVisit(ReadOnlySpan<AegisFileInfo> files)
+            public void OnPreOrderVisit(AegisVirtualDirectoryPath dirPath, ReadOnlySpan<AegisFileInfo> files)
             {
                 this.PreOrderHits++;
                 this.PreOrderVisitFiles.AddRange(files.ToArray());
             }
 
-            public void OnPostOrderVisit(ReadOnlySpan<AegisFileInfo> files)
+            public void OnPostOrderVisit(AegisVirtualDirectoryPath dirPath, ReadOnlySpan<AegisFileInfo> files)
             {
                 this.PostOrderHits++;
                 this.PostOrderVisitFiles.AddRange(files.ToArray());
