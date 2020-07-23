@@ -105,9 +105,6 @@ namespace Aegis
         {
             [Value(0, Required = true, MetaName = "<Files | Keys>", HelpText = "Indicates whether to list files or authorized keys.")]
             public string ListType { get; set; }
-
-            [Option("tree", Required = false, HelpText = "Displays files in a tree view (only applies to listing files).")]
-            public bool TreeView { get; set; }
         }
 
         [Verb("authorize", HelpText = "Authorizes a new user key to access the archive.")]

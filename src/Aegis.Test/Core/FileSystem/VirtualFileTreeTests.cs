@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using Aegis.Core.FileSystem;
-using Aegis.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aegis.Test.Core.FileSystem
@@ -193,6 +192,16 @@ namespace Aegis.Test.Core.FileSystem
             {
                 this.PostOrderHits++;
                 this.PostOrderVisitFiles.AddRange(files.ToArray());
+            }
+
+            public void OnStart()
+            {
+                // Empty.
+            }
+
+            public void OnDone()
+            {
+                // Empty.
             }
         }
     }

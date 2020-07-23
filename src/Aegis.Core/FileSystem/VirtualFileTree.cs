@@ -77,6 +77,8 @@ namespace Aegis.Core.FileSystem
         /// <param name="visitorImplementation">The visitor implementation to execute when visiting each node.</param>
         public void TraverseNodes(IVirtualFileTreeVisitor visitorImplementation)
         {
+            visitorImplementation.OnStart();
+
             var traversal = new Stack<VirtualFileTreeNode>();
             traversal.Push(this.Root);
 
@@ -123,6 +125,8 @@ namespace Aegis.Core.FileSystem
                     }
                 }
             }
+
+            visitorImplementation.OnDone();
         }
 
         /// <summary>

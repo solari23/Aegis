@@ -4,6 +4,7 @@ using System.Text;
 
 using Aegis.Core;
 using Aegis.Core.FileSystem;
+using Aegis.VirtualTreeVisitors;
 
 using static Aegis.CommandLineVerbs;
 
@@ -231,10 +232,25 @@ namespace Aegis
                     $"Can't list '{options.ListType}'. This command can list 'files' or 'keys'.");
             }
 
-            // TODO: Implement the 'list' verb.
-            Console.WriteLine(
-                $"[DEBUG] Command will list {listTargetType}" + (listTargetType == ListVerbTargetType.Files && options.TreeView ? " in tree view" : string.Empty));
-            return false;
+            switch (listTargetType)
+            {
+                case ListVerbTargetType.Files:
+                    this.Archive.TraverseFileTree(new BasicFileListingVisitor(Console.Out));
+                    break;
+
+                case ListVerbTargetType.Keys:
+                    Console.WriteLine("Listing keys is not yet implemented.");
+                    return false;
+
+                case ListVerbTargetType.Metadata:
+                    Console.WriteLine("Listing metadata is not yet implemented.");
+                    return false;
+
+                default:
+                    throw new InvalidOperationException($"Unhandled listing target of type '{listTargetType}'.");
+            }
+
+            return true;
         }
 
         /// <summary>
