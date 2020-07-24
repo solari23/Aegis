@@ -22,6 +22,20 @@ namespace Aegis
         private const string TEMP_Password = "P@$sW3rD!!1!";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="AegisInterface"/> class.
+        /// </summary>
+        /// <param name="infoOutput">The stream to write informational output to.</param>
+        /// <param name="errorOutput">The stream to write error output to.</param>
+        public AegisInterface(TextWriter infoOutput, TextWriter errorOutput)
+        {
+            ArgCheck.NotNull(infoOutput, nameof(infoOutput));
+            ArgCheck.NotNull(errorOutput, nameof(errorOutput));
+
+            this.InfoOutput = infoOutput;
+            this.ErrorOutput = errorOutput;
+        }
+
+        /// <summary>
         /// Gets the temporary directory where secured files can be checked out.
         /// </summary>
         private string TempDirectory { get; } = Path.GetTempPath();
@@ -35,6 +49,16 @@ namespace Aegis
         /// Flag that indicates we're running in REPL mode.
         /// </summary>
         private bool InReplMode { get; set; }
+
+        /// <summary>
+        /// Gets the stream to write informational output to.
+        /// </summary>
+        private TextWriter InfoOutput { get; }
+
+        /// <summary>
+        /// Gets the stream to write error output to.
+        /// </summary>
+        private TextWriter ErrorOutput { get; }
 
         /// <summary>
         /// Runs the Aegis command line interface.
@@ -140,7 +164,7 @@ namespace Aegis
                         .Select(attr => (attr as VerbAttribute)?.Name)
                         .FirstOrDefault();
 
-                    Console.WriteLine($"The requested '{verbName}' operation is not yet implemented.");
+                    this.InfoOutput.WriteLine($"The requested '{verbName}' operation is not yet implemented.");
                 }
             }
             while (this.InReplMode);
@@ -178,7 +202,7 @@ namespace Aegis
             {
                 // Only catch recoverable errors while in REPL mode.
                 // Let unrecoverable errors bubble up to the top-level error handler.
-                Console.Error.WriteLine($"[Error] {e.Message}");
+                this.ErrorOutput.WriteLine($"[Error] {e.Message}");
             }
 
             return isHandled;

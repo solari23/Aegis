@@ -27,7 +27,7 @@ namespace Aegis
 
                 // If we ever implement a UI, we'll expect a single input argument with the
                 // path to the archive to open. For now we just have the CLI implementation :)
-                AegisInterface aegis = new AegisInterface();
+                AegisInterface aegis = new AegisInterface(Console.Out, Console.Error);
                 aegis.Run(args);
             }
             catch (AegisUserErrorException e)

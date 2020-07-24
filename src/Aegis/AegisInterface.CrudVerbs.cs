@@ -80,7 +80,7 @@ namespace Aegis
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);
 
                 var newArchiveFileInfo = new FileInfo(archive.FullFilePath);
-                Console.WriteLine($"Created new secure archive file '{newArchiveFileInfo.FullName}'.");
+                this.InfoOutput.WriteLine($"Created new secure archive file '{newArchiveFileInfo.FullName}'.");
             }
             catch (IOException e)
             {
@@ -123,11 +123,11 @@ namespace Aegis
 
                 if (existingFileInfo?.FileId == newFileInfo.FileId)
                 {
-                    Console.WriteLine($"Archive file ID '{newFileInfo.FileId}' at virtual path '{newFileInfo.Path}' was updated.");
+                    this.InfoOutput.WriteLine($"Archive file ID '{newFileInfo.FileId}' at virtual path '{newFileInfo.Path}' was updated.");
                 }
                 else
                 {
-                    Console.WriteLine($"New file ID '{newFileInfo.FileId}' created at virtual path '{newFileInfo.Path}'.");
+                    this.InfoOutput.WriteLine($"New file ID '{newFileInfo.FileId}' created at virtual path '{newFileInfo.Path}'.");
                 }
             }
             catch
@@ -166,7 +166,7 @@ namespace Aegis
             }
 
             this.Archive.RemoveFile(existingFileInfo.FileId);
-            Console.WriteLine($"Removed file ID '{existingFileInfo.FileId}' from virtual path '{existingFileInfo.Path}'.");
+            this.InfoOutput.WriteLine($"Removed file ID '{existingFileInfo.FileId}' from virtual path '{existingFileInfo.Path}'.");
 
             return true;
         }
@@ -214,11 +214,11 @@ namespace Aegis
             {
                 var outputFilePath = Path.Join(options.OutputDirectoryPath, existingFileInfo.Path.FileName);
 
-                Console.WriteLine(
+                this.InfoOutput.WriteLine(
                     $"Extracting file {existingFileInfo.FileId} @ virtual path '{existingFileInfo.Path}' to local path '{outputFilePath}'");
                 using var fileStream = File.OpenWrite(outputFilePath);
                 this.Archive.ExtractFile(existingFileInfo, fileStream);
-                Console.WriteLine("Extraction complete!");
+                this.InfoOutput.WriteLine("Extraction complete!");
             }
             catch
             {
@@ -281,15 +281,15 @@ namespace Aegis
             switch (listTargetType)
             {
                 case ListVerbTargetType.Files:
-                    this.Archive.TraverseFileTree(new BasicFileListingVisitor(Console.Out));
+                    this.Archive.TraverseFileTree(new BasicFileListingVisitor(this.InfoOutput));
                     break;
 
                 case ListVerbTargetType.Keys:
-                    Console.WriteLine("Listing keys is not yet implemented.");
+                    this.InfoOutput.WriteLine("Listing keys is not yet implemented.");
                     return false;
 
                 case ListVerbTargetType.Metadata:
-                    Console.WriteLine("Listing metadata is not yet implemented.");
+                    this.InfoOutput.WriteLine("Listing metadata is not yet implemented.");
                     return false;
 
                 default:
