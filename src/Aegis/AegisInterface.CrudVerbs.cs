@@ -76,7 +76,6 @@ namespace Aegis
                 var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
 
                 var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
-                
 
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);
 
@@ -119,7 +118,7 @@ namespace Aegis
 
             try
             {
-                var inputFileStream = File.OpenRead(options.FilePath);
+                using var inputFileStream = File.OpenRead(options.FilePath);
                 var newFileInfo = this.Archive.PutFile(addPath, inputFileStream, options.Force);
 
                 if (existingFileInfo?.FileId == newFileInfo.FileId)
@@ -162,7 +161,7 @@ namespace Aegis
                 var errorMessage = "Can't remove file. ";
                 errorMessage += options.ArchiveFileId != Guid.Empty
                     ? $"File with ID '{options.ArchiveFileId}' does not exist."
-                    : $"No file exists at path '{options.ArchiveVirtualPath}'.";
+                    : $"No file exists at archive virtual path '{options.ArchiveVirtualPath}'.";
                 throw new AegisUserErrorException(errorMessage);
             }
 
@@ -179,8 +178,55 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool ExtractVerb(ExtractVerbOptions options)
         {
-            // TODO: Implement the 'extract' verb.
-            return false;
+            if (options.ArchiveFileId == Guid.Empty
+                && string.IsNullOrWhiteSpace(options.ArchiveVirtualPath))
+            {
+                throw new AegisUserErrorException($"Must specify either a file ID or a virtual path to extract.");
+            }
+
+            var existingFileInfo = options.ArchiveFileId != Guid.Empty
+                ? this.Archive.GetFileInfo(options.ArchiveFileId)
+                : this.Archive.GetFileInfo(new AegisVirtualFilePath(options.ArchiveVirtualPath));
+
+            if (existingFileInfo is null)
+            {
+                var errorMessage = "Can't extract file. ";
+                errorMessage += options.ArchiveFileId != Guid.Empty
+                    ? $"File with ID '{options.ArchiveFileId}' does not exist."
+                    : $"No file exists at archive virtual path '{options.ArchiveVirtualPath}'.";
+                throw new AegisUserErrorException(errorMessage);
+            }
+
+            if (string.IsNullOrWhiteSpace(options.OutputDirectoryPath))
+            {
+                options.OutputDirectoryPath = ".";
+            }
+            else
+            {
+                if (!Directory.Exists(options.OutputDirectoryPath))
+                {
+                    throw new AegisUserErrorException(
+                        $"Output directory '{options.OutputDirectoryPath}' does not exist. Please create it first before extracting to it.");
+                }
+            }
+
+            try
+            {
+                var outputFilePath = Path.Join(options.OutputDirectoryPath, existingFileInfo.Path.FileName);
+
+                Console.WriteLine(
+                    $"Extracting file {existingFileInfo.FileId} @ virtual path '{existingFileInfo.Path}' to local path '{outputFilePath}'");
+                using var fileStream = File.OpenWrite(outputFilePath);
+                this.Archive.ExtractFile(existingFileInfo, fileStream);
+                Console.WriteLine("Extraction complete!");
+            }
+            catch
+            {
+                // TODO: Improved error handling during extraction.
+                throw;
+            }
+
+            return true;
         }
 
         /// <summary>

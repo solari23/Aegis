@@ -293,14 +293,15 @@ namespace Aegis.Core
                 });
             fileInfo.IndexEntry.LastModifiedTime = currentTime;
 
-            // TODO: Read & encrypt the input file stream
-            // TODO: Push the encrypted stream into the ZIP archive
-
-            // -- Temp code --
-            using var fooWriter = new StreamWriter(this.SecureArchive.GetEntryWriteStream(fileInfo.ArchiveEntryName));
-            fooWriter.Write("Hello world!");
-            fooWriter.Close();
-            // ---------------
+            // Encrypt the file.
+            // This mechanism won't work for very large files since it loads the whole thing into memory.
+            // For now, this is an acceptable limit for Aegis file archiving.
+            using var memoryStream = new MemoryStream();
+            fileStream.CopyTo(memoryStream);
+            var encryptedFile = this.ArchiveKey.Encrypt(
+                this.CryptoStrategy,
+                memoryStream.ToArray());
+            encryptedFile.WriteToBinaryStream(this.SecureArchive.GetEntryWriteStream(fileInfo.ArchiveEntryName));
 
             try
             {
@@ -319,6 +320,32 @@ namespace Aegis.Core
             this.FlushArchive();
 
             return fileInfo;
+        }
+
+        /// <summary>
+        /// Decrypts and extract a file from the archive.
+        /// </summary>
+        /// <param name="fileInfo">The file to extract.</param>
+        /// <param name="outputStream">The stream to extract the file to.</param>
+        public void ExtractFile(AegisFileInfo fileInfo, Stream outputStream)
+        {
+            ArgCheck.NotNull(fileInfo, nameof(fileInfo));
+            ArgCheck.NotNull(outputStream, nameof(outputStream));
+            this.ThrowIfLocked();
+
+            var archiveEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
+
+            if (archiveEntry is null)
+            {
+                throw new ArchiveCorruptedException($"Unable to find archived entry for file ID {fileInfo.FileId}");
+            }
+
+            using var archiveStream = archiveEntry.Open();
+            var encryptedFileData = EncryptedPacketExtensions.ReadFromBinaryStream(
+                archiveStream,
+                this.ArchiveMetadata.SecuritySettings.EncryptionAlgo);
+            var plainTextFileBytes = this.ArchiveKey.Decrypt(this.CryptoStrategy, encryptedFileData);
+            outputStream.Write(plainTextFileBytes);
         }
 
         /// <summary>

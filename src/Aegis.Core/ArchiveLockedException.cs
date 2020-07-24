@@ -15,7 +15,7 @@ namespace Aegis.Core
         /// Initializes a new instance of the <see cref="ArchiveLockedException"/> class.
         /// </summary>
         public ArchiveLockedException()
-            : this("The archive is locked!", null)
+            : this("The operation is not possible while the archive is locked.", null)
         {
             // Empty.
         }

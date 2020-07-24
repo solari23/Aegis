@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace Aegis.Core.Crypto
     /// <summary>
     /// A collection of static helper utilities to deal with crypto operations.
     /// </summary>
-    public static class CryptoHelpers
+    internal static class CryptoHelpers
     {
         /// <summary>
         /// Gets an array of a given size filled with cryptographically secure random bytes.
@@ -81,7 +82,7 @@ namespace Aegis.Core.Crypto
         /// </summary>
         /// <param name="algo">The cryptographic algorithm.</param>
         /// <returns>The <see cref="ICryptoStrategy"/> associated with the algorithm.</returns>
-        internal static ICryptoStrategy GetCryptoStrategy(EncryptionAlgo algo) => algo switch
+        public static ICryptoStrategy GetCryptoStrategy(EncryptionAlgo algo) => algo switch
         {
             EncryptionAlgo.Aes256Gcm => new Aes256GcmCryptoStrategy(),
             _ => throw new InvalidOperationException($"No CryptoStrategy defined for algorithm '{algo}'!"),
@@ -92,7 +93,7 @@ namespace Aegis.Core.Crypto
         /// </summary>
         /// <param name="function">The key derivation function.</param>
         /// <returns>The <see cref="IKeyDerivationStrategy"/> associated with the key derivation function.</returns>
-        internal static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction function) => function switch
+        public static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction function) => function switch
         {
             KeyDerivationFunction.PBKDF2 => new Pbkdf2KeyDerivationStrategy(),
             _ => throw new InvalidOperationException($"No key derivation strategy defined for function '{function}'!"),

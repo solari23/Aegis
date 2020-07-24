@@ -73,14 +73,14 @@ namespace Aegis
             // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
             // but with different "SetName" values (can't specify options from more than one set).
 
-            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            [Option('v', "vpath", SetName = "ExtractTarget_VPATH", Group = "ExtractTarget", HelpText = "The virtual path in the archive of the file to extract.")]
             public string ArchiveVirtualPath { get; set; }
 
-            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "[GUID] The ID of the archive file to update.")]
+            [Option('i', "id", SetName = "ExtractTarget_ID", Group = "ExtractTarget", HelpText = "[GUID] The ID of the archive file to extract.")]
             public Guid ArchiveFileId { get; set; }
 
-            [Option('o', "out", Required = false, HelpText = "The path to which the file will be extracted. Defaults to current directory.")]
-            public string OutputFilePath { get; set; }
+            [Option('o', "out", Required = false, HelpText = "The directory to which the file will be extracted. Defaults to current directory.")]
+            public string OutputDirectoryPath { get; set; }
         }
 
         [Verb("update", HelpText = "Updates a file from the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
