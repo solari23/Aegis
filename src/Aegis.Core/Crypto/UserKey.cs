@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Aegis.Core.CredentialsInterface;
 using Aegis.Models;
 
 namespace Aegis.Core.Crypto
@@ -7,7 +8,7 @@ namespace Aegis.Core.Crypto
     /// <summary>
     /// An encryption key derived from a user secret used to decrypt the archive's <see cref="ArchiveKey"/>.
     /// </summary>
-    public class UserKey : Secret
+    public class UserKey : EncryptionSecret
     {
         /// <summary>
         /// Derives a <see cref="UserKey"/> from the input user secret.
@@ -16,11 +17,11 @@ namespace Aegis.Core.Crypto
         /// <param name="keyDerivationSalt">The salt used to derive the key.</param>
         /// <param name="securitySettings">Security parameters for the <see cref="SecureArchive"/>.</param>
         public static UserKey DeriveFrom(
-            ReadOnlySpan<byte> userSecret,
+            RawUserSecret userSecret,
             ReadOnlySpan<byte> keyDerivationSalt,
             SecuritySettings securitySettings)
         {
-            ArgCheck.NotEmpty(userSecret, nameof(userSecret));
+            ArgCheck.NotNull(userSecret, nameof(userSecret));
             ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
             // TODO: Validate input securitySettings
 
@@ -36,7 +37,7 @@ namespace Aegis.Core.Crypto
             var keyDerivationStrategy = CryptoHelpers.GetKeyDerivationStrategy(securitySettings.KeyDerivationFunction);
             var keyMatter = keyDerivationStrategy.DeriveKeyMatter(
                 cryptoAlgoProperties.KeySizeInBytes + securitySettings.KeyIdSizeInBytes,
-                userSecret,
+                userSecret.Key,
                 keyDerivationSalt,
                 securitySettings.KeyDerivationWorkFactor);
 

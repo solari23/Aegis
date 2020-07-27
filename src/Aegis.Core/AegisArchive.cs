@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
+using Aegis.Core.CredentialsInterface;
 using Aegis.Core.Crypto;
 using Aegis.Core.FileSystem;
 using Aegis.Models;
@@ -39,12 +40,12 @@ namespace Aegis.Core
             // Derive and authorize the first user key.
             var keyDerivationSalt = CryptoHelpers.GetRandomBytes(creationParameters.KeyDerivationSaltSizeInBytes);
             using var firstUserKey = UserKey.DeriveFrom(
-                creationParameters.UserSecret,
+                creationParameters.FirstUserKeyAuthorization.UserSecret,
                 keyDerivationSalt,
                 creationParameters.SecuritySettings);
 
             var firstUserKeyAuthorization = UserKeyAuthorizationExtensions.CreateNewAuthorization(
-                creationParameters.UserKeyFriendlyName,
+                creationParameters.FirstUserKeyAuthorization.FriendlyName,
                 firstUserKey,
                 archiveKey,
                 creationParameters.SecuritySettings);
@@ -184,9 +185,9 @@ namespace Aegis.Core
         /// Unlocks (i.e. decrypts) the archive with the given raw user secret.
         /// </summary>
         /// <param name="userSecret">The user secret to use to unlock the archive.</param>
-        public void Unlock(ReadOnlySpan<byte> userSecret)
+        public void Unlock(RawUserSecret userSecret)
         {
-            ArgCheck.NotEmpty(userSecret, nameof(userSecret));
+            ArgCheck.NotNull(userSecret, nameof(userSecret));
 
             using var userKey = UserKey.DeriveFrom(
                 userSecret,

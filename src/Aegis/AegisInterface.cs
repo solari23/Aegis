@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 
 using Aegis.Core;
+using Aegis.Core.CredentialsInterface;
+
 using CommandLine;
 
 using static Aegis.CommandLineVerbs;
@@ -231,7 +233,7 @@ namespace Aegis
                 archive = AegisArchive.Load(archiveFileSettings);
 
                 // TODO: Implement credential selection and input
-                var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
+                using var rawUserSecret = new RawUserSecret(Encoding.UTF8.GetBytes(TEMP_Password));
 
                 archive.Unlock(rawUserSecret);
                 openSuccess = true;

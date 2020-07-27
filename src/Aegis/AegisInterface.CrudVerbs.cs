@@ -3,7 +3,9 @@ using System.IO;
 using System.Text;
 
 using Aegis.Core;
+using Aegis.Core.CredentialsInterface;
 using Aegis.Core.FileSystem;
+using Aegis.Models;
 using Aegis.VirtualTreeVisitors;
 
 using static Aegis.CommandLineVerbs;
@@ -72,10 +74,14 @@ namespace Aegis
                 }
 
                 // TODO: Implement credential selection and input
-                var userKeyFriendlyName = "Password";
-                var rawUserSecret = Encoding.UTF8.GetBytes(TEMP_Password);
+                using var firstUserKeyAuthorization = new UserKeyAuthorizationParameters(
+                    new RawUserSecret(Encoding.UTF8.GetBytes(TEMP_Password)))
+                {
+                    FriendlyName = "Password",
+                    SecretMetadata = new PasswordSecretMetadata(),
+                };
 
-                var createParameters = new SecureArchiveCreationParameters(userKeyFriendlyName, rawUserSecret);
+                using var createParameters = new SecureArchiveCreationParameters(firstUserKeyAuthorization);
 
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);
 

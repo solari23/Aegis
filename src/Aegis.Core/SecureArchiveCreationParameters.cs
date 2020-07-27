@@ -1,24 +1,24 @@
-﻿using Aegis.Models;
+﻿using System;
+
+using Aegis.Core.CredentialsInterface;
+using Aegis.Models;
 
 namespace Aegis.Core
 {
     /// <summary>
     /// Encapsulates the parameters required to create a new <see cref="SecureArchive"/>.
     /// </summary>
-    public class SecureArchiveCreationParameters
+    public class SecureArchiveCreationParameters : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
         /// </summary>
-        /// <param name="userKeyFriendlyName">The friendly name for the first user key.</param>
-        /// <param name="userSecret">The secret entered by the user to create the first user key.</param>
-        public SecureArchiveCreationParameters(string userKeyFriendlyName, byte[] userSecret)
+        /// <param name="firstUserKeyAuthorization">The parameters to authorize the first user key.</param>
+        public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstUserKeyAuthorization)
         {
-            ArgCheck.NotEmpty(userKeyFriendlyName, nameof(userKeyFriendlyName));
-            ArgCheck.NotEmpty(userSecret, nameof(userSecret));
+            ArgCheck.NotNull(firstUserKeyAuthorization, nameof(firstUserKeyAuthorization));
 
-            this.UserKeyFriendlyName = userKeyFriendlyName;
-            this.UserSecret = userSecret;
+            this.FirstUserKeyAuthorization = firstUserKeyAuthorization;
         }
 
         /// <summary>
@@ -32,13 +32,43 @@ namespace Aegis.Core
         public int KeyDerivationSaltSizeInBytes { get; set; } = AegisConstants.DefaultKeyDerivationSaltSizeInBytes;
 
         /// <summary>
-        /// Gets or sets the friendly name for the first user key.
+        /// Gets the parameters to authorize the first user key
         /// </summary>
-        public string UserKeyFriendlyName { get; set; }
+        internal UserKeyAuthorizationParameters FirstUserKeyAuthorization { get; }
+
+        #region IDisposable Support
 
         /// <summary>
-        /// Gets the secret entered by the user to create the first user key.
+        /// Flag to detect redundant calls to dispose the object.
         /// </summary>
-        internal byte[] UserSecret { get; }
+        private bool isDisposed = false;
+
+        /// <summary>
+        /// Disposes the current object when it is no longer required.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes the current object when it is no longer required.
+        /// </summary>
+        /// <param name="disposing">Whether or not the operation is coming from Dispose() (as opposed to a finalizer).</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.FirstUserKeyAuthorization.Dispose();
+                }
+
+                this.isDisposed = true;
+            }
+        }
+
+        #endregion
     }
 }

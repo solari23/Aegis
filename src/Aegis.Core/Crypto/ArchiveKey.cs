@@ -5,7 +5,7 @@ namespace Aegis.Core.Crypto
     /// <summary>
     /// An encryption key used to encrypt data in the <see cref="SecureArchive"/>.
     /// </summary>
-    internal class ArchiveKey : Secret
+    internal class ArchiveKey : EncryptionSecret
     {
         /// <summary>
         /// Creates a new symmetric <see cref="ArchiveKey"/> that can be used with the

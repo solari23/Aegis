@@ -32,6 +32,11 @@ namespace Aegis.Models
         public string KeyId { get; set; }
 
         /// <summary>
+        /// Gets or sets metadata about the secret used to derive the user key.
+        /// </summary>
+        public SecretMetadata SecretMetadata { get; set; }
+
+        /// <summary>
         /// Timestamp of when the key was authorized.
         /// </summary>
         public DateTimeOffset TimeAdded { get; set; }
