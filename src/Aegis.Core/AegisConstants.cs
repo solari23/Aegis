@@ -20,7 +20,7 @@ namespace Aegis.Core
         /// <summary>
         /// Specifies the default key derivation function that Aegis will use.
         /// </summary>
-        public const KeyDerivationFunction DefaultKeyDerivationFunction = KeyDerivationFunction.PBKDF2;
+        public const KeyDerivationFunction DefaultKeyDerivationFunction = KeyDerivationFunction.PBKDF2SHA256;
 
         /// <summary>
         /// Species the default key derivation work factor that Aegis will use.

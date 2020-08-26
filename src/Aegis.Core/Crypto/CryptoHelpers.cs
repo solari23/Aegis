@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -95,7 +94,7 @@ namespace Aegis.Core.Crypto
         /// <returns>The <see cref="IKeyDerivationStrategy"/> associated with the key derivation function.</returns>
         public static IKeyDerivationStrategy GetKeyDerivationStrategy(KeyDerivationFunction function) => function switch
         {
-            KeyDerivationFunction.PBKDF2 => new Pbkdf2KeyDerivationStrategy(),
+            KeyDerivationFunction.PBKDF2SHA256 => new Pbkdf2Sha256KeyDerivationStrategy(),
             _ => throw new InvalidOperationException($"No key derivation strategy defined for function '{function}'!"),
         };
     }

@@ -51,6 +51,8 @@ namespace Aegis.Core.CredentialsInterface
         /// </exception>
         public void RegisterSecretEntryInterface(IUserSecretEntryInterface secretEntryInterface)
         {
+            ArgCheck.NotNull(secretEntryInterface, nameof(secretEntryInterface));
+
             if (this.SecretEntryInterfaces.ContainsKey(secretEntryInterface.ProvidedSecretKind))
             {
                 var existingProviderType = this.SecretEntryInterfaces[secretEntryInterface.ProvidedSecretKind].GetType();
@@ -75,6 +77,7 @@ namespace Aegis.Core.CredentialsInterface
             }
 
             // TODO: Implement subroutine for unlocking archives.
+            this.SecretSelector.ToString();
             throw new NotImplementedException();
         }
 
@@ -85,6 +88,7 @@ namespace Aegis.Core.CredentialsInterface
         public UserKeyAuthorizationParameters GetNewUserKeyAuthorization()
         {
             // TODO: Implement subroutine for getting a new user secret authorization.
+            this.SecretSelector.ToString();
             throw new NotImplementedException();
         }
 
@@ -100,6 +104,7 @@ namespace Aegis.Core.CredentialsInterface
             archive.ThrowIfLocked();
 
             // TODO: Implement subroutine for authorizing new user secrets.
+            this.SecretSelector.ToString();
             throw new NotImplementedException();
         }
     }

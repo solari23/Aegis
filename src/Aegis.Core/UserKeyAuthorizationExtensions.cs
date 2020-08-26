@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 using Aegis.Core.Crypto;
@@ -46,6 +47,7 @@ namespace Aegis.Core
             };
         }
 
+
         /// <summary>
         /// Attempts to use the given <see cref="UserKey"/> to decrypt the <see cref="ArchiveKey"/>.
         /// </summary>
@@ -57,6 +59,7 @@ namespace Aegis.Core
         /// <remarks>
         /// The decrypted <see cref="ArchiveKey"/> will still need to be tested to see if it can decrypt the <see cref="SecureArchive"/>.
         /// </remarks>
+        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "This is implementing a 'try' pattern.")]
         public static bool TryDecryptArchiveKey(
             this UserKeyAuthorization authorization,
             UserKey userKey,

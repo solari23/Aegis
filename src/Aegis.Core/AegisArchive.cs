@@ -29,52 +29,74 @@ namespace Aegis.Core
             SecureArchiveFileSettings fileSettings,
             SecureArchiveCreationParameters creationParameters)
         {
-            // TODO: Validate input fileSettings
-            // TODO: Validate input creationParameters
+            // TODO: More complete input validation for fileSettings
+            // TODO: More complete input validation for creationParameters
+            ArgCheck.NotNull(fileSettings, nameof(fileSettings));
+            ArgCheck.NotNull(creationParameters, nameof(creationParameters));
 
             var currentTime = DateTimeOffset.UtcNow;
             var archiveId = Guid.NewGuid();
 
-            var archiveKey = ArchiveKey.CreateNew(creationParameters.SecuritySettings);
+            ArchiveKey tempArchiveKey = null;
 
-            // Derive and authorize the first user key.
-            var keyDerivationSalt = CryptoHelpers.GetRandomBytes(creationParameters.KeyDerivationSaltSizeInBytes);
-            using var firstUserKey = UserKey.DeriveFrom(
-                creationParameters.FirstUserKeyAuthorization.UserSecret,
-                keyDerivationSalt,
-                creationParameters.SecuritySettings);
+            AegisArchive tempArchive = null;
+            AegisArchive archive = null;
 
-            var firstUserKeyAuthorization = UserKeyAuthorizationExtensions.CreateNewAuthorization(
-                creationParameters.FirstUserKeyAuthorization.FriendlyName,
-                firstUserKey,
-                archiveKey,
-                creationParameters.SecuritySettings);
-
-            var authCanary = archiveKey.Encrypt(
-                CryptoHelpers.GetCryptoStrategy(creationParameters.SecuritySettings.EncryptionAlgo),
-                archiveId.ToByteArray());
-
-            var archiveMetadata = new SecureArchiveMetadata
+            try
             {
-                Id = archiveId,
-                SecuritySettings = creationParameters.SecuritySettings,
-                CreateTime = currentTime,
-                LastModifiedTime = currentTime,
-                KeyDerivationSalt = new List<byte>(keyDerivationSalt),
-                AuthCanary = authCanary,
-                UserKeyAuthorizations = new List<UserKeyAuthorization> { firstUserKeyAuthorization },
-            };
+                tempArchiveKey = ArchiveKey.CreateNew(creationParameters.SecuritySettings);
 
-            var archive = new AegisArchive
+                // Derive and authorize the first user key.
+                var keyDerivationSalt = CryptoHelpers.GetRandomBytes(creationParameters.KeyDerivationSaltSizeInBytes);
+                using var firstUserKey = UserKey.DeriveFrom(
+                    creationParameters.FirstUserKeyAuthorization.UserSecret,
+                    keyDerivationSalt,
+                    creationParameters.SecuritySettings);
+
+                var firstUserKeyAuthorization = UserKeyAuthorizationExtensions.CreateNewAuthorization(
+                    creationParameters.FirstUserKeyAuthorization.FriendlyName,
+                    firstUserKey,
+                    tempArchiveKey,
+                    creationParameters.SecuritySettings);
+
+                var authCanary = tempArchiveKey.Encrypt(
+                    CryptoHelpers.GetCryptoStrategy(creationParameters.SecuritySettings.EncryptionAlgo),
+                    archiveId.ToByteArray());
+
+                var archiveMetadata = new SecureArchiveMetadata
+                {
+                    Id = archiveId,
+                    SecuritySettings = creationParameters.SecuritySettings,
+                    CreateTime = currentTime,
+                    LastModifiedTime = currentTime,
+                    KeyDerivationSalt = new List<byte>(keyDerivationSalt),
+                    AuthCanary = authCanary,
+                    UserKeyAuthorizations = new List<UserKeyAuthorization> { firstUserKeyAuthorization },
+                };
+
+                tempArchive = new AegisArchive
+                {
+                    ArchiveMetadata = archiveMetadata,
+                    ArchiveKey = tempArchiveKey,
+                    FileSettings = fileSettings,
+                    FileIndex = new FileIndex(),
+                    SecureArchive = OpenSecureArchiveFile(fileSettings, createNewArchive: true),
+                };
+
+                tempArchive.PersistMetadata();
+
+                // Transfer the archive reference to the return variable.
+                archive = tempArchive;
+                tempArchive = null;
+
+                // Dispose ownership of the archive key now belongs to the archive.
+                tempArchiveKey = null;
+            }
+            finally
             {
-                ArchiveMetadata = archiveMetadata,
-                ArchiveKey = archiveKey,
-                FileSettings = fileSettings,
-                FileIndex = new FileIndex(),
-                SecureArchive = OpenSecureArchiveFile(fileSettings, createNewArchive: true),
-            };
-
-            archive.PersistMetadata();
+                tempArchive?.Dispose();
+                tempArchiveKey?.Dispose();
+            }
 
             return archive;
         }
@@ -86,16 +108,18 @@ namespace Aegis.Core
         /// <returns>The loaded <see cref="AegisBondArchive"/>.</returns>
         public static AegisArchive Load(SecureArchiveFileSettings fileSettings)
         {
-            // TODO: Validate input fileSettings
+            // TODO: More complete input validation for fileSettings
+            ArgCheck.NotNull(fileSettings, nameof(fileSettings));
 
-            ZipArchive secureArchive = null;
+            ZipArchive tempSecureArchive = null;
+            AegisArchive archive = null;
 
             try
             {
                 // Open the secure archive and read the metadata entry.
-                secureArchive = OpenSecureArchiveFile(fileSettings);
+                tempSecureArchive = OpenSecureArchiveFile(fileSettings);
 
-                var metadataEntry = secureArchive.GetEntry(AegisConstants.SecureArchiveMetadataEntryName);
+                var metadataEntry = tempSecureArchive.GetEntry(AegisConstants.SecureArchiveMetadataEntryName);
 
                 if (metadataEntry is null)
                 {
@@ -112,20 +136,22 @@ namespace Aegis.Core
                     throw new ArchiveCorruptedException("Unable to parse the archive internal metadata!");
                 }
 
-                return new AegisArchive
+                archive = new AegisArchive
                 {
                     ArchiveMetadata = metadata,
                     FileSettings = fileSettings,
-                    SecureArchive = secureArchive,
+                    SecureArchive = tempSecureArchive,
                 };
+
+                // We've transfered dispose ownership of tempSecureArchive to the archive.
+                tempSecureArchive = null;
             }
-            catch
+            finally
             {
-                // If we failed to open the archive for any reason, make sure we release the
-                // hold on the underlying ZIP file.
-                secureArchive?.Dispose();
-                throw;
+                tempSecureArchive?.Dispose();
             }
+
+            return archive;
         }
 
         /// <summary>

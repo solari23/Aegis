@@ -4,9 +4,10 @@ using System.Security.Cryptography;
 namespace Aegis.Core.Crypto
 {
     /// <summary>
-    /// Implements key derivation using the PBKDF2 algorithm descibed in RFC 2898.
+    /// Implements key derivation using the PBKDF2 algorithm descibed in RFC 2898,
+    /// with SHA256 used as the base hash function.
     /// </summary>
-    internal class Pbkdf2KeyDerivationStrategy : IKeyDerivationStrategy
+    internal class Pbkdf2Sha256KeyDerivationStrategy : IKeyDerivationStrategy
     {
         /// <inheritdoc />
         public Span<byte> DeriveKeyMatter(
@@ -20,7 +21,7 @@ namespace Aegis.Core.Crypto
             ArgCheck.NotEmpty(salt, nameof(salt));
             ArgCheck.GreaterThanZero(workFactor, nameof(workFactor));
 
-            using var kdf = new Rfc2898DeriveBytes(secret.ToArray(), salt.ToArray(), workFactor);
+            using var kdf = new Rfc2898DeriveBytes(secret.ToArray(), salt.ToArray(), workFactor, HashAlgorithmName.SHA256);
             return kdf.GetBytes(numBytesToDerive);
         }
     }

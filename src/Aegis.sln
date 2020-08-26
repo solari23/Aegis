@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Core", "Aegis.Core\Ae
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Models", "Aegis.Models\Aegis.Models.csproj", "{D5F6C480-6FA8-474C-855C-DF97D0DB6187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aegis.Test", "Aegis.Test\Aegis.Test.csproj", "{443C9A18-C0F3-4774-AA15-CAA090CC82B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Test", "Aegis.Test\Aegis.Test.csproj", "{443C9A18-C0F3-4774-AA15-CAA090CC82B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D157686-9B50-4A51-855E-C6D83CC84BEF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

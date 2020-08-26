@@ -11,8 +11,8 @@
         Unknown = 0,
 
         /// <summary>
-        /// Password-Based Key Derivation Function 2.
+        /// Password-Based Key Derivation Function 2, using SHA256 as the base hash function.
         /// </summary>
-        PBKDF2 = 1,
+        PBKDF2SHA256 = 1,
     }
 }

@@ -23,7 +23,8 @@ namespace Aegis.Core.Crypto
         {
             ArgCheck.NotNull(userSecret, nameof(userSecret));
             ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
-            // TODO: Validate input securitySettings
+            // TODO: More complete input validation for securitySettings
+            ArgCheck.NotNull(securitySettings, nameof(securitySettings));
 
             var cryptoAlgoProperties = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo);
 
