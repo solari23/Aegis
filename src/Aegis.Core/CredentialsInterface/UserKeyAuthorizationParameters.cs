@@ -7,7 +7,7 @@ namespace Aegis.Core.CredentialsInterface
     /// <summary>
     /// Encapsulates the parameters required to authorize a new user key.
     /// </summary>
-    public class UserKeyAuthorizationParameters : IDisposable
+    public sealed class UserKeyAuthorizationParameters : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UserKeyAuthorizationParameters"/> class.
@@ -55,7 +55,7 @@ namespace Aegis.Core.CredentialsInterface
         /// Disposes the current object when it is no longer required.
         /// </summary>
         /// <param name="disposing">Whether or not the operation is coming from Dispose() (as opposed to a finalizer).</param>
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!this.isDisposed)
             {

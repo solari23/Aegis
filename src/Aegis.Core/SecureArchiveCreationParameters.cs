@@ -8,7 +8,7 @@ namespace Aegis.Core
     /// <summary>
     /// Encapsulates the parameters required to create a new <see cref="SecureArchive"/>.
     /// </summary>
-    public class SecureArchiveCreationParameters : IDisposable
+    public sealed class SecureArchiveCreationParameters : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
@@ -56,7 +56,7 @@ namespace Aegis.Core
         /// Disposes the current object when it is no longer required.
         /// </summary>
         /// <param name="disposing">Whether or not the operation is coming from Dispose() (as opposed to a finalizer).</param>
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!this.isDisposed)
             {

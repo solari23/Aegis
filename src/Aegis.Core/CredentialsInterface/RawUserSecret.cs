@@ -5,7 +5,7 @@ namespace Aegis.Core.CredentialsInterface
     /// <summary>
     /// Container for a user secret used to derive user keys.
     /// </summary>
-    public class RawUserSecret : Secret
+    public sealed class RawUserSecret : Secret
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RawUserSecret"/> class.

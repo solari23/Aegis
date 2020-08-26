@@ -524,7 +524,7 @@ namespace Aegis.Core
         /// </summary>
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ThrowIfLocked()
+        internal void ThrowIfLocked()
         {
             if (this.IsLocked)
             {
