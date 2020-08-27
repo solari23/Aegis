@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json.Serialization;
+using Aegis.Models.JsonConverters;
 
 namespace Aegis.Models
 {
@@ -34,6 +36,7 @@ namespace Aegis.Models
         /// <summary>
         /// Gets or sets metadata about the secret used to derive the user key.
         /// </summary>
+        [JsonConverter(typeof(SecretMetadataPolymorphicConverter))]
         public SecretMetadata SecretMetadata { get; set; }
 
         /// <summary>

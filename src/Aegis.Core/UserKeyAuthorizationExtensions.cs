@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
+using Aegis.Core.CredentialsInterface;
 using Aegis.Core.Crypto;
 using Aegis.Models;
 
@@ -21,29 +22,35 @@ namespace Aegis.Core
         /// <param name="securitySettings">The archive's <see cref="SecuritySettings"/>.</param>
         /// <returns>The new <see cref="UserKeyAuthorization"/> entry.</returns>
         public static UserKeyAuthorization CreateNewAuthorization(
-            string friendlyName,
-            UserKey userKey,
+            UserKeyAuthorizationParameters newKeyParams,
+            ReadOnlySpan<byte> keyDerivationSalt,
             ArchiveKey archiveKey,
             SecuritySettings securitySettings)
         {
-            ArgCheck.NotEmpty(friendlyName, nameof(friendlyName));
-            ArgCheck.NotNull(userKey, nameof(userKey));
+            ArgCheck.IsValid(newKeyParams, nameof(newKeyParams));
+            ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
             ArgCheck.NotNull(archiveKey, nameof(archiveKey));
             ArgCheck.IsValid(securitySettings, nameof(securitySettings));
 
+            using var userKey = UserKey.DeriveFrom(
+                newKeyParams.UserSecret,
+                keyDerivationSalt,
+                securitySettings);
+
             // The SecureArchive file format requires that the friendly name and keyId be
             // checked for tampering when using authenticated cyphers.
-            var additionalData = Encoding.UTF8.GetBytes(friendlyName + userKey.KeyId);
+            var additionalData = Encoding.UTF8.GetBytes(newKeyParams.FriendlyName + userKey.KeyId);
 
             var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
             var encryptedArchiveKey = userKey.EncryptSecret(cryptoStrategy, archiveKey, additionalData);
 
             return new UserKeyAuthorization
             {
-                FriendlyName = friendlyName,
+                FriendlyName = newKeyParams.FriendlyName,
                 KeyId = userKey.KeyId,
                 TimeAdded = DateTime.UtcNow,
                 EncryptedArchiveKey = encryptedArchiveKey,
+                SecretMetadata = newKeyParams.SecretMetadata,
             };
         }
 

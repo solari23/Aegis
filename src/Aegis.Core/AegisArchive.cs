@@ -46,14 +46,10 @@ namespace Aegis.Core
 
                 // Derive and authorize the first user key.
                 var keyDerivationSalt = CryptoHelpers.GetRandomBytes(creationParameters.KeyDerivationSaltSizeInBytes);
-                using var firstUserKey = UserKey.DeriveFrom(
-                    creationParameters.FirstUserKeyAuthorization.UserSecret,
-                    keyDerivationSalt,
-                    creationParameters.SecuritySettings);
-
+                
                 var firstUserKeyAuthorization = UserKeyAuthorizationExtensions.CreateNewAuthorization(
-                    creationParameters.FirstUserKeyAuthorization.FriendlyName,
-                    firstUserKey,
+                    creationParameters.FirstUserKeyAuthorization,
+                    keyDerivationSalt,
                     tempArchiveKey,
                     creationParameters.SecuritySettings);
 
