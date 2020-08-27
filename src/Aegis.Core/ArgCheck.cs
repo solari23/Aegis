@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -187,6 +188,47 @@ namespace Aegis.Core
             if (arg <= 0)
             {
                 throw new ArgumentOutOfRangeException(argName, "The input value must be greater than zero!");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the <see cref="IValidatableObject"/> argument is valid.
+        /// </summary>
+        /// <param name="validatableArg">The argument to verify.</param>
+        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+        /// <param name="isNullValid">Whether or not to treat null as a valid value for the argument.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when the argument is null and <paramref name="isNullValid"/> is false.
+        /// </exception>
+        /// <exception cref="ArgumentException">Thrown when the argument is invalid.</exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void IsValid(
+            [ValidatedNotNull]IValidatableObject validatableArg,
+            string argName,
+            bool isNullValid = false)
+        {
+            if (validatableArg is null)
+            {
+                if (isNullValid)
+                {
+                    return;
+                }
+
+                throw new ArgumentNullException(argName);
+            }
+
+            var validationResults = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(
+                validatableArg,
+                new ValidationContext(validatableArg),
+                validationResults);
+
+            if (!isValid)
+            {
+                throw new ArgumentException(
+                    $"The input is invalid. Validation errors:{Environment.NewLine}{string.Join(Environment.NewLine, validationResults)}",
+                    argName);
             }
         }
 

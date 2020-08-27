@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Aegis.Core.CredentialsInterface;
 using Aegis.Models;
 
@@ -8,7 +9,7 @@ namespace Aegis.Core
     /// <summary>
     /// Encapsulates the parameters required to create a new <see cref="SecureArchive"/>.
     /// </summary>
-    public sealed class SecureArchiveCreationParameters : IDisposable
+    public sealed class SecureArchiveCreationParameters : IDisposable, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
@@ -16,7 +17,7 @@ namespace Aegis.Core
         /// <param name="firstUserKeyAuthorization">The parameters to authorize the first user key.</param>
         public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstUserKeyAuthorization)
         {
-            ArgCheck.NotNull(firstUserKeyAuthorization, nameof(firstUserKeyAuthorization));
+            ArgCheck.IsValid(firstUserKeyAuthorization, nameof(firstUserKeyAuthorization));
 
             this.FirstUserKeyAuthorization = firstUserKeyAuthorization;
         }
@@ -35,6 +36,32 @@ namespace Aegis.Core
         /// Gets the parameters to authorize the first user key
         /// </summary>
         internal UserKeyAuthorizationParameters FirstUserKeyAuthorization { get; }
+
+        /// <inheritdoc />
+        public IEnumerable<ValidationResult> Validate(ValidationContext _)
+        {
+            if (this.KeyDerivationSaltSizeInBytes <= 0)
+            {
+                yield return new ValidationResult(
+                    $"Property {nameof(this.KeyDerivationSaltSizeInBytes)} must be greater than zero.");
+            }
+
+            var validationResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateProperty(
+                this.SecuritySettings,
+                new ValidationContext(this) { MemberName = nameof(this.SecuritySettings) },
+                validationResults))
+            {
+                foreach (var result in validationResults)
+                {
+                    yield return new ValidationResult(
+                        $"Property {nameof(this.SecuritySettings)} is not valid. Issue: {result.ErrorMessage}");
+                }
+
+                validationResults.Clear();
+            }
+        }
 
         #region IDisposable Support
 

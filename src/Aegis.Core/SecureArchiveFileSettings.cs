@@ -1,9 +1,12 @@
-﻿namespace Aegis.Core
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace Aegis.Core
 {
     /// <summary>
     /// Settings for where the <see cref="SecureArchive"/> and related files are stored.
     /// </summary>
-    public class SecureArchiveFileSettings
+    public class SecureArchiveFileSettings : IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveFileSettings"/> class.
@@ -28,5 +31,21 @@
         /// Gets or sets the path to the directory where secured files can be temporarily checked out.
         /// </summary>
         public string TempDirectory { get; set; }
+
+        /// <inheritdoc />
+        public IEnumerable<ValidationResult> Validate(ValidationContext _)
+        {
+            if (string.IsNullOrWhiteSpace(this.Path))
+            {
+                yield return new ValidationResult(
+                    $"Property {nameof(this.Path)} can't be empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.TempDirectory))
+            {
+                yield return new ValidationResult(
+                    $"Property {nameof(this.TempDirectory)} can't be empty.");
+            }
+        }
     }
 }

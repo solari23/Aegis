@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 using Aegis.Models;
 
@@ -7,7 +9,7 @@ namespace Aegis.Core.CredentialsInterface
     /// <summary>
     /// Encapsulates the parameters required to authorize a new user key.
     /// </summary>
-    public sealed class UserKeyAuthorizationParameters : IDisposable
+    public sealed class UserKeyAuthorizationParameters : IDisposable, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UserKeyAuthorizationParameters"/> class.
@@ -34,6 +36,32 @@ namespace Aegis.Core.CredentialsInterface
         /// Gets or sets metadata to store about the user secret.
         /// </summary>
         public SecretMetadata SecretMetadata { get; set; }
+
+        /// <inheritdoc />
+        public IEnumerable<ValidationResult> Validate(ValidationContext _)
+        {
+            if (string.IsNullOrWhiteSpace(this.FriendlyName))
+            {
+                yield return new ValidationResult(
+                    $"Property {nameof(this.FriendlyName)} must not be empty.");
+            }
+
+            var validationResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateProperty(
+                this.SecretMetadata,
+                new ValidationContext(this) { MemberName = nameof(this.SecretMetadata) },
+                validationResults))
+            {
+                foreach (var result in validationResults)
+                {
+                    yield return new ValidationResult(
+                        $"Property {nameof(this.SecretMetadata)} is not valid. Issue: {result.ErrorMessage}");
+                }
+
+                validationResults.Clear();
+            }
+        }
 
         #region IDisposable Support
 

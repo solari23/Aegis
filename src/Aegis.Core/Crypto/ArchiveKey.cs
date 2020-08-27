@@ -15,7 +15,7 @@ namespace Aegis.Core.Crypto
         /// <returns>The new <see cref="ArchiveKey"/>.</returns>
         public static ArchiveKey CreateNew(SecuritySettings securitySettings)
         {
-            // TODO: Validate input securitySettings
+            ArgCheck.IsValid(securitySettings, nameof(securitySettings));
 
             var numKeyBytes = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo).KeySizeInBytes;
             return new ArchiveKey(CryptoHelpers.GetRandomBytes(numKeyBytes));

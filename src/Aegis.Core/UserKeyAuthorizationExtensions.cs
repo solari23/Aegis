@@ -29,7 +29,7 @@ namespace Aegis.Core
             ArgCheck.NotEmpty(friendlyName, nameof(friendlyName));
             ArgCheck.NotNull(userKey, nameof(userKey));
             ArgCheck.NotNull(archiveKey, nameof(archiveKey));
-            // TODO: Validate input securitySettings
+            ArgCheck.IsValid(securitySettings, nameof(securitySettings));
 
             // The SecureArchive file format requires that the friendly name and keyId be
             // checked for tampering when using authenticated cyphers.
@@ -68,7 +68,7 @@ namespace Aegis.Core
         {
             ArgCheck.NotNull(authorization, nameof(authorization));
             ArgCheck.NotNull(userKey, nameof(userKey));
-            // TODO: Validate input securitySettings
+            ArgCheck.IsValid(securitySettings, nameof(securitySettings));
 
             archiveKey = null;
 

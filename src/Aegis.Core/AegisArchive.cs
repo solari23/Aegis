@@ -29,10 +29,8 @@ namespace Aegis.Core
             SecureArchiveFileSettings fileSettings,
             SecureArchiveCreationParameters creationParameters)
         {
-            // TODO: More complete input validation for fileSettings
-            // TODO: More complete input validation for creationParameters
-            ArgCheck.NotNull(fileSettings, nameof(fileSettings));
-            ArgCheck.NotNull(creationParameters, nameof(creationParameters));
+            ArgCheck.IsValid(fileSettings, nameof(fileSettings));
+            ArgCheck.IsValid(creationParameters, nameof(creationParameters));
 
             var currentTime = DateTimeOffset.UtcNow;
             var archiveId = Guid.NewGuid();
@@ -108,8 +106,7 @@ namespace Aegis.Core
         /// <returns>The loaded <see cref="AegisBondArchive"/>.</returns>
         public static AegisArchive Load(SecureArchiveFileSettings fileSettings)
         {
-            // TODO: More complete input validation for fileSettings
-            ArgCheck.NotNull(fileSettings, nameof(fileSettings));
+            ArgCheck.IsValid(fileSettings, nameof(fileSettings));
 
             ZipArchive tempSecureArchive = null;
             AegisArchive archive = null;
