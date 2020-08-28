@@ -422,6 +422,16 @@ namespace Aegis.Core
         }
 
         /// <summary>
+        /// Gets the user key authorization records for the archive.
+        /// </summary>
+        /// <returns>A copy of the user key authorizations.</returns>
+        public List<UserKeyAuthorization> GetUserKeyAuthorizations() =>
+            // Slightly hacky -- we'll use the serialization cloning trick.
+            // We don't want to return the original references.
+            JsonSerializer.Deserialize<List<UserKeyAuthorization>>(
+                JsonSerializer.Serialize(this.ArchiveMetadata.UserKeyAuthorizations));
+
+        /// <summary>
         /// Opens a secure archive (zip) file on disk.
         /// </summary>
         /// <param name="fileSettings">The <see cref="SecureArchiveFileSettings"/> for the archive to open.</param>

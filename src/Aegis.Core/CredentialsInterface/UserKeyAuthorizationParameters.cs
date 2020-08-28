@@ -23,14 +23,14 @@ namespace Aegis.Core.CredentialsInterface
         }
 
         /// <summary>
+        /// Gets the user key.
+        /// </summary>
+        public RawUserSecret UserSecret { get; }
+
+        /// <summary>
         /// Gets or sets the friendly name for the user key.
         /// </summary>
         public string FriendlyName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user key.
-        /// </summary>
-        public RawUserSecret UserSecret { get; }
 
         /// <summary>
         /// Gets or sets metadata to store about the user secret.

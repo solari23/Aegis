@@ -73,14 +73,7 @@ namespace Aegis
                     }
                 }
 
-                // TODO: Implement credential selection and input
-                using var firstUserKeyAuthorization = new UserKeyAuthorizationParameters(
-                    new RawUserSecret(Encoding.UTF8.GetBytes(TEMP_Password)))
-                {
-                    FriendlyName = "Password",
-                    SecretMetadata = new PasswordSecretMetadata(),
-                };
-
+                using var firstUserKeyAuthorization = this.ArchiveUnlocker.GetNewUserKeyAuthorization();
                 using var createParameters = new SecureArchiveCreationParameters(firstUserKeyAuthorization);
 
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);

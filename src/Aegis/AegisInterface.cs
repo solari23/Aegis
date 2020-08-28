@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
+using Aegis.CredentialsInterface;
 
 using CommandLine;
 
@@ -18,23 +18,23 @@ namespace Aegis
     public partial class AegisInterface
     {
         /// <summary>
-        /// The password used for all archives.
-        /// Important: This is a temporary placeholder for development.
-        /// </summary>
-        private const string TEMP_Password = "P@$sW3rD!!1!";
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AegisInterface"/> class.
         /// </summary>
         /// <param name="infoOutput">The stream to write informational output to.</param>
         /// <param name="errorOutput">The stream to write error output to.</param>
-        public AegisInterface(TextWriter infoOutput, TextWriter errorOutput)
+        /// <param name="input">The input stream to read character data from.</param>
+        public AegisInterface(TextWriter infoOutput, TextWriter errorOutput, TextReader input)
         {
             ArgCheck.NotNull(infoOutput, nameof(infoOutput));
             ArgCheck.NotNull(errorOutput, nameof(errorOutput));
+            ArgCheck.NotNull(input, nameof(input));
 
             this.InfoOutput = infoOutput;
             this.ErrorOutput = errorOutput;
+
+            this.ArchiveUnlocker = new ArchiveUnlocker(
+                new SecretSelector(input, infoOutput),
+                new PasswordEntryInterface(input, infoOutput));
         }
 
         /// <summary>
@@ -61,6 +61,11 @@ namespace Aegis
         /// Gets the stream to write error output to.
         /// </summary>
         private TextWriter ErrorOutput { get; }
+
+        /// <summary>
+        /// Gets the archive unlocking helper.
+        /// </summary>
+        private ArchiveUnlocker ArchiveUnlocker { get; }
 
         /// <summary>
         /// Runs the Aegis command line interface.
@@ -194,7 +199,10 @@ namespace Aegis
             {
                 if (this.Archive is null && openArchiveIfNotOpened)
                 {
-                    this.Archive = OpenArchive(options.AegisArchivePath, this.TempDirectory);
+                    this.Archive = OpenArchive(
+                        options.AegisArchivePath,
+                        this.TempDirectory,
+                        this.ArchiveUnlocker);
                     this.SetWindowTitle();
                 }
 
@@ -215,8 +223,9 @@ namespace Aegis
         /// </summary>
         /// <param name="archivePath">The path to the <see cref="AegisArchive"/> on disk.</param>
         /// <param name="tempDirectory">The temp directory that the archive can use for operations.</param>
+        /// <param name="archiveUnlocker">The archive unlock helper.</param>
         /// <returns>The opened <see cref="AegisArchive"/>.</returns>
-        private static AegisArchive OpenArchive(string archivePath, string tempDirectory)
+        private static AegisArchive OpenArchive(string archivePath, string tempDirectory, ArchiveUnlocker archiveUnlocker)
         {
             if (string.IsNullOrWhiteSpace(archivePath))
             {
@@ -231,11 +240,7 @@ namespace Aegis
             {
                 var archiveFileSettings = new SecureArchiveFileSettings(archivePath, tempDirectory);
                 archive = AegisArchive.Load(archiveFileSettings);
-
-                // TODO: Implement credential selection and input
-                using var rawUserSecret = new RawUserSecret(Encoding.UTF8.GetBytes(TEMP_Password));
-
-                archive.Unlock(rawUserSecret);
+                archiveUnlocker.Unlock(archive);
                 openSuccess = true;
             }
             catch (IOException e)

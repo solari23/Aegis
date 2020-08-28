@@ -6,42 +6,42 @@ using System.Security.Permissions;
 namespace Aegis.Core.CredentialsInterface
 {
     /// <summary>
-    /// Exception to be thrown by user interface implementations when the user cancels a prompt.
+    /// Exception thrown when none of the authorized user keys registered on an archive
+    /// can currently be used to unlock the archive.
     /// </summary>
-    public class SecretInterfaceOperationCancelledException : Exception
+    public class NoKeyAvailableException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ArchiveCorruptedException"/> class.
+        /// Initializes a new instance of the <see cref="NoKeyAvailableException"/> class.
         /// </summary>
-        public SecretInterfaceOperationCancelledException()
-            : this("The secret interface operation was cancelled!", null)
+        public NoKeyAvailableException()
         {
             // Empty.
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecretInterfaceOperationCancelledException"/> class.
+        /// Initializes a new instance of the <see cref="NoKeyAvailableException"/> class.
         /// </summary>
         /// <param name="message">The error message.</param>
-        public SecretInterfaceOperationCancelledException(string message)
+        public NoKeyAvailableException(string message)
             : this(message, null)
         {
             // Empty.
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecretInterfaceOperationCancelledException"/> class.
+        /// Initializes a new instance of the <see cref="NoKeyAvailableException"/> class.
         /// </summary>
         /// <param name="message">The error message.</param>
         /// <param name="innerException">The cause of the error.</param>
-        public SecretInterfaceOperationCancelledException(string message, Exception innerException)
+        public NoKeyAvailableException(string message, Exception innerException)
             : base(message, innerException)
         {
             // Empty.
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecretInterfaceOperationCancelledException"/> class.
+        /// Initializes a new instance of the <see cref="NoKeyAvailableException"/> class.
         /// </summary>
         /// <param name="info">The SerializationInfo to populate with data.</param>
         /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
@@ -49,7 +49,7 @@ namespace Aegis.Core.CredentialsInterface
         /// This overload is required to properly implement <see cref="ISerializable"/>.
         /// </remarks>
         [SuppressMessage("Usage", "CA1801: Review unused parameters", Justification = "The method signature is required by the framework.")]
-        protected SecretInterfaceOperationCancelledException(SerializationInfo info, StreamingContext context)
+        protected NoKeyAvailableException(SerializationInfo info, StreamingContext context)
         {
             // Deserialize any internal properties using info.GetValue
         }

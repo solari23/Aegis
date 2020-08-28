@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 using Aegis.Models;
 
@@ -53,6 +55,13 @@ namespace Aegis.Core.CredentialsInterface
         {
             ArgCheck.NotNull(secretEntryInterface, nameof(secretEntryInterface));
 
+            if (secretEntryInterface.ProvidedSecretKind == SecretKind.Unknown)
+            {
+                throw new ArgumentException(
+                    $"Can't register secret interface for 'unknown' secret kind.",
+                    nameof(secretEntryInterface));
+            }
+
             if (this.SecretEntryInterfaces.ContainsKey(secretEntryInterface.ProvidedSecretKind))
             {
                 var existingProviderType = this.SecretEntryInterfaces[secretEntryInterface.ProvidedSecretKind].GetType();
@@ -76,9 +85,33 @@ namespace Aegis.Core.CredentialsInterface
                 throw new InvalidOperationException("The given archive is already unlocked.");
             }
 
-            // TODO: Implement subroutine for unlocking archives.
-            this.SecretSelector.ToString();
-            throw new NotImplementedException();
+            // First, filter down the user key authorizations to only keep those for which we have a registered interface.
+            var availableUserKeys = archive.GetUserKeyAuthorizations()
+                .Where(key => 
+                    this.SecretEntryInterfaces.ContainsKey(key.SecretMetadata.SecretKind)
+                    && this.SecretEntryInterfaces[key.SecretMetadata.SecretKind].CanProvideSecret(key.SecretMetadata));
+
+            if (!availableUserKeys.Any())
+            {
+                throw new NoKeyAvailableException(
+                    "None of the authorized user keys are currently available because this interface does not support them.");
+            }
+
+            // Of those, ask the user to choose which type of secret they'd like to use to unlock the archive.
+            var availableSecretKinds = availableUserKeys.Select(k => k.SecretMetadata.SecretKind).Distinct().ToImmutableArray();
+            var selectedSecretKind = availableSecretKinds.Length > 1
+                ? this.SecretSelector.PromptSelectSecretKind(availableSecretKinds)
+                : availableSecretKinds[0];
+
+            // Split out the user keys that are available, and of the selected type.
+            var selectedUserKeys = availableUserKeys
+                .Where(k => k.SecretMetadata.SecretKind == selectedSecretKind)
+                .Select(k => k.SecretMetadata)
+                .ToImmutableArray();
+
+            // Finally, prompt to get the user secret and use it to unlock the archive.
+            using var userSecret = this.SecretEntryInterfaces[selectedSecretKind].GetUserSecret(selectedUserKeys);
+            archive.Unlock(userSecret);
         }
 
         /// <summary>
@@ -87,9 +120,11 @@ namespace Aegis.Core.CredentialsInterface
         /// <returns>The new <see cref="UserKeyAuthorizationParameters"/>.</returns>
         public UserKeyAuthorizationParameters GetNewUserKeyAuthorization()
         {
-            // TODO: Implement subroutine for getting a new user secret authorization.
-            this.SecretSelector.ToString();
-            throw new NotImplementedException();
+            var newSecretKind = this.SecretEntryInterfaces.Count > 1
+                ? this.SecretSelector.PromptSelectSecretKind(this.SecretEntryInterfaces.Keys.ToImmutableArray())
+                : this.SecretEntryInterfaces.Keys.First();
+
+            return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters();
         }
 
         /// <summary>
@@ -103,6 +138,8 @@ namespace Aegis.Core.CredentialsInterface
 
             archive.ThrowIfLocked();
 
+            using var newAuthorization = this.GetNewUserKeyAuthorization();
+            
             // TODO: Implement subroutine for authorizing new user secrets.
             this.SecretSelector.ToString();
             throw new NotImplementedException();

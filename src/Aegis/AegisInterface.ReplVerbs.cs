@@ -21,7 +21,7 @@ namespace Aegis
                     "Another archive is already opened. Either close the opened archive or use the --force flag.");
             }
 
-            var archive = OpenArchive(options.AegisArchivePath, this.TempDirectory);
+            var archive = OpenArchive(options.AegisArchivePath, this.TempDirectory, this.ArchiveUnlocker);
 
             // The new archive is fully loaded. Close out the previous one, if there was one.
             this.CloseVerb(new CloseVerbOptions());

@@ -1,4 +1,6 @@
-﻿using Aegis.Models;
+﻿using System.Collections.Immutable;
+
+using Aegis.Models;
 
 namespace Aegis.Core.CredentialsInterface
 {
@@ -16,20 +18,25 @@ namespace Aegis.Core.CredentialsInterface
         /// Queries the secret provider to check if it can provide a secret based
         /// on that secret's metadata.
         /// </summary>
-        /// <param name="secretMetadata">The metadata of the secret to check for.</param>
+        /// <param name="secretMetadata">
+        /// The metadata of the secret to check for. The secret is guaranteed to match <see cref="ProvidedSecretKind"/>.
+        /// </param>
         /// <returns>True if the provider can retrieve the secret, false otherwise.</returns>
         bool CanProvideSecret(SecretMetadata secretMetadata);
 
         /// <summary>
         /// Primary interface for retrieving secret values from user input.
         /// </summary>
-        /// <param name="secretMetadata">The metadata of the secret to retrieve.</param>
+        /// <param name="possibleSecretMetadata">
+        /// The metadata for secrets that the user may choose from.
+        /// These secrets are guaranteed to match <see cref="ProvidedSecretKind"/>.
+        /// </param>
         /// <returns>The user secret.</returns>
         /// <remarks>
         /// Implementations should throw <see cref="SecretInterfaceOperationCancelledException"/>
         /// to indicate that the user cancelled the operation without entering the secret.
         /// </remarks>
-        RawUserSecret GetUserSecret(SecretMetadata secretMetadata);
+        RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata);
 
         /// <summary>
         /// Interface to retrieve the necessary paramaters to register a new user secret.

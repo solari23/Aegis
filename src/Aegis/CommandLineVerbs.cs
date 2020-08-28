@@ -83,7 +83,7 @@ namespace Aegis
             public string OutputDirectoryPath { get; set; }
         }
 
-        [Verb("update", HelpText = "Updates a file from the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
+        [Verb("update", HelpText = "Updates a file in the archive. Equivalent to using the 'add' verb with the 'force' option set.")]
         public class UpdateVerbOptions : AegisVerbOptions
         {
             [Value(0, Required = true, MetaName = "FilePath", HelpText = "The path to the file to add to the archive.")]
