@@ -25,9 +25,11 @@ namespace Aegis
                     args = new string[] { ReplHelpers.StartReplVerb };
                 }
 
-                // If we ever implement a UI, we'll expect a single input argument with the
-                // path to the archive to open. For now we just have the CLI implementation :)
-                var ioStreams = new IOStreamSet(Console.Out, Console.Error, Console.In);
+                var ioStreams = new IOStreamSet(
+                    Console.Out,
+                    Console.Error,
+                    Console.In,
+                    Console.ReadKey);
                 var aegis = new AegisInterface(ioStreams);
                 aegis.Run(args);
             }

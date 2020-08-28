@@ -62,7 +62,7 @@ namespace Aegis.CredentialsInterface
             var inputPrompt = new InputPrompt(
                 this.IO,
                 $"Enter selection [1-{this.Options.Length}]: ",
-                s => int.TryParse(s, out var v) && v >= 1 && v <= this.Options.Length);
+                validator: s => int.TryParse(s, out var v) && v >= 1 && v <= this.Options.Length);
 
             var input = inputPrompt.GetValue();
             var selectedIndex = int.Parse(input);

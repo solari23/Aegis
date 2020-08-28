@@ -43,11 +43,14 @@ namespace Aegis.CredentialsInterface
         /// <inheritdoc />
         public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
         {
-            // TODO: Implement prompting for the friendly name and password
-            var password = this.GetUserSecret(ImmutableArray<SecretMetadata>.Empty);
-            return new UserKeyAuthorizationParameters(password)
+            var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
+            var friendlyName = namePrompt.GetValue();
+
+            var secret = this.GetUserSecret(ImmutableArray<SecretMetadata>.Empty);
+
+            return new UserKeyAuthorizationParameters(secret)
             {
-                FriendlyName = "Password",
+                FriendlyName = friendlyName,
                 SecretMetadata = new PasswordSecretMetadata(),
             };
         }
@@ -55,8 +58,10 @@ namespace Aegis.CredentialsInterface
         /// <inheritdoc />
         public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
         {
-            // TODO: Implement password entry on the command-line.
-            return new RawUserSecret(Encoding.UTF8.GetBytes(TEMP_Password));
+            var passwordPrompt = new InputPrompt(this.IO, "Enter the password: ", isConfidentialInput: true);
+            var password = passwordPrompt.GetValue();
+
+            return new RawUserSecret(Encoding.UTF8.GetBytes(password));
         }
     }
 }
