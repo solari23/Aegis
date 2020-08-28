@@ -138,7 +138,7 @@ namespace Aegis
 
         #region REPL control verbs
 
-        [Verb(CommandLineHelpers.StartReplVerb, Hidden = true, HelpText = "Hidden verb that allows the user the start REPL mode.")]
+        [Verb(ReplHelpers.StartReplVerb, Hidden = true, HelpText = "Hidden verb that allows the user the start REPL mode.")]
         public class StartReplVerbOptions
         {
             // Empty.

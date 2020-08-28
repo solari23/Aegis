@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.IO;
 using System.Text;
 
 using Aegis.Core;
@@ -22,29 +21,21 @@ namespace Aegis.CredentialsInterface
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordEntryInterface"/> class.
         /// </summary>
-        /// <param name="input">The input stream to read characters from.</param>
-        /// <param name="output">The output stream to write prompts to.</param>
-        public PasswordEntryInterface(TextReader input, TextWriter output)
+        /// <param name="ioStreamSet">The IO streams.</param>
+        public PasswordEntryInterface(IOStreamSet ioStreamSet)
         {
-            ArgCheck.NotNull(input, nameof(input));
-            ArgCheck.NotNull(output, nameof(output));
+            ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
 
-            this.Input = input;
-            this.Output = output;
+            this.IO = ioStreamSet;
         }
 
         /// <inheritdoc />
         public SecretKind ProvidedSecretKind => SecretKind.Password;
 
         /// <summary>
-        /// Gets the input stream to read characters from.
+        /// Gets the IO streams.
         /// </summary>
-        public TextReader Input { get; }
-
-        /// <summary>
-        /// Gets the output stream to write prompts to.
-        /// </summary>
-        public TextWriter Output { get; }
+        private IOStreamSet IO { get; }
 
         /// <inheritdoc />
         public bool CanProvideSecret(SecretMetadata secretMetadata) => true;

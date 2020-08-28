@@ -8,9 +8,9 @@ using CommandLine;
 namespace Aegis
 {
     /// <summary>
-    /// A collection of static helper utilities for dealing with the command line.
+    /// A collection of static helper utilities for implementing the command line REPL.
     /// </summary>
-    public static class CommandLineHelpers
+    public static class ReplHelpers
     {
         /// <summary>
         /// A hidden command line verb that starts the REPL (Read-Execute-Print-Loop) mode.

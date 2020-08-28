@@ -20,21 +20,16 @@ namespace Aegis
         /// <summary>
         /// Initializes a new instance of the <see cref="AegisInterface"/> class.
         /// </summary>
-        /// <param name="infoOutput">The stream to write informational output to.</param>
-        /// <param name="errorOutput">The stream to write error output to.</param>
-        /// <param name="input">The input stream to read character data from.</param>
-        public AegisInterface(TextWriter infoOutput, TextWriter errorOutput, TextReader input)
+        /// <param name="ioStreamSet">The IO streams.</param>
+        public AegisInterface(IOStreamSet ioStreamSet)
         {
-            ArgCheck.NotNull(infoOutput, nameof(infoOutput));
-            ArgCheck.NotNull(errorOutput, nameof(errorOutput));
-            ArgCheck.NotNull(input, nameof(input));
+            ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
 
-            this.InfoOutput = infoOutput;
-            this.ErrorOutput = errorOutput;
+            this.IO = ioStreamSet;
 
             this.ArchiveUnlocker = new ArchiveUnlocker(
-                new SecretSelector(input, infoOutput),
-                new PasswordEntryInterface(input, infoOutput));
+                new SecretSelector(ioStreamSet),
+                new PasswordEntryInterface(ioStreamSet));
         }
 
         /// <summary>
@@ -53,14 +48,9 @@ namespace Aegis
         private bool InReplMode { get; set; }
 
         /// <summary>
-        /// Gets the stream to write informational output to.
+        /// Gets the IO streams.
         /// </summary>
-        private TextWriter InfoOutput { get; }
-
-        /// <summary>
-        /// Gets the stream to write error output to.
-        /// </summary>
-        private TextWriter ErrorOutput { get; }
+        private IOStreamSet IO { get; }
 
         /// <summary>
         /// Gets the archive unlocking helper.
@@ -73,7 +63,7 @@ namespace Aegis
         public void Run(string[] initialArgs)
         {
             var args = initialArgs;
-            var optionsClasses = CommandLineHelpers.GetCommandLineVerbOptionTypes();
+            var optionsClasses = ReplHelpers.GetCommandLineVerbOptionTypes();
             var commandParser = new Parser(settings =>
             {
                 settings.AutoHelp = true;
@@ -94,8 +84,8 @@ namespace Aegis
                     // In REPL mode -> Prompt for the next command.
                     var prompt = this.Archive is null 
                         ? null
-                        : CommandLineHelpers.MakePromptString(this.Archive.FileName);
-                    args = CommandLineHelpers.Prompt(prompt);
+                        : ReplHelpers.MakePromptString(this.Archive.FileName);
+                    args = ReplHelpers.Prompt(prompt);
                 }
 
                 var parserResult = commandParser.ParseArguments(args, optionsClasses);
@@ -171,7 +161,7 @@ namespace Aegis
                         .Select(attr => (attr as VerbAttribute)?.Name)
                         .FirstOrDefault();
 
-                    this.InfoOutput.WriteLine($"The requested '{verbName}' operation is not yet implemented.");
+                    this.IO.Out.WriteLine($"The requested '{verbName}' operation is not yet implemented.");
                 }
             }
             while (this.InReplMode);
@@ -212,7 +202,7 @@ namespace Aegis
             {
                 // Only catch recoverable errors while in REPL mode.
                 // Let unrecoverable errors bubble up to the top-level error handler.
-                this.ErrorOutput.WriteLine($"[Error] {e.Message}");
+                this.IO.Error.WriteLine($"[Error] {e.Message}");
             }
 
             return isHandled;

@@ -22,12 +22,13 @@ namespace Aegis
                 if (args is null || args.Length == 0)
                 {
                     // No arguments -> signal to start REPL mode.
-                    args = new string[] { CommandLineHelpers.StartReplVerb };
+                    args = new string[] { ReplHelpers.StartReplVerb };
                 }
 
                 // If we ever implement a UI, we'll expect a single input argument with the
                 // path to the archive to open. For now we just have the CLI implementation :)
-                AegisInterface aegis = new AegisInterface(Console.Out, Console.Error, Console.In);
+                var ioStreams = new IOStreamSet(Console.Out, Console.Error, Console.In);
+                var aegis = new AegisInterface(ioStreams);
                 aegis.Run(args);
             }
             catch (AegisUserErrorException e)
