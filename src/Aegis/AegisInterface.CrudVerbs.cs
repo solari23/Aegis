@@ -284,12 +284,13 @@ namespace Aegis
                     break;
 
                 case ListVerbTargetType.Keys:
+                    // TODO: Implement 'list keys'.
                     this.IO.Out.WriteLine("Listing keys is not yet implemented.");
                     return false;
 
                 case ListVerbTargetType.Metadata:
-                    this.IO.Out.WriteLine("Listing metadata is not yet implemented.");
-                    return false;
+                    this.IO.Out.WriteLine(this.Archive.GetArchiveMetadataJson());
+                    break;
 
                 default:
                     throw new InvalidOperationException($"Unhandled listing target of type '{listTargetType}'.");

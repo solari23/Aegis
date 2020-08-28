@@ -2,6 +2,8 @@
 
 using CommandLine;
 
+using ListVerbTargetType = Aegis.AegisInterface.ListVerbTargetType;
+
 namespace Aegis
 {
     /// <summary>
@@ -105,6 +107,10 @@ namespace Aegis
         {
             [Value(0, Required = true, MetaName = "<Files | Keys>", HelpText = "Indicates whether to list files or authorized keys.")]
             public string ListType { get; set; }
+
+            public bool IsListTarget(ListVerbTargetType target) =>
+                Enum.TryParse<ListVerbTargetType>(this.ListType, ignoreCase: true, out var listTargetType)
+                && listTargetType == target;
         }
 
         [Verb("authorize", HelpText = "Authorizes a new user key to access the archive.")]

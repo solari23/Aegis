@@ -130,16 +130,16 @@ namespace Aegis
                 // Check handlers for Aegis verbs.
                 isHandled = parserResult.MapResult(
                     // Verbs that specifically handle dealing with archives in REPL mode.
-                    (OpenVerbOptions opts) => this.ExecuteAegisVerb(opts, this.OpenVerb, openArchiveIfNotOpened: false),
-                    (CloseVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CloseVerb, openArchiveIfNotOpened: false),
+                    (OpenVerbOptions opts) => this.ExecuteAegisVerb(opts, this.OpenVerb, requireOpenArchive: false),
+                    (CloseVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CloseVerb, requireOpenArchive: false),
 
                     // CRUD verbs available in either CLI or REPL mode.
-                    (CreateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CreateVerb, openArchiveIfNotOpened: false),
+                    (CreateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.CreateVerb, requireOpenArchive: false),
                     (AddVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AddVerb),
                     (RemoveVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RemoveVerb),
                     (ExtractVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ExtractVerb),
                     (UpdateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.UpdateVerb),
-                    (ListVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ListVerb),
+                    (ListVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ListVerb, requireUnlockedArchive: opts.IsListTarget(ListVerbTargetType.Files)),
                     (AuthorizeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AuthorizeVerb),
                     (RevokeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RevokeVerb),
 
@@ -172,7 +172,8 @@ namespace Aegis
         /// </summary>
         /// <param name="options">The options to pass to the verb.</param>
         /// <param name="operation">The verb operation to execute.</param>
-        /// <param name="openArchiveIfNotOpened">Whether or not to open/unlock the archive if one is not already opened.</param>
+        /// <param name="requireOpenArchive">Whether or not to open the archive if not already open.</param>
+        /// <param name="requireUnlockedArchive">Whether or not to unlock the archive if not already unlocked.</param>
         /// <returns>
         /// Whether or not the operation was fully handled.
         /// It may be that some options for some verbs are not yet implemented.
@@ -180,20 +181,26 @@ namespace Aegis
         private bool ExecuteAegisVerb<TOptions>(
             TOptions options,
             Func<TOptions, bool> operation,
-            bool openArchiveIfNotOpened = true)
+            bool requireOpenArchive = true,
+            bool requireUnlockedArchive = true)
             where TOptions : AegisVerbOptions
         {
             bool isHandled = true;
 
             try
             {
-                if (this.Archive is null && openArchiveIfNotOpened)
+                if (this.Archive is null && requireOpenArchive)
                 {
                     this.Archive = OpenArchive(
                         options.AegisArchivePath,
                         this.TempDirectory,
-                        this.ArchiveUnlocker);
+                        requireUnlockedArchive ? this.ArchiveUnlocker : null);
                     this.SetWindowTitle();
+                }
+
+                if (this.Archive != null && this.Archive.IsLocked && requireUnlockedArchive)
+                {
+                    UnlockArchive(this.Archive, this.ArchiveUnlocker);
                 }
 
                 isHandled = operation(options);
@@ -209,11 +216,11 @@ namespace Aegis
         }
 
         /// <summary>
-        /// Helper that opens (loads and unlocks) an <see cref="AegisArchive"/> from disk.
+        /// Helper that opens an <see cref="AegisArchive"/> from disk.
         /// </summary>
         /// <param name="archivePath">The path to the <see cref="AegisArchive"/> on disk.</param>
         /// <param name="tempDirectory">The temp directory that the archive can use for operations.</param>
-        /// <param name="archiveUnlocker">The archive unlock helper.</param>
+        /// <param name="archiveUnlocker">The archive unlock helper. If null, archive will be opened but left unlocked.</param>
         /// <returns>The opened <see cref="AegisArchive"/>.</returns>
         private static AegisArchive OpenArchive(string archivePath, string tempDirectory, ArchiveUnlocker archiveUnlocker)
         {
@@ -230,7 +237,12 @@ namespace Aegis
             {
                 var archiveFileSettings = new SecureArchiveFileSettings(archivePath, tempDirectory);
                 archive = AegisArchive.Load(archiveFileSettings);
-                archiveUnlocker.Unlock(archive);
+
+                if (archiveUnlocker != null)
+                {
+                    UnlockArchive(archive, archiveUnlocker);
+                }
+
                 openSuccess = true;
             }
             catch (IOException e)
@@ -245,12 +257,6 @@ namespace Aegis
                     $"The archive file at {archivePath} is corrupted: {e.Message}",
                     innerException: e);
             }
-            catch (UnauthorizedException e)
-            {
-                throw new AegisUserErrorException(
-                    $"The key was not able to unlock the archive.",
-                    innerException: e);
-            }
             finally
             {
                 if (!openSuccess)
@@ -261,6 +267,31 @@ namespace Aegis
             }
 
             return archive;
+        }
+
+        /// <summary>
+        /// Helper that unlocks the <see cref="AegisArchive"/> using the given <see cref="ArchiveUnlocker"/>.
+        /// </summary>
+        /// <param name="archive">The archive to unlock.</param>
+        /// <param name="unlocker">The unlocking helper.</param>
+        private static void UnlockArchive(AegisArchive archive, ArchiveUnlocker unlocker)
+        {
+            try
+            {
+                unlocker.Unlock(archive);
+            }
+            catch (ArchiveCorruptedException e)
+            {
+                throw new AegisUserErrorException(
+                    $"The archive file at {archive.FullFilePath} is corrupted: {e.Message}",
+                    innerException: e);
+            }
+            catch (UnauthorizedException e)
+            {
+                throw new AegisUserErrorException(
+                    $"The key was not able to unlock the archive.",
+                    innerException: e);
+            }
         }
     }
 }

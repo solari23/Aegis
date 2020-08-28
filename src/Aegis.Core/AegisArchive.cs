@@ -432,6 +432,13 @@ namespace Aegis.Core
                 JsonSerializer.Serialize(this.ArchiveMetadata.UserKeyAuthorizations));
 
         /// <summary>
+        /// Gets the archive's <see cref="ArchiveMetadata"/> serialized as JSON.
+        /// </summary>
+        /// <returns>The serialized metadata.</returns>
+        public string GetArchiveMetadataJson() =>
+            JsonSerializer.Serialize(this.ArchiveMetadata, JsonHelpers.DefaultSerializerOptions);
+
+        /// <summary>
         /// Opens a secure archive (zip) file on disk.
         /// </summary>
         /// <param name="fileSettings">The <see cref="SecureArchiveFileSettings"/> for the archive to open.</param>
@@ -525,7 +532,7 @@ namespace Aegis.Core
             this.ArchiveMetadata.LastModifiedTime = DateTimeOffset.UtcNow;
 
             // Serialize the metadata to JSON and write it to the archive.
-            var metadataJson = JsonSerializer.Serialize(this.ArchiveMetadata, JsonHelpers.DefaultSerializerOptions);
+            var metadataJson = this.GetArchiveMetadataJson();
             using var archiveWriter = new StreamWriter(
                 this.SecureArchive.GetEntryWriteStream(AegisConstants.SecureArchiveMetadataEntryName));
             archiveWriter.Write(metadataJson);
