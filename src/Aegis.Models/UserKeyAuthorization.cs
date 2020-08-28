@@ -20,6 +20,11 @@ namespace Aegis.Models
     public class UserKeyAuthorization
     {
         /// <summary>
+        /// A unique identifier for the authorization record.
+        /// </summary>
+        public Guid AuthorizationId { get; set; }
+
+        /// <summary>
         /// A friendly name to help the user identify the key.
         /// </summary>
         public string FriendlyName { get; set; }

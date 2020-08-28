@@ -46,6 +46,7 @@ namespace Aegis.Core
 
             return new UserKeyAuthorization
             {
+                AuthorizationId = Guid.NewGuid(),
                 FriendlyName = newKeyParams.FriendlyName,
                 KeyId = userKey.KeyId,
                 TimeAdded = DateTime.UtcNow,
