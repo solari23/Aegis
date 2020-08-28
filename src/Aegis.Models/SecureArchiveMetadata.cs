@@ -36,6 +36,24 @@ namespace Aegis.Models
         /// <summary>
         /// The salt used when deriving keys.
         /// </summary>
+        /// <remarks>
+        /// It is by-design that there is a single global key derivation salt for the
+        /// archive rather than having a different salt per individual key.
+        ///
+        /// When the user provides their secret, we don't necessarily know which key it
+        /// corresponds to. If we had a salt per key then we'd potentially need to compute
+        /// the KDF for all of the authorized keys until we found the right one. This could
+        /// take a long time for an archive with several keys and an expensive KDF. With a
+        /// global salt, we just need to run the KDF once.
+        ///
+        /// The downside is that, within the scope of one archive, two identical secrets
+        /// (e.g. two passwords that happen to be the same) will have the same keyId.
+        /// Someone inspecting the archive metadata would see that they are the same.
+        ///
+        /// This tradeoff is considered acceptable given that it's not expected for a
+        /// single archive to be in the custody of more than a few people. With stronger
+        /// secret types (e.g. cryptographic keys), this won't be a problem at all.
+        /// </remarks>
         [JsonConverter(typeof(JsonByteListBase64Converter))]
         [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Required for serialization framework.")]
         public List<byte> KeyDerivationSalt { get; set; }
