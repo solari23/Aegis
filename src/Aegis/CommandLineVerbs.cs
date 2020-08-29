@@ -108,6 +108,9 @@ namespace Aegis
             [Value(0, Required = true, MetaName = "<Files | Keys>", HelpText = "Indicates whether to list files or authorized keys.")]
             public string ListType { get; set; }
 
+            [Option('d', "detailed", Required = false, HelpText = "Outputs a more detailed listing.")]
+            public bool Detailed { get; set; }
+
             public bool IsListTarget(ListVerbTargetType target) =>
                 Enum.TryParse<ListVerbTargetType>(this.ListType, ignoreCase: true, out var listTargetType)
                 && listTargetType == target;

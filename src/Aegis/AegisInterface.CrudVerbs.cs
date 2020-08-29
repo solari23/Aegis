@@ -280,7 +280,7 @@ namespace Aegis
             switch (listTargetType)
             {
                 case ListVerbTargetType.Files:
-                    this.Archive.TraverseFileTree(new BasicFileListingVisitor(this.IO.Out));
+                    this.Archive.TraverseFileTree(new BasicFileListingVisitor(this.IO.Out, options.Detailed));
                     break;
 
                 case ListVerbTargetType.Keys:
@@ -292,8 +292,12 @@ namespace Aegis
                         var kind = key.SecretMetadata.SecretKind;
                         var friendlyName = key.FriendlyName;
                         var timeAdded = key.TimeAdded.ToLocalTime();
+                        var authorizationId = options.Detailed
+                            ? $"[{key.AuthorizationId}]"
+                            : string.Empty;
 
-                        this.IO.Out.WriteLine($"[{kind}] {friendlyName} (Added on: {timeAdded:yyyy-MM-dd hh:mm tt})");
+                        this.IO.Out.WriteLine(
+                            $"[{kind}]{authorizationId} {friendlyName} (Added on: {timeAdded:yyyy-MM-dd hh:mm tt})");
                     }
 
                     break;

@@ -15,15 +15,22 @@ namespace Aegis.VirtualTreeVisitors
         /// Initializes a new instance of the <see cref="BasicFileListingVisitor"/> class.
         /// </summary>
         /// <param name="output">The output stream to write the listing to.</param>
-        public BasicFileListingVisitor(TextWriter output)
+        /// <param name="showDetailed">Whether or not to output a detailed view.</param>
+        public BasicFileListingVisitor(TextWriter output, bool showDetailed = false)
         {
             this.Output = output;
+            this.ShowDetailed = showDetailed;
         }
 
         /// <summary>
         /// Gets the output stream to write the listing to.
         /// </summary>
         private TextWriter Output { get; }
+
+        /// <summary>
+        /// Gets whether or not to output a detailed view.
+        /// </summary>
+        private bool ShowDetailed { get; }
 
         /// <summary>
         /// Gets or sets a counter that tracks the number of files in the archive.
@@ -44,7 +51,9 @@ namespace Aegis.VirtualTreeVisitors
 
             foreach (var file in files)
             {
-                this.Output.WriteLine($"{file.LastModifiedTime.ToLocalTime():yyyy-MM-dd hh:mm tt}   {file.Path.FileName}");
+                var fileId = this.ShowDetailed ? $"   {file.FileId}   " : string.Empty;
+
+                this.Output.WriteLine($"{file.LastModifiedTime.ToLocalTime():yyyy-MM-dd hh:mm tt}{fileId}   {file.Path.FileName}");
             }
 
             this.Output.WriteLine();
