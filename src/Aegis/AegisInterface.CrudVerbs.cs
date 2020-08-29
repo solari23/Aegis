@@ -284,9 +284,19 @@ namespace Aegis
                     break;
 
                 case ListVerbTargetType.Keys:
-                    // TODO: Implement 'list keys'.
-                    this.IO.Out.WriteLine("Listing keys is not yet implemented.");
-                    return false;
+                    this.IO.Out.WriteLine("Authorized Keys:");
+                    this.IO.Out.WriteLine("================");
+
+                    foreach (var key in this.Archive.GetUserKeyAuthorizations())
+                    {
+                        var kind = key.SecretMetadata.SecretKind;
+                        var friendlyName = key.FriendlyName;
+                        var timeAdded = key.TimeAdded.ToLocalTime();
+
+                        this.IO.Out.WriteLine($"[{kind}] {friendlyName} (Added on: {timeAdded:yyyy-MM-dd hh:mm tt})");
+                    }
+
+                    break;
 
                 case ListVerbTargetType.Metadata:
                     this.IO.Out.WriteLine(this.Archive.GetArchiveMetadataJson());
