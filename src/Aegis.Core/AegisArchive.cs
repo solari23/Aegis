@@ -397,8 +397,8 @@ namespace Aegis.Core
             var fileInfo = this.GetFileInfo(fileId);
             if (fileInfo is null)
             {
-                // No-op.
-                return;
+                throw new EntityNotFoundException(
+                    $"Archived file with ID '{fileId}' was not found.");
             }
 
             this.FileIndex.Remove(fileInfo.FileId);
@@ -419,6 +419,99 @@ namespace Aegis.Core
             }
 
             this.FlushArchive();
+        }
+
+        /// <summary>
+        /// Authorizes a new user key to access the archive.
+        /// </summary>
+        /// <param name="authorizationParameters">The new user key authorization parameters.</param>
+        public void AuthorizeNewKey(UserKeyAuthorizationParameters authorizationParameters)
+        {
+            ArgCheck.IsValid(authorizationParameters, nameof(authorizationParameters));
+
+            this.ThrowIfLocked();
+
+            var newAuthorization = UserKeyAuthorizationExtensions.CreateNewAuthorization(
+                authorizationParameters,
+                this.ArchiveMetadata.KeyDerivationSalt.ToArray(),
+                this.ArchiveKey,
+                this.ArchiveMetadata.SecuritySettings);
+
+            this.ArchiveMetadata.UserKeyAuthorizations.Add(newAuthorization);
+
+            try
+            {
+                this.PersistMetadata();
+            }
+            catch
+            {
+                // Revert the change. Keep in-memory structure consistent.
+                this.ArchiveMetadata.UserKeyAuthorizations.RemoveAt(
+                    this.ArchiveMetadata.UserKeyAuthorizations.Count - 1);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Revokes an authorized key so it can no longer unlock the archive.
+        /// </summary>
+        /// <param name="authorizationId">The authorization ID of the key to revoke.</param>
+        /// <exception cref="InvalidOperationException">The specified authorization record was not found.</exception>
+        public void RevokeKey(Guid authorizationId)
+        {
+            var matchingAuthorizations = this.ArchiveMetadata.UserKeyAuthorizations
+                .Where(k => k.AuthorizationId == authorizationId)
+                .ToArray();
+
+            if (!matchingAuthorizations.Any())
+            {
+                throw new EntityNotFoundException(
+                    $"Authorization with ID '{authorizationId}' was not found.");
+            }
+
+            if (matchingAuthorizations.Length > 1)
+            {
+                // There should never be two authorizations with the same ID.
+                // If this happens, fail closed to avoid any further archive corruption.
+                throw new ArchiveCorruptedException(
+                    $"Found 2 key authorizations with ID '{authorizationId}'. Cancelling revocation operation.");
+            }
+
+            if (this.ArchiveMetadata.UserKeyAuthorizations.Count == 1)
+            {
+                throw new InvalidOperationException($"Can't revoke the last authorized key.");
+            }
+
+            // We'll track the item being removed. If saving the changes fails, we'll
+            // revert the removal to put the in-memory structure back into a consistent state.
+            UserKeyAuthorization removedAuthorization = null;
+            int removedIndex = -1;
+
+            for (int i = 0; i < this.ArchiveMetadata.UserKeyAuthorizations.Count; i++)
+            {
+                if (this.ArchiveMetadata.UserKeyAuthorizations[i].AuthorizationId == authorizationId)
+                {
+                    removedAuthorization = this.ArchiveMetadata.UserKeyAuthorizations[i];
+                    removedIndex = i;
+
+                    this.ArchiveMetadata.UserKeyAuthorizations.RemoveAt(i);
+
+                    break;
+                }
+            }
+
+            try
+            {
+                this.PersistMetadata();
+            }
+            catch
+            {
+                // Revert the change. Keep in-memory structure consistent.
+                this.ArchiveMetadata.UserKeyAuthorizations.Insert(
+                    removedIndex,
+                    removedAuthorization);
+                throw;
+            }
         }
 
         /// <summary>
