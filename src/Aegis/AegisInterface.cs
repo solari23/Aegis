@@ -141,7 +141,7 @@ namespace Aegis
                     (UpdateVerbOptions opts) => this.ExecuteAegisVerb(opts, this.UpdateVerb),
                     (ListVerbOptions opts) => this.ExecuteAegisVerb(opts, this.ListVerb, requireUnlockedArchive: opts.IsListTarget(ListVerbTargetType.Files)),
                     (AuthorizeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.AuthorizeVerb),
-                    (RevokeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RevokeVerb),
+                    (RevokeVerbOptions opts) => this.ExecuteAegisVerb(opts, this.RevokeVerb, requireUnlockedArchive: false),
 
                     // Default catch-all case. The command is just not implemented yet.
                     (object opts) => false,

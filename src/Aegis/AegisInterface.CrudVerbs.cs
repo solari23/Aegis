@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Aegis.Core;
-using Aegis.Core.CredentialsInterface;
 using Aegis.Core.FileSystem;
-using Aegis.Models;
+using Aegis.CredentialsInterface;
 using Aegis.VirtualTreeVisitors;
 
 using static Aegis.CommandLineVerbs;
@@ -73,7 +73,7 @@ namespace Aegis
                     }
                 }
 
-                using var firstUserKeyAuthorization = this.ArchiveUnlocker.GetNewUserKeyAuthorization();
+                using var firstUserKeyAuthorization = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams();
                 using var createParameters = new SecureArchiveCreationParameters(firstUserKeyAuthorization);
 
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);
@@ -320,9 +320,10 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool AuthorizeVerb(AuthorizeVerbOptions options)
         {
-            // TODO: Implement the 'authorize' verb.
-            // This is pending fleshing out the user keys subsystem.
-            return false;
+            using var newAuthorizationParams = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams();
+            this.Archive.AuthorizeNewKey(newAuthorizationParams);
+
+            return true;
         }
 
         /// <summary>
@@ -332,9 +333,52 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool RevokeVerb(RevokeVerbOptions options)
         {
-            // TODO: Implement the 'revoke' verb.
-            // This is pending fleshing out the user keys subsystem.
-            return false;
+            if (!options.Confirm)
+            {
+                // Get the user to confirm the key deletion.
+                var key = this.Archive.GetUserKeyAuthorizations()
+                    .Where(k => k.AuthorizationId == options.AuthorizationId)
+                    .FirstOrDefault();
+
+                if (key is null)
+                {
+                    throw new AegisUserErrorException(
+                        $"Key with authorization ID '{options.AuthorizationId}' not found.");
+                }
+
+                var promptStringBuilder = new StringBuilder();
+                promptStringBuilder.AppendLine($"This operation will revoke the following key:");
+                promptStringBuilder.AppendLine($"[{key.SecretMetadata.SecretKind}] {key.FriendlyName}");
+                promptStringBuilder.AppendLine($"KeyId: {key.KeyId}");
+                promptStringBuilder.AppendLine($"AuthorizationId: {key.AuthorizationId}");
+                promptStringBuilder.AppendLine($"Added On: {key.TimeAdded:yyyy-MM-dd hh:mm tt}");
+
+                var prompt = new ConfirmationPrompt(this.IO, promptStringBuilder.ToString());
+                if (!prompt.GetConfirmation())
+                {
+                    // User did not confirm the key revocation. Bail.
+                    return true;
+                }
+            }
+
+            try
+            {
+                this.Archive.RevokeKey(options.AuthorizationId);
+            }
+            catch (EntityNotFoundException e)
+            {
+                throw new AegisUserErrorException(
+                    e.Message,
+                    innerException: e);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new AegisUserErrorException(
+                    e.Message,
+                    innerException: e);
+            }
+
+            return true;
         }
     }
 }

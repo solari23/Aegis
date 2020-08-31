@@ -14,12 +14,12 @@ namespace Aegis.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
         /// </summary>
-        /// <param name="firstUserKeyAuthorization">The parameters to authorize the first user key.</param>
-        public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstUserKeyAuthorization)
+        /// <param name="firstKeyAuthorizationParam">The parameters to authorize the first user key.</param>
+        public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstKeyAuthorizationParam)
         {
-            ArgCheck.IsValid(firstUserKeyAuthorization, nameof(firstUserKeyAuthorization));
+            ArgCheck.IsValid(firstKeyAuthorizationParam, nameof(firstKeyAuthorizationParam));
 
-            this.FirstUserKeyAuthorization = firstUserKeyAuthorization;
+            this.FirstKeyAuthorizationParams = firstKeyAuthorizationParam;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Aegis.Core
         /// <summary>
         /// Gets the parameters to authorize the first user key
         /// </summary>
-        internal UserKeyAuthorizationParameters FirstUserKeyAuthorization { get; }
+        internal UserKeyAuthorizationParameters FirstKeyAuthorizationParams { get; }
 
         /// <inheritdoc />
         public IEnumerable<ValidationResult> Validate(ValidationContext _)
@@ -89,7 +89,7 @@ namespace Aegis.Core
             {
                 if (disposing)
                 {
-                    this.FirstUserKeyAuthorization.Dispose();
+                    this.FirstKeyAuthorizationParams.Dispose();
                 }
 
                 this.isDisposed = true;

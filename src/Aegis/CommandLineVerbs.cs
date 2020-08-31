@@ -119,15 +119,17 @@ namespace Aegis
         [Verb("authorize", HelpText = "Authorizes a new user key to access the archive.")]
         public class AuthorizeVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'authorize' verb.
-            // This is pending fleshing out the user keys subsystem.
+            // No specific parameters. This operation requires interaction.
         }
 
         [Verb("revoke", HelpText = "Revokes a user key authorization.")]
         public class RevokeVerbOptions : AegisVerbOptions
         {
-            // TODO: Define options for the 'revoke' verb.
-            // This is pending fleshing out the user keys subsystem.
+            [Option('i', "id", Required = true, HelpText = "[GUID] The Authorization ID of the key to revoke.")]
+            public Guid AuthorizationId { get; set; }
+
+            [Option('c', "confirm", HelpText = "Automatically confirm the revocation.")]
+            public bool Confirm { get; set; }
         }
 
         /// <summary>

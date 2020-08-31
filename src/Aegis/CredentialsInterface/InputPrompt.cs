@@ -11,7 +11,7 @@ namespace Aegis.CredentialsInterface
     public class InputPrompt
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Menu"/> class.
+        /// Initializes a new instance of the <see cref="InputPrompt"/> class.
         /// </summary>
         /// <param name="ioStreamSet">The IO streams.</param>
         /// <param name="prompt">The prompt to display.</param>
@@ -25,7 +25,7 @@ namespace Aegis.CredentialsInterface
             bool isConfidentialInput = false,
             Func<string, bool> validator = null)
         {
-            ArgCheck.NotNull(ioStreamSet, nameof(IO));
+            ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
             ArgCheck.NotEmpty(prompt, nameof(prompt));
 
             this.IO = ioStreamSet;

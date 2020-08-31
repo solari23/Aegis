@@ -118,31 +118,13 @@ namespace Aegis.Core.CredentialsInterface
         /// Prompts the user to provide the parameters for a new user key authorization.
         /// </summary>
         /// <returns>The new <see cref="UserKeyAuthorizationParameters"/>.</returns>
-        public UserKeyAuthorizationParameters GetNewUserKeyAuthorization()
+        public UserKeyAuthorizationParameters GetNewUserKeyAuthorizationParams()
         {
             var newSecretKind = this.SecretEntryInterfaces.Count > 1
                 ? this.SecretSelector.PromptSelectSecretKind(this.SecretEntryInterfaces.Keys.ToImmutableArray())
                 : this.SecretEntryInterfaces.Keys.First();
 
             return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters();
-        }
-
-        /// <summary>
-        /// Prompts the user for a new user key and authorizes it to unlock the given archive.
-        /// The archive must already be unlocked.
-        /// </summary>
-        /// <param name="archive">The archive that the new secret will be authorized to unlock.</param>
-        public void AuthorizeNewUserSecret(AegisArchive archive)
-        {
-            ArgCheck.NotNull(archive, nameof(archive));
-
-            archive.ThrowIfLocked();
-
-            using var newAuthorization = this.GetNewUserKeyAuthorization();
-            
-            // TODO: Implement subroutine for authorizing new user secrets.
-            this.SecretSelector.ToString();
-            throw new NotImplementedException();
         }
     }
 }
