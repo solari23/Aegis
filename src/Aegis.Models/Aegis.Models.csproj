@@ -2,10 +2,14 @@
 
   <PropertyGroup>
     <AssemblyName>Aegis.Models</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Alexandre Kerametlian</Authors>
     <Description>Core library providing Aegis secure file storage data models.</Description>
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

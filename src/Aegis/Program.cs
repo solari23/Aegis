@@ -1,46 +1,43 @@
-﻿using System;
+﻿namespace Aegis;
 
-namespace Aegis
+/// <summary>
+/// Contains the main entry point for the Aegis CLI.
+/// </summary>
+public class Program
 {
     /// <summary>
-    /// Contains the main entry point for the Aegis CLI.
+    /// The name of the program.
     /// </summary>
-    public class Program
+    public const string Name = "Aegis";
+
+    /// <summary>
+    /// The entry point for the Aegis application.
+    /// </summary>
+    public static void Main(string[] args)
     {
-        /// <summary>
-        /// The name of the program.
-        /// </summary>
-        public const string Name = "Aegis";
-
-        /// <summary>
-        /// The entry point for the Aegis application.
-        /// </summary>
-        public static void Main(string[] args)
+        try
         {
-            try
+            if (args is null || args.Length == 0)
             {
-                if (args is null || args.Length == 0)
-                {
-                    // No arguments -> signal to start REPL mode.
-                    args = new string[] { ReplHelpers.StartReplVerb };
-                }
+                // No arguments -> signal to start REPL mode.
+                args = new string[] { ReplHelpers.StartReplVerb };
+            }
 
-                var ioStreams = new IOStreamSet(
-                    Console.Out,
-                    Console.Error,
-                    Console.In,
-                    Console.ReadKey);
-                var aegis = new AegisInterface(ioStreams);
-                aegis.Run(args);
-            }
-            catch (AegisUserErrorException e)
-            {
-                Console.Error.WriteLine($"[Error] {e.Message}");
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine($"[INTERNAL ERROR] {Name} ran into internal issues.{Environment.NewLine}Error details: {e}");
-            }
+            var ioStreams = new IOStreamSet(
+                Console.Out,
+                Console.Error,
+                Console.In,
+                Console.ReadKey);
+            var aegis = new AegisInterface(ioStreams);
+            aegis.Run(args);
+        }
+        catch (AegisUserErrorException e)
+        {
+            Console.Error.WriteLine($"[Error] {e.Message}");
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"[INTERNAL ERROR] {Name} ran into internal issues.{Environment.NewLine}Error details: {e}");
         }
     }
 }

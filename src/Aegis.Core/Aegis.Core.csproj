@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <AssemblyName>Aegis.Core</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Alexandre Kerametlian</Authors>
     <Description>Core library providing Aegis secure file storage functionality.</Description>
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -1,243 +1,239 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace Aegis.Core
+namespace Aegis.Core;
+
+/// <summary>
+/// A collection of argument checking helpers.
+/// </summary>
+public static class ArgCheck
 {
     /// <summary>
-    /// A collection of argument checking helpers.
+    /// Verifies the argument is not null.
     /// </summary>
-    public static class ArgCheck
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotNull<T>([ValidatedNotNull] T arg, string argName)
+        where T : class
     {
-        /// <summary>
-        /// Verifies the argument is not null.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotNull<T>([ValidatedNotNull]T arg, string argName)
-            where T : class
+        if (arg is null)
         {
-            if (arg is null)
-            {
-                throw new ArgumentNullException(argName);
-            }
+            throw new ArgumentNullException(argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the given string is not null or empty.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <param name="allowWhitespace">Whether or not to consider whitespace as non-empty. Default is false.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotEmpty([ValidatedNotNull]string arg, string argName, bool allowWhitespace = false)
+    /// <summary>
+    /// Verifies the given string is not null or empty.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <param name="allowWhitespace">Whether or not to consider whitespace as non-empty. Default is false.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotEmpty([ValidatedNotNull] string arg, string argName, bool allowWhitespace = false)
+    {
+        if (allowWhitespace ? string.IsNullOrEmpty(arg) : string.IsNullOrWhiteSpace(arg))
         {
-            if (allowWhitespace ? string.IsNullOrEmpty(arg) : string.IsNullOrWhiteSpace(arg))
-            {
-                throw new ArgumentNullException(argName, "The input string must not be empty!");
-            }
+            throw new ArgumentNullException(argName, "The input string must not be empty!");
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument is not empty.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotEmpty<T>(IEnumerable<T> arg, string argName)
+    /// <summary>
+    /// Verifies the argument is not empty.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotEmpty<T>(IEnumerable<T> arg, string argName)
+    {
+        var hasElements = arg?.Any() ?? throw new ArgumentNullException(argName, "The input must not be null or empty!");
+
+        if (!hasElements)
         {
-            var hasElements = arg?.Any() ?? throw new ArgumentNullException(argName, "The input must not be null or empty!");
-
-            if (!hasElements)
-            {
-                throw new ArgumentException("The input string must not be empty!", argName);
-            }
+            throw new ArgumentException("The input string must not be empty!", argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument is not empty.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotEmpty<T>(Span<T> arg, string argName) => NotEmpty((ReadOnlySpan<T>)arg, argName);
+    /// <summary>
+    /// Verifies the argument is not empty.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotEmpty<T>(Span<T> arg, string argName) => NotEmpty((ReadOnlySpan<T>)arg, argName);
 
-        /// <summary>
-        /// Verifies the argument is not empty.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotEmpty<T>(ReadOnlySpan<T> arg, string argName)
+    /// <summary>
+    /// Verifies the argument is not empty.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotEmpty<T>(ReadOnlySpan<T> arg, string argName)
+    {
+        if (arg.IsEmpty)
         {
-            if (arg.IsEmpty)
-            {
-                throw new ArgumentException("The input span must not be empty!", argName);
-            }
+            throw new ArgumentException("The input span must not be empty!", argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument contains exactly a given number of elements.
-        /// </summary>
-        /// <param name="requiredLength">The exact number of elements required.</param>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void HasLength<T>(int requiredLength, IEnumerable<T> arg, string argName)
+    /// <summary>
+    /// Verifies the argument contains exactly a given number of elements.
+    /// </summary>
+    /// <param name="requiredLength">The exact number of elements required.</param>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentNullException">Thrown when the constraint is violated because the argument is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void HasLength<T>(int requiredLength, IEnumerable<T> arg, string argName)
+    {
+        var elementCount = arg?.Count()
+            ?? throw new ArgumentNullException(argName, $"The input must not be null and must be of length {requiredLength}!");
+
+        if (elementCount != requiredLength)
         {
-            var elementCount = arg?.Count() 
-                ?? throw new ArgumentNullException(argName, $"The input must not be null and must be of length {requiredLength}!");
-
-            if (elementCount != requiredLength)
-            {
-                throw new ArgumentException($"The input must be of length {requiredLength}!", argName);
-            }
+            throw new ArgumentException($"The input must be of length {requiredLength}!", argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument contains exactly a given number of elements.
-        /// </summary>
-        /// <param name="requiredLength">The exact number of elements required.</param>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void HasLength<T>(int requiredLength, Span<T> arg, string argName)
-            => HasLength(requiredLength, (ReadOnlySpan<T>)arg, argName);
+    /// <summary>
+    /// Verifies the argument contains exactly a given number of elements.
+    /// </summary>
+    /// <param name="requiredLength">The exact number of elements required.</param>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void HasLength<T>(int requiredLength, Span<T> arg, string argName)
+        => HasLength(requiredLength, (ReadOnlySpan<T>)arg, argName);
 
-        /// <summary>
-        /// Verifies the argument contains exactly a given number of elements.
-        /// </summary>
-        /// <param name="requiredLength">The exact number of elements required.</param>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void HasLength<T>(int requiredLength, ReadOnlySpan<T> arg, string argName)
+    /// <summary>
+    /// Verifies the argument contains exactly a given number of elements.
+    /// </summary>
+    /// <param name="requiredLength">The exact number of elements required.</param>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void HasLength<T>(int requiredLength, ReadOnlySpan<T> arg, string argName)
+    {
+        if (arg.Length != requiredLength)
         {
-            if (arg.Length != requiredLength)
-            {
-                throw new ArgumentException($"The input span must be of length {requiredLength}!", argName);
-            }
+            throw new ArgumentException($"The input span must be of length {requiredLength}!", argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument is not equal to a given invalid value.
-        /// </summary>
-        /// <param name="invalidValue">The invalid value to check against.</param>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IsNot<T>(T invalidValue, T arg, string argName)
-            where T : IComparable
+    /// <summary>
+    /// Verifies the argument is not equal to a given invalid value.
+    /// </summary>
+    /// <param name="invalidValue">The invalid value to check against.</param>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void IsNot<T>(T invalidValue, T arg, string argName)
+        where T : IComparable
+    {
+        if (object.ReferenceEquals(arg, invalidValue) || arg.CompareTo(invalidValue) == 0)
         {
-            if (object.ReferenceEquals(arg, invalidValue) || arg.CompareTo(invalidValue) == 0)
-            {
-                throw new ArgumentException($"The input value must not be {invalidValue}!", argName);
-            }
+            throw new ArgumentException($"The input value must not be {invalidValue}!", argName);
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument is not negative.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void NotNegative(long arg, string argName)
+    /// <summary>
+    /// Verifies the argument is not negative.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NotNegative(long arg, string argName)
+    {
+        if (arg < 0)
         {
-            if (arg < 0)
-            {
-                throw new ArgumentOutOfRangeException(argName, "The input value must not be negative!");
-            }
+            throw new ArgumentOutOfRangeException(argName, "The input value must not be negative!");
         }
+    }
 
-        /// <summary>
-        /// Verifies the argument is greater than 0.
-        /// </summary>
-        /// <param name="arg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GreaterThanZero(long arg, string argName)
+    /// <summary>
+    /// Verifies the argument is greater than 0.
+    /// </summary>
+    /// <param name="arg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void GreaterThanZero(long arg, string argName)
+    {
+        if (arg <= 0)
         {
-            if (arg <= 0)
-            {
-                throw new ArgumentOutOfRangeException(argName, "The input value must be greater than zero!");
-            }
+            throw new ArgumentOutOfRangeException(argName, "The input value must be greater than zero!");
         }
+    }
 
-        /// <summary>
-        /// Verifies that the <see cref="IValidatableObject"/> argument is valid.
-        /// </summary>
-        /// <param name="validatableArg">The argument to verify.</param>
-        /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
-        /// <param name="isNullValid">Whether or not to treat null as a valid value for the argument.</param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when the argument is null and <paramref name="isNullValid"/> is false.
-        /// </exception>
-        /// <exception cref="ArgumentException">Thrown when the argument is invalid.</exception>
-        [DebuggerStepThrough]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IsValid(
-            [ValidatedNotNull]IValidatableObject validatableArg,
-            string argName,
-            bool isNullValid = false)
+    /// <summary>
+    /// Verifies that the <see cref="IValidatableObject"/> argument is valid.
+    /// </summary>
+    /// <param name="validatableArg">The argument to verify.</param>
+    /// <param name="argName">The name of the argument (usually obtained using the nameof operator).</param>
+    /// <param name="isNullValid">Whether or not to treat null as a valid value for the argument.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when the argument is null and <paramref name="isNullValid"/> is false.
+    /// </exception>
+    /// <exception cref="ArgumentException">Thrown when the argument is invalid.</exception>
+    [DebuggerStepThrough]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void IsValid(
+        [ValidatedNotNull] IValidatableObject validatableArg,
+        string argName,
+        bool isNullValid = false)
+    {
+        if (validatableArg is null)
         {
-            if (validatableArg is null)
+            if (isNullValid)
             {
-                if (isNullValid)
-                {
-                    return;
-                }
-
-                throw new ArgumentNullException(argName);
+                return;
             }
 
-            var validationResults = new List<ValidationResult>();
-            var isValid = Validator.TryValidateObject(
-                validatableArg,
-                new ValidationContext(validatableArg),
-                validationResults);
-
-            if (!isValid)
-            {
-                throw new ArgumentException(
-                    $"The input is invalid. Validation errors:{Environment.NewLine}{string.Join(Environment.NewLine, validationResults)}",
-                    argName);
-            }
+            throw new ArgumentNullException(argName);
         }
 
-        /// <summary>
-        /// Marker that lets code analysis know that a method will ensure the argument is not null.
-        /// </summary>
-        [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-        internal sealed class ValidatedNotNullAttribute : Attribute
+        var validationResults = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(
+            validatableArg,
+            new ValidationContext(validatableArg),
+            validationResults);
+
+        if (!isValid)
         {
+            throw new ArgumentException(
+                $"The input is invalid. Validation errors:{Environment.NewLine}{string.Join(Environment.NewLine, validationResults)}",
+                argName);
         }
+    }
+
+    /// <summary>
+    /// Marker that lets code analysis know that a method will ensure the argument is not null.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    internal sealed class ValidatedNotNullAttribute : Attribute
+    {
     }
 }
