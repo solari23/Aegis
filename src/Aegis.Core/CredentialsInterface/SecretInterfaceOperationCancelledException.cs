@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Aegis.Core.CredentialsInterface
 {
@@ -59,7 +58,6 @@ namespace Aegis.Core.CredentialsInterface
         /// </summary>
         /// <param name="info">Details of the serialization.</param>
         /// <param name="context">Stream context.</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             ArgCheck.NotNull(info, nameof(info));

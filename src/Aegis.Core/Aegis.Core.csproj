@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <AssemblyName>Aegis.Core</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Alexandre Kerametlian</Authors>
     <Description>Core library providing Aegis secure file storage functionality.</Description>
     <RepositoryUrl>https://github.com/solari23/Aegis</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
