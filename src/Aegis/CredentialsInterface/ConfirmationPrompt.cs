@@ -30,8 +30,8 @@ public class ConfirmationPrompt
         IOStreamSet ioStreamSet,
         string confirmationDetails)
     {
-        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
-        ArgCheck.NotEmpty(confirmationDetails, nameof(confirmationDetails));
+        ArgCheck.NotNull(ioStreamSet);
+        ArgCheck.NotEmpty(confirmationDetails);
 
         this.IO = ioStreamSet;
         this.ConfirmationDetails = confirmationDetails;

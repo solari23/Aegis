@@ -18,8 +18,8 @@ public sealed class ArchiveUnlocker
         IUserSecretSelector secretSelector,
         params IUserSecretEntryInterface[] secretProviders)
     {
-        ArgCheck.NotNull(secretSelector, nameof(secretSelector));
-        ArgCheck.NotEmpty(secretProviders, nameof(secretProviders));
+        ArgCheck.NotNull(secretSelector);
+        ArgCheck.NotEmpty(secretProviders);
 
         this.SecretSelector = secretSelector;
 
@@ -50,7 +50,7 @@ public sealed class ArchiveUnlocker
     /// </exception>
     public void RegisterSecretEntryInterface(IUserSecretEntryInterface secretEntryInterface)
     {
-        ArgCheck.NotNull(secretEntryInterface, nameof(secretEntryInterface));
+        ArgCheck.NotNull(secretEntryInterface);
 
         if (secretEntryInterface.ProvidedSecretKind == SecretKind.Unknown)
         {
@@ -75,7 +75,7 @@ public sealed class ArchiveUnlocker
     /// <param name="archive">The archive to unlock.</param>
     public void Unlock(AegisArchive archive)
     {
-        ArgCheck.NotNull(archive, nameof(archive));
+        ArgCheck.NotNull(archive);
 
         if (!archive.IsLocked)
         {

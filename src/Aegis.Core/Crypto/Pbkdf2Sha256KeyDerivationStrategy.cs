@@ -15,10 +15,10 @@ internal class Pbkdf2Sha256KeyDerivationStrategy : IKeyDerivationStrategy
         ReadOnlySpan<byte> salt,
         int workFactor)
     {
-        ArgCheck.GreaterThanZero(numBytesToDerive, nameof(numBytesToDerive));
-        ArgCheck.NotEmpty(secret, nameof(secret));
-        ArgCheck.NotEmpty(salt, nameof(salt));
-        ArgCheck.GreaterThanZero(workFactor, nameof(workFactor));
+        ArgCheck.GreaterThanZero(numBytesToDerive);
+        ArgCheck.NotEmpty(secret);
+        ArgCheck.NotEmpty(salt);
+        ArgCheck.GreaterThanZero(workFactor);
 
         using var kdf = new Rfc2898DeriveBytes(secret.ToArray(), salt.ToArray(), workFactor, HashAlgorithmName.SHA256);
         return kdf.GetBytes(numBytesToDerive);

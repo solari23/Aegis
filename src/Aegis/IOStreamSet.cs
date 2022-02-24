@@ -27,10 +27,10 @@ public class IOStreamSet
         TextReader input,
         ReadConsoleKeyDelegate readKey)
     {
-        ArgCheck.NotNull(infoOutput, nameof(infoOutput));
-        ArgCheck.NotNull(errorOutput, nameof(errorOutput));
-        ArgCheck.NotNull(input, nameof(input));
-        ArgCheck.NotNull(readKey, nameof(readKey));
+        ArgCheck.NotNull(infoOutput);
+        ArgCheck.NotNull(errorOutput);
+        ArgCheck.NotNull(input);
+        ArgCheck.NotNull(readKey);
 
         this.Out = infoOutput;
         this.Error = errorOutput;

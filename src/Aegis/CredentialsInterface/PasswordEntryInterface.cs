@@ -18,7 +18,7 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
     /// <param name="ioStreamSet">The IO streams.</param>
     public PasswordEntryInterface(IOStreamSet ioStreamSet)
     {
-        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
+        ArgCheck.NotNull(ioStreamSet);
 
         this.IO = ioStreamSet;
     }

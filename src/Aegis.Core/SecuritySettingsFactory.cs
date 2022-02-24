@@ -32,10 +32,10 @@ public static class SecuritySettingsFactory
         int keyDerivationWorkFactor,
         int keyIdSizeInBytes)
     {
-        ArgCheck.IsNot(EncryptionAlgo.Unknown, encryptionAlgo, nameof(encryptionAlgo));
-        ArgCheck.IsNot(KeyDerivationFunction.Unknown, keyDerivationFunction, nameof(keyDerivationFunction));
-        ArgCheck.GreaterThanZero(keyDerivationWorkFactor, nameof(keyDerivationWorkFactor));
-        ArgCheck.GreaterThanZero(keyIdSizeInBytes, nameof(keyIdSizeInBytes));
+        ArgCheck.IsNot(EncryptionAlgo.Unknown, encryptionAlgo);
+        ArgCheck.IsNot(KeyDerivationFunction.Unknown, keyDerivationFunction);
+        ArgCheck.GreaterThanZero(keyDerivationWorkFactor);
+        ArgCheck.GreaterThanZero(keyIdSizeInBytes);
 
         return new SecuritySettings
         {

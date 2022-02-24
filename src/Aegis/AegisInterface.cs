@@ -19,7 +19,7 @@ public partial class AegisInterface
     /// <param name="ioStreamSet">The IO streams.</param>
     public AegisInterface(IOStreamSet ioStreamSet)
     {
-        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
+        ArgCheck.NotNull(ioStreamSet);
 
         this.IO = ioStreamSet;
 

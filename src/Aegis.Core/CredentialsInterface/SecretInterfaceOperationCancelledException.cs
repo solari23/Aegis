@@ -58,7 +58,7 @@ public class SecretInterfaceOperationCancelledException : Exception
     /// <param name="context">Stream context.</param>
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        ArgCheck.NotNull(info, nameof(info));
+        ArgCheck.NotNull(info);
 
         // Serialize any internal properties using info.AddValue
         base.GetObjectData(info, context);

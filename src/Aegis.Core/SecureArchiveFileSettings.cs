@@ -14,8 +14,8 @@ public class SecureArchiveFileSettings : IValidatableObject
     /// <param name="tempDirectory">The path to the directory where secured files can be temporarily checked out.</param>
     public SecureArchiveFileSettings(string archiveFilePath, string tempDirectory)
     {
-        ArgCheck.NotEmpty(archiveFilePath, nameof(archiveFilePath));
-        ArgCheck.NotEmpty(tempDirectory, nameof(tempDirectory));
+        ArgCheck.NotEmpty(archiveFilePath);
+        ArgCheck.NotEmpty(tempDirectory);
 
         this.Path = archiveFilePath;
         this.TempDirectory = tempDirectory;

@@ -26,10 +26,10 @@ internal static class UserKeyAuthorizationExtensions
         ArchiveKey archiveKey,
         SecuritySettings securitySettings)
     {
-        ArgCheck.IsValid(newKeyParams, nameof(newKeyParams));
-        ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
-        ArgCheck.NotNull(archiveKey, nameof(archiveKey));
-        ArgCheck.IsValid(securitySettings, nameof(securitySettings));
+        ArgCheck.IsValid(newKeyParams);
+        ArgCheck.NotEmpty(keyDerivationSalt);
+        ArgCheck.NotNull(archiveKey);
+        ArgCheck.IsValid(securitySettings);
 
         using var userKey = UserKey.DeriveFrom(
             newKeyParams.UserSecret,
@@ -73,9 +73,9 @@ internal static class UserKeyAuthorizationExtensions
         SecuritySettings securitySettings,
         out ArchiveKey archiveKey)
     {
-        ArgCheck.NotNull(authorization, nameof(authorization));
-        ArgCheck.NotNull(userKey, nameof(userKey));
-        ArgCheck.IsValid(securitySettings, nameof(securitySettings));
+        ArgCheck.NotNull(authorization);
+        ArgCheck.NotNull(userKey);
+        ArgCheck.IsValid(securitySettings);
 
         archiveKey = null;
 

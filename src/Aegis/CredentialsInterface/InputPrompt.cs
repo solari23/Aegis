@@ -24,8 +24,8 @@ public class InputPrompt
         bool isConfidentialInput = false,
         Func<string, bool> validator = null)
     {
-        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
-        ArgCheck.NotEmpty(prompt, nameof(prompt));
+        ArgCheck.NotNull(ioStreamSet);
+        ArgCheck.NotEmpty(prompt);
 
         this.IO = ioStreamSet;
         this.Prompt = prompt;

@@ -25,8 +25,8 @@ public sealed class AegisArchive : IDisposable
         SecureArchiveFileSettings fileSettings,
         SecureArchiveCreationParameters creationParameters)
     {
-        ArgCheck.IsValid(fileSettings, nameof(fileSettings));
-        ArgCheck.IsValid(creationParameters, nameof(creationParameters));
+        ArgCheck.IsValid(fileSettings);
+        ArgCheck.IsValid(creationParameters);
 
         var currentTime = DateTimeOffset.UtcNow;
         var archiveId = Guid.NewGuid();
@@ -98,7 +98,7 @@ public sealed class AegisArchive : IDisposable
     /// <returns>The loaded <see cref="AegisBondArchive"/>.</returns>
     public static AegisArchive Load(SecureArchiveFileSettings fileSettings)
     {
-        ArgCheck.IsValid(fileSettings, nameof(fileSettings));
+        ArgCheck.IsValid(fileSettings);
 
         ZipArchive tempSecureArchive = null;
         AegisArchive archive = null;
@@ -202,7 +202,7 @@ public sealed class AegisArchive : IDisposable
     /// <param name="userSecret">The user secret to use to unlock the archive.</param>
     public void Unlock(RawUserSecret userSecret)
     {
-        ArgCheck.NotNull(userSecret, nameof(userSecret));
+        ArgCheck.NotNull(userSecret);
 
         using var userKey = UserKey.DeriveFrom(
             userSecret,
@@ -217,7 +217,7 @@ public sealed class AegisArchive : IDisposable
     /// <param name="userKey">The <see cref="UserKey"/> to use to unlock the archive.</param>
     public void Unlock(UserKey userKey)
     {
-        ArgCheck.NotNull(userKey, nameof(userKey));
+        ArgCheck.NotNull(userKey);
 
         // Setting the ArchiveKey property puts the archive into the "unlocked" state.
         // Wait to set the property until after everything is properly unlocked.
@@ -249,7 +249,7 @@ public sealed class AegisArchive : IDisposable
     /// <returns>The <see cref="AegisFileInfo"/> about the file, or null if it isn't found.</returns>
     public AegisFileInfo GetFileInfo(AegisVirtualFilePath filePath)
     {
-        ArgCheck.NotNull(filePath, nameof(filePath));
+        ArgCheck.NotNull(filePath);
         this.ThrowIfLocked();
 
         return this.FileIndex.GetFileInfo(filePath);
@@ -261,7 +261,7 @@ public sealed class AegisArchive : IDisposable
     /// <param name="visitorImplementation">The visitor implementation to execute when visiting each node.</param>
     public void TraverseFileTree(IVirtualFileTreeVisitor visitorImplementation)
     {
-        ArgCheck.NotNull(visitorImplementation, nameof(visitorImplementation));
+        ArgCheck.NotNull(visitorImplementation);
         this.ThrowIfLocked();
 
         this.FileIndex.TraverseFileTree(visitorImplementation);
@@ -279,8 +279,8 @@ public sealed class AegisArchive : IDisposable
     /// <returns>Metadata about the file added to the archive.</returns>
     public AegisFileInfo PutFile(AegisVirtualFilePath virtualPath, Stream fileStream, bool overwriteIfExists = false)
     {
-        ArgCheck.NotNull(virtualPath, nameof(virtualPath));
-        ArgCheck.NotNull(fileStream, nameof(fileStream));
+        ArgCheck.NotNull(virtualPath);
+        ArgCheck.NotNull(fileStream);
         this.ThrowIfLocked();
 
         // Remove any existing files stored at the path, if we're allowed to.
@@ -345,8 +345,8 @@ public sealed class AegisArchive : IDisposable
     /// <param name="outputStream">The stream to extract the file to.</param>
     public void ExtractFile(AegisFileInfo fileInfo, Stream outputStream)
     {
-        ArgCheck.NotNull(fileInfo, nameof(fileInfo));
-        ArgCheck.NotNull(outputStream, nameof(outputStream));
+        ArgCheck.NotNull(fileInfo);
+        ArgCheck.NotNull(outputStream);
         this.ThrowIfLocked();
 
         var archiveEntry = this.SecureArchive.GetEntry(fileInfo.ArchiveEntryName);
@@ -371,7 +371,7 @@ public sealed class AegisArchive : IDisposable
     /// <remarks>If no file exists at that path, this operation is a silent no-op.</remarks>
     public void RemoveFile(AegisVirtualFilePath filePath)
     {
-        ArgCheck.NotNull(filePath, nameof(filePath));
+        ArgCheck.NotNull(filePath);
         this.ThrowIfLocked();
 
         var fileInfo = this.GetFileInfo(filePath);
@@ -423,7 +423,7 @@ public sealed class AegisArchive : IDisposable
     /// <param name="authorizationParameters">The new user key authorization parameters.</param>
     public void AuthorizeNewKey(UserKeyAuthorizationParameters authorizationParameters)
     {
-        ArgCheck.IsValid(authorizationParameters, nameof(authorizationParameters));
+        ArgCheck.IsValid(authorizationParameters);
 
         this.ThrowIfLocked();
 

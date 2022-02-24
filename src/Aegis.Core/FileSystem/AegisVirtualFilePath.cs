@@ -33,7 +33,7 @@ public class AegisVirtualFilePath : IEquatable<AegisVirtualFilePath>, IComparabl
     /// </example>
     public static ImmutableArray<string> SplitPathComponents(string path)
     {
-        ArgCheck.NotEmpty(path, nameof(path));
+        ArgCheck.NotEmpty(path);
 
         return path
             .Split(parsablePathSeparators, StringSplitOptions.RemoveEmptyEntries)
@@ -46,7 +46,7 @@ public class AegisVirtualFilePath : IEquatable<AegisVirtualFilePath>, IComparabl
     /// <param name="path">The string representation of the virtual path.</param>
     public AegisVirtualFilePath(string path)
     {
-        ArgCheck.NotEmpty(path, nameof(path));
+        ArgCheck.NotEmpty(path);
 
         var pathComponents = SplitPathComponents(path);
 

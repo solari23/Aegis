@@ -19,9 +19,9 @@ public class UserKey : EncryptionSecret
         ReadOnlySpan<byte> keyDerivationSalt,
         SecuritySettings securitySettings)
     {
-        ArgCheck.NotNull(userSecret, nameof(userSecret));
-        ArgCheck.NotEmpty(keyDerivationSalt, nameof(keyDerivationSalt));
-        ArgCheck.IsValid(securitySettings, nameof(securitySettings));
+        ArgCheck.NotNull(userSecret);
+        ArgCheck.NotEmpty(keyDerivationSalt);
+        ArgCheck.IsValid(securitySettings);
 
         var cryptoAlgoProperties = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo);
 

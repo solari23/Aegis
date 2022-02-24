@@ -17,7 +17,7 @@ internal static class CryptoHelpers
     /// <returns>The array of random bytes.</returns>
     public static byte[] GetRandomBytes(int numBytes)
     {
-        ArgCheck.NotNegative(numBytes, nameof(numBytes));
+        ArgCheck.NotNegative(numBytes);
 
         var bytes = new byte[numBytes];
         RandomNumberGenerator.Fill(bytes);

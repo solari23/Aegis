@@ -16,7 +16,7 @@ public sealed class SecureArchiveCreationParameters : IDisposable, IValidatableO
     /// <param name="firstKeyAuthorizationParam">The parameters to authorize the first user key.</param>
     public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstKeyAuthorizationParam)
     {
-        ArgCheck.IsValid(firstKeyAuthorizationParam, nameof(firstKeyAuthorizationParam));
+        ArgCheck.IsValid(firstKeyAuthorizationParam);
 
         this.FirstKeyAuthorizationParams = firstKeyAuthorizationParam;
     }

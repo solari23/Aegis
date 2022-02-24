@@ -15,8 +15,8 @@ internal class Aes256GcmCryptoStrategy : ICryptoStrategy
     /// <inheritdoc />
     public EncryptedPacket Encrypt(ReadOnlySpan<byte> plainText, ReadOnlySpan<byte> key, ReadOnlySpan<byte> optionalAssociatedData = default)
     {
-        ArgCheck.NotEmpty(plainText, nameof(plainText));
-        ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key, nameof(key));
+        ArgCheck.NotEmpty(plainText);
+        ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key);
 
         var iv = CryptoHelpers.GetRandomBytes(this.AlgorithmProperties.IvSizeInBytes);
 
@@ -33,10 +33,10 @@ internal class Aes256GcmCryptoStrategy : ICryptoStrategy
     /// <inheritdoc />
     public Span<byte> Decrypt(EncryptedPacket encryptedData, ReadOnlySpan<byte> key, ReadOnlySpan<byte> optionalAssociatedData = default)
     {
-        ArgCheck.NotNull(encryptedData, nameof(encryptedData));
-        ArgCheck.HasLength(this.AlgorithmProperties.IvSizeInBytes, encryptedData.IV, nameof(encryptedData.IV));
-        ArgCheck.HasLength(this.AlgorithmProperties.AuthTagSizeInBytes, encryptedData.AuthTag, nameof(encryptedData.AuthTag));
-        ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key, nameof(key));
+        ArgCheck.NotNull(encryptedData);
+        ArgCheck.HasLength(this.AlgorithmProperties.IvSizeInBytes, encryptedData.IV);
+        ArgCheck.HasLength(this.AlgorithmProperties.AuthTagSizeInBytes, encryptedData.AuthTag);
+        ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key);
 
         // Containers to hold crypto operation outputs.
         var plainText = new byte[encryptedData.CipherText.Count];

@@ -16,9 +16,9 @@ public class Menu<TIdentifier>
     /// <param name="options">The options to present.</param>
     public Menu(IOStreamSet ioStreamSet, string prompt, params Option[] options)
     {
-        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
-        ArgCheck.NotEmpty(prompt, nameof(prompt));
-        ArgCheck.NotEmpty(options, nameof(options));
+        ArgCheck.NotNull(ioStreamSet);
+        ArgCheck.NotEmpty(prompt);
+        ArgCheck.NotEmpty(options);
 
         this.IO = ioStreamSet;
         this.Prompt = prompt;

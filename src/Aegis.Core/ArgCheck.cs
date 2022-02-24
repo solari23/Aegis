@@ -17,7 +17,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotNull<T>([ValidatedNotNull] T arg, string argName)
+    public static void NotNull<T>([ValidatedNotNull] T arg, [CallerArgumentExpression("arg")] string argName = null)
         where T : class
     {
         if (arg is null)
@@ -35,7 +35,10 @@ public static class ArgCheck
     /// <exception cref="ArgumentNullException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotEmpty([ValidatedNotNull] string arg, string argName, bool allowWhitespace = false)
+    public static void NotEmpty(
+        [ValidatedNotNull] string arg,
+        [CallerArgumentExpression("arg")] string argName = null,
+        bool allowWhitespace = false)
     {
         if (allowWhitespace ? string.IsNullOrEmpty(arg) : string.IsNullOrWhiteSpace(arg))
         {
@@ -52,7 +55,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotEmpty<T>(IEnumerable<T> arg, string argName)
+    public static void NotEmpty<T>(IEnumerable<T> arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         var hasElements = arg?.Any() ?? throw new ArgumentNullException(argName, "The input must not be null or empty!");
 
@@ -70,7 +73,8 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotEmpty<T>(Span<T> arg, string argName) => NotEmpty((ReadOnlySpan<T>)arg, argName);
+    public static void NotEmpty<T>(Span<T> arg, [CallerArgumentExpression("arg")] string argName = null)
+        => NotEmpty((ReadOnlySpan<T>)arg, argName);
 
     /// <summary>
     /// Verifies the argument is not empty.
@@ -80,7 +84,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotEmpty<T>(ReadOnlySpan<T> arg, string argName)
+    public static void NotEmpty<T>(ReadOnlySpan<T> arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         if (arg.IsEmpty)
         {
@@ -98,7 +102,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void HasLength<T>(int requiredLength, IEnumerable<T> arg, string argName)
+    public static void HasLength<T>(int requiredLength, IEnumerable<T> arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         var elementCount = arg?.Count()
             ?? throw new ArgumentNullException(argName, $"The input must not be null and must be of length {requiredLength}!");
@@ -118,7 +122,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void HasLength<T>(int requiredLength, Span<T> arg, string argName)
+    public static void HasLength<T>(int requiredLength, Span<T> arg, [CallerArgumentExpression("arg")] string argName = null)
         => HasLength(requiredLength, (ReadOnlySpan<T>)arg, argName);
 
     /// <summary>
@@ -130,7 +134,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void HasLength<T>(int requiredLength, ReadOnlySpan<T> arg, string argName)
+    public static void HasLength<T>(int requiredLength, ReadOnlySpan<T> arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         if (arg.Length != requiredLength)
         {
@@ -147,10 +151,10 @@ public static class ArgCheck
     /// <exception cref="ArgumentException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void IsNot<T>(T invalidValue, T arg, string argName)
+    public static void IsNot<T>(T invalidValue, T arg, [CallerArgumentExpression("arg")] string argName = null)
         where T : IComparable
     {
-        if (object.ReferenceEquals(arg, invalidValue) || arg.CompareTo(invalidValue) == 0)
+        if (ReferenceEquals(arg, invalidValue) || arg.CompareTo(invalidValue) == 0)
         {
             throw new ArgumentException($"The input value must not be {invalidValue}!", argName);
         }
@@ -164,7 +168,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void NotNegative(long arg, string argName)
+    public static void NotNegative(long arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         if (arg < 0)
         {
@@ -180,7 +184,7 @@ public static class ArgCheck
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the constraint is violated.</exception>
     [DebuggerStepThrough]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void GreaterThanZero(long arg, string argName)
+    public static void GreaterThanZero(long arg, [CallerArgumentExpression("arg")] string argName = null)
     {
         if (arg <= 0)
         {
@@ -202,7 +206,7 @@ public static class ArgCheck
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void IsValid(
         [ValidatedNotNull] IValidatableObject validatableArg,
-        string argName,
+        [CallerArgumentExpression("validatableArg")] string argName = null,
         bool isNullValid = false)
     {
         if (validatableArg is null)

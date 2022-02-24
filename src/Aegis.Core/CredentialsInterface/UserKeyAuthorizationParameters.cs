@@ -15,7 +15,7 @@ public sealed class UserKeyAuthorizationParameters : IDisposable, IValidatableOb
     /// <param name="keyData">The raw archive encryption key.</param>
     public UserKeyAuthorizationParameters(RawUserSecret userSecret)
     {
-        ArgCheck.NotNull(userSecret, nameof(userSecret));
+        ArgCheck.NotNull(userSecret);
 
         this.UserSecret = userSecret;
     }

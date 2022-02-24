@@ -15,7 +15,7 @@ internal class ArchiveKey : EncryptionSecret
     /// <returns>The new <see cref="ArchiveKey"/>.</returns>
     public static ArchiveKey CreateNew(SecuritySettings securitySettings)
     {
-        ArgCheck.IsValid(securitySettings, nameof(securitySettings));
+        ArgCheck.IsValid(securitySettings);
 
         var numKeyBytes = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo).KeySizeInBytes;
         return new ArchiveKey(CryptoHelpers.GetRandomBytes(numKeyBytes));

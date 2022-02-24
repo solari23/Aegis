@@ -13,7 +13,7 @@ public abstract class Secret : IDisposable
     /// <param name="keyData">The secret key data. This container should be considered the owner for this data.</param>
     protected Secret(byte[] keyData)
     {
-        ArgCheck.NotEmpty(keyData, nameof(keyData));
+        ArgCheck.NotEmpty(keyData);
 
         this.InternalKeyData = keyData;
     }
