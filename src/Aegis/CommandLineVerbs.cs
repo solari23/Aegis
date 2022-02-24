@@ -58,13 +58,13 @@ namespace Aegis
         public class RemoveVerbOptions : AegisVerbOptions
         {
             // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
-            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
-            // but with different "SetName" values (can't specify options from more than one set).
+            // This is enforced by setting them both to be required but with different
+            // "SetName" values (can't specify options from more than one set).
 
-            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            [Option('v', "vpath", Required = true, SetName = "UpdateTarget_VPATH", HelpText = "The virtual path in the archive of the file to update.")]
             public string ArchiveVirtualPath { get; set; }
 
-            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "[GUID] The ID of the archive file to update.")]
+            [Option('i', "id", Required = true, SetName = "UpdateTarget_ID", HelpText = "[GUID] The ID of the archive file to update.")]
             public Guid ArchiveFileId { get; set; }
         }
 
@@ -72,13 +72,13 @@ namespace Aegis
         public class ExtractVerbOptions : AegisVerbOptions
         {
             // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
-            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
-            // but with different "SetName" values (can't specify options from more than one set).
+            // This is enforced by setting them both to be required but with different
+            // "SetName" values (can't specify options from more than one set).
 
-            [Option('v', "vpath", SetName = "ExtractTarget_VPATH", Group = "ExtractTarget", HelpText = "The virtual path in the archive of the file to extract.")]
+            [Option('v', "vpath", Required = true, SetName = "ExtractTarget_VPATH", HelpText = "The virtual path in the archive of the file to extract.")]
             public string ArchiveVirtualPath { get; set; }
 
-            [Option('i', "id", SetName = "ExtractTarget_ID", Group = "ExtractTarget", HelpText = "[GUID] The ID of the archive file to extract.")]
+            [Option('i', "id", Required = true, SetName = "ExtractTarget_ID", HelpText = "[GUID] The ID of the archive file to extract.")]
             public Guid ArchiveFileId { get; set; }
 
             [Option('o', "out", Required = false, HelpText = "The directory to which the file will be extracted. Defaults to current directory.")]
@@ -92,13 +92,13 @@ namespace Aegis
             public string FilePath { get; set; }
 
             // The user must choose exactly one of ArchiveVirtualPath or ArchiveFileId.
-            // This is enforced by setting them in the same "Group" (at least one of a group must be provided)
-            // but with different "SetName" values (can't specify options from more than one set).
+            // This is enforced by setting them both to be required but with different
+            // "SetName" values (can't specify options from more than one set).
 
-            [Option('v', "vpath", SetName = "UpdateTarget_VPATH", Group = "UpdateTarget", HelpText = "The virtual path in the archive of the file to update.")]
+            [Option('v', "vpath", Required = true, SetName = "UpdateTarget_VPATH", HelpText = "The virtual path in the archive of the file to update.")]
             public string ArchiveVirtualPath { get; set; }
 
-            [Option('i', "id", SetName = "UpdateTarget_ID", Group = "UpdateTarget", HelpText = "[GUID] The ID of the archive file to update.")]
+            [Option('i', "id", Required = true, SetName = "UpdateTarget_ID", HelpText = "[GUID] The ID of the archive file to update.")]
             public Guid ArchiveFileId { get; set; }
         }
 
