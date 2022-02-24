@@ -113,7 +113,7 @@ internal sealed class FileIndex
     {
         var fileInfo = this.FileTree.Remove(filePath);
 
-        if (fileInfo is object)
+        if (fileInfo is not null)
         {
             this.FileEntriesById.Remove(fileInfo.FileId);
         }

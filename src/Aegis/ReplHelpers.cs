@@ -32,7 +32,7 @@ public static class ReplHelpers
             .Where(t => t.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Any())
             .ToArray();
 
-        return verbTypes ?? new Type[0];
+        return verbTypes ?? Array.Empty<Type>();
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public static class ReplHelpers
     /// <returns>The arguments entered by the user.</returns>
     public static string[] Prompt(string promptString = null)
     {
-        promptString = promptString ?? MakePromptString(Program.Name);
+        promptString ??= MakePromptString(Program.Name);
 
         Console.Write(promptString);
         var rawInput = Console.ReadLine();

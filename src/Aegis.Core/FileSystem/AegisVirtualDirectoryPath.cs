@@ -112,7 +112,7 @@ public class AegisVirtualDirectoryPath : IEquatable<AegisVirtualDirectoryPath>, 
     public static bool operator !=(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => !(left == right);
 
     /// <inheritdoc/>
-    public static bool operator <(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is null ? right is object : left.CompareTo(right) < 0;
+    public static bool operator <(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is null ? right is not null : left.CompareTo(right) < 0;
 
     /// <inheritdoc/>
     public static bool operator <=(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is null || left.CompareTo(right) <= 0;

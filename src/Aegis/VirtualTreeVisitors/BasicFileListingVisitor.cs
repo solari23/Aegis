@@ -35,10 +35,7 @@ public class BasicFileListingVisitor : IVirtualFileTreeVisitor
     private int FileCount { get; set; }
 
     /// <inheritdoc/>
-    public void OnStart()
-    {
-        this.Output.WriteLine();
-    }
+    public void OnStart() => this.Output.WriteLine();
 
     /// <inheritdoc/>
     public void OnPreOrderVisit(AegisVirtualDirectoryPath directory, ReadOnlySpan<AegisFileInfo> files)
