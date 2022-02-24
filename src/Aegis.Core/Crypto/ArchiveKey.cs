@@ -1,34 +1,33 @@
 ﻿using Aegis.Models;
 
-namespace Aegis.Core.Crypto
+namespace Aegis.Core.Crypto;
+
+/// <summary>
+/// An encryption key used to encrypt data in the <see cref="SecureArchive"/>.
+/// </summary>
+internal class ArchiveKey : EncryptionSecret
 {
     /// <summary>
-    /// An encryption key used to encrypt data in the <see cref="SecureArchive"/>.
+    /// Creates a new symmetric <see cref="ArchiveKey"/> that can be used with the
+    /// algorithms described in the given <see cref="SecuritySettings"/>.
     /// </summary>
-    internal class ArchiveKey : EncryptionSecret
+    /// <param name="securitySettings">The <see cref="SecuritySettings"/> for the archive.</param>
+    /// <returns>The new <see cref="ArchiveKey"/>.</returns>
+    public static ArchiveKey CreateNew(SecuritySettings securitySettings)
     {
-        /// <summary>
-        /// Creates a new symmetric <see cref="ArchiveKey"/> that can be used with the
-        /// algorithms described in the given <see cref="SecuritySettings"/>.
-        /// </summary>
-        /// <param name="securitySettings">The <see cref="SecuritySettings"/> for the archive.</param>
-        /// <returns>The new <see cref="ArchiveKey"/>.</returns>
-        public static ArchiveKey CreateNew(SecuritySettings securitySettings)
-        {
-            ArgCheck.IsValid(securitySettings, nameof(securitySettings));
+        ArgCheck.IsValid(securitySettings, nameof(securitySettings));
 
-            var numKeyBytes = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo).KeySizeInBytes;
-            return new ArchiveKey(CryptoHelpers.GetRandomBytes(numKeyBytes));
-        }
+        var numKeyBytes = EncryptionAlgoProperties.For(securitySettings.EncryptionAlgo).KeySizeInBytes;
+        return new ArchiveKey(CryptoHelpers.GetRandomBytes(numKeyBytes));
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ArchiveKey"/> class.
-        /// </summary>
-        /// <param name="keyData">The raw archive encryption key.</param>
-        public ArchiveKey(byte[] keyData)
-            : base(keyData)
-        {
-            // Empty.
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ArchiveKey"/> class.
+    /// </summary>
+    /// <param name="keyData">The raw archive encryption key.</param>
+    public ArchiveKey(byte[] keyData)
+        : base(keyData)
+    {
+        // Empty.
     }
 }

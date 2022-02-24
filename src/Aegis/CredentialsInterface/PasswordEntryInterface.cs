@@ -5,63 +5,56 @@ using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
 using Aegis.Models;
 
-namespace Aegis.CredentialsInterface
+namespace Aegis.CredentialsInterface;
+
+/// <summary>
+/// Implementation of <see cref="IUserSecretEntryInterface"/> for entering passwords on the command line.
+/// </summary>
+public class PasswordEntryInterface : IUserSecretEntryInterface
 {
     /// <summary>
-    /// Implementation of <see cref="IUserSecretEntryInterface"/> for entering passwords on the command line.
+    /// Initializes a new instance of the <see cref="PasswordEntryInterface"/> class.
     /// </summary>
-    public class PasswordEntryInterface : IUserSecretEntryInterface
+    /// <param name="ioStreamSet">The IO streams.</param>
+    public PasswordEntryInterface(IOStreamSet ioStreamSet)
     {
-        /// <summary>
-        /// The password used for all archives.
-        /// Important: This is a temporary placeholder for development.
-        /// </summary>
-        private const string TEMP_Password = "P@$sW3rD!!1!";
+        ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordEntryInterface"/> class.
-        /// </summary>
-        /// <param name="ioStreamSet">The IO streams.</param>
-        public PasswordEntryInterface(IOStreamSet ioStreamSet)
+        this.IO = ioStreamSet;
+    }
+
+    /// <inheritdoc />
+    public SecretKind ProvidedSecretKind => SecretKind.Password;
+
+    /// <summary>
+    /// Gets the IO streams.
+    /// </summary>
+    private IOStreamSet IO { get; }
+
+    /// <inheritdoc />
+    public bool CanProvideSecret(SecretMetadata secretMetadata) => true;
+
+    /// <inheritdoc />
+    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
+    {
+        var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
+        var friendlyName = namePrompt.GetValue();
+
+        var secret = this.GetUserSecret(ImmutableArray<SecretMetadata>.Empty);
+
+        return new UserKeyAuthorizationParameters(secret)
         {
-            ArgCheck.NotNull(ioStreamSet, nameof(ioStreamSet));
+            FriendlyName = friendlyName,
+            SecretMetadata = new PasswordSecretMetadata(),
+        };
+    }
 
-            this.IO = ioStreamSet;
-        }
+    /// <inheritdoc />
+    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
+    {
+        var passwordPrompt = new InputPrompt(this.IO, "Enter the password: ", isConfidentialInput: true);
+        var password = passwordPrompt.GetValue();
 
-        /// <inheritdoc />
-        public SecretKind ProvidedSecretKind => SecretKind.Password;
-
-        /// <summary>
-        /// Gets the IO streams.
-        /// </summary>
-        private IOStreamSet IO { get; }
-
-        /// <inheritdoc />
-        public bool CanProvideSecret(SecretMetadata secretMetadata) => true;
-
-        /// <inheritdoc />
-        public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
-        {
-            var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
-            var friendlyName = namePrompt.GetValue();
-
-            var secret = this.GetUserSecret(ImmutableArray<SecretMetadata>.Empty);
-
-            return new UserKeyAuthorizationParameters(secret)
-            {
-                FriendlyName = friendlyName,
-                SecretMetadata = new PasswordSecretMetadata(),
-            };
-        }
-
-        /// <inheritdoc />
-        public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
-        {
-            var passwordPrompt = new InputPrompt(this.IO, "Enter the password: ", isConfidentialInput: true);
-            var password = passwordPrompt.GetValue();
-
-            return new RawUserSecret(Encoding.UTF8.GetBytes(password));
-        }
+        return new RawUserSecret(Encoding.UTF8.GetBytes(password));
     }
 }

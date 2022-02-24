@@ -1,20 +1,19 @@
 ﻿using Aegis.Core.Crypto;
 
-namespace Aegis.Core.CredentialsInterface
+namespace Aegis.Core.CredentialsInterface;
+
+/// <summary>
+/// Container for a user secret used to derive user keys.
+/// </summary>
+public sealed class RawUserSecret : Secret
 {
     /// <summary>
-    /// Container for a user secret used to derive user keys.
+    /// Initializes a new instance of the <see cref="RawUserSecret"/> class.
     /// </summary>
-    public sealed class RawUserSecret : Secret
+    /// <param name="keyData">The raw archive encryption key.</param>
+    public RawUserSecret(byte[] keyData)
+        : base(keyData)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RawUserSecret"/> class.
-        /// </summary>
-        /// <param name="keyData">The raw archive encryption key.</param>
-        public RawUserSecret(byte[] keyData)
-            : base(keyData)
-        {
-            // Empty.
-        }
+        // Empty.
     }
 }
