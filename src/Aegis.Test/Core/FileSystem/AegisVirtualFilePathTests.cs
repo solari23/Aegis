@@ -204,8 +204,10 @@ public class AegisVirtualFilePathTests
     [TestMethod]
     public void TestEquality_CaseInsensitivity()
     {
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
         AegisVirtualFilePath vpath1 = null;
         AegisVirtualFilePath vpath2 = null;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
 
         // Bare file names.
         vpath1 = new AegisVirtualFilePath("foo.ags");

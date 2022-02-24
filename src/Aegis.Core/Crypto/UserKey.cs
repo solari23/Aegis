@@ -39,8 +39,8 @@ public class UserKey : EncryptionSecret
             keyDerivationSalt,
             securitySettings.KeyDerivationWorkFactor);
 
-        var key = keyMatter.Slice(0, cryptoAlgoProperties.KeySizeInBytes);
-        var keyId = Helpers.Base64UrlEncode(keyMatter.Slice(cryptoAlgoProperties.KeySizeInBytes));
+        var key = keyMatter[..cryptoAlgoProperties.KeySizeInBytes];
+        var keyId = Helpers.Base64UrlEncode(keyMatter[cryptoAlgoProperties.KeySizeInBytes..]);
 
         return new UserKey(keyId, key.ToArray());
     }

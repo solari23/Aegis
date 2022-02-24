@@ -46,7 +46,6 @@ public class SecretInterfaceOperationCancelledException : Exception
     /// <remarks>
     /// This overload is required to properly implement <see cref="ISerializable"/>.
     /// </remarks>
-    [SuppressMessage("Usage", "CA1801: Review unused parameters", Justification = "The method signature is required by the framework.")]
     protected SecretInterfaceOperationCancelledException(SerializationInfo info, StreamingContext context)
     {
         // Deserialize any internal properties using info.GetValue

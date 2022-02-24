@@ -97,9 +97,8 @@ public class AegisVirtualDirectoryPath : IEquatable<AegisVirtualDirectoryPath>, 
             return true;
         }
 
-        return other is null
-            ? false
-            : string.Equals(this.FullPath, other.FullPath, StringComparison.OrdinalIgnoreCase);
+        return other is not null
+            && string.Equals(this.FullPath, other.FullPath, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <inheritdoc/>
@@ -118,7 +117,7 @@ public class AegisVirtualDirectoryPath : IEquatable<AegisVirtualDirectoryPath>, 
     public static bool operator <=(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is null || left.CompareTo(right) <= 0;
 
     /// <inheritdoc/>
-    public static bool operator >(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is object && left.CompareTo(right) > 0;
+    public static bool operator >(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is not null && left.CompareTo(right) > 0;
 
     /// <inheritdoc/>
     public static bool operator >=(AegisVirtualDirectoryPath left, AegisVirtualDirectoryPath right) => left is null ? right is null : left.CompareTo(right) >= 0;
