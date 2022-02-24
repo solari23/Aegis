@@ -4,18 +4,18 @@
 A utility to create and manage encrypted archives for sensitive files.
 
 ## What is it?
-Like the tagline says, Aegis is (will be?) a lightweight command-line utility that can create and manage encrypted file archives in a custom file format. The encrypted archive can safely be stored in one's favourite cloud storage service without worrying about leaks.
+Like the tagline says, Aegis is a lightweight command-line utility that can create and manage encrypted file archives in a custom file format. The encrypted archive can safely be stored in one's favourite cloud storage service without worrying about leaks.
 
 The design allows for:
 - Different types of user keys
 - Multiple user keys that can be used to decrypt the data
 - Decrypting/accessing one file without having to decrypt them all
 - Easy extensibility to add new crypto/key derivation algorithms
-- Swapping frontends, since the core logic is implemented as a library.
+- Swapping frontends, since the core logic is implemented as a library
 
 
 ## What's left to implement?
-Pretty much all of it. At time of writing this, I've only implemented the core crypto framework and an outline of the file format. I'd say an initial verison of Aegis is "ready" once there is a repl-like interface allowing one to unlock and interace with a "SecureArchive" file.
+The current version of the app implements all the basic functionality to securely archive files from a command-line interface, including a basic REPL. Currently only passwords are supported as keys, but you can have more than one for a given archive.
 
 Long term vision is:
 - Introduce user keys that aren't passwords. Ideally I'd like to implement keys derived from Fido 2.0 hardware.
@@ -42,3 +42,4 @@ The idea popped up while I was working on filing taxes. I currently store those 
 
 #### Q: Be honest. Did you just set up the project as an excuse to play with the preview versions of VS2019/C# 8/.Net Core 3?
 ...Maybe >.>
+(And since moved on to VS2022/C# 10/.Net 6)
