@@ -19,4 +19,10 @@
     <ProjectReference Include="..\Aegis.Models\Aegis.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SampleFiles\SimpleTextFile.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

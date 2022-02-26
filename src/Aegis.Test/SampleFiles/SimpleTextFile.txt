@@ -1,0 +1,5 @@
+This is a simple text file used for tests.
+
+It contains multiple lines and some interesting text.
+
+Lorem Ipsum!
