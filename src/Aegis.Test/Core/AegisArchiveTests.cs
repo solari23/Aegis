@@ -23,7 +23,9 @@ public class AegisArchiveTests
 
     [TestMethod]
     [Description("Tests adding and extracting a single file.")]
-    public void TestArchive_BasicScenario()
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath, DisplayName = "Basic Scenario: Simple Text File")]
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath, DisplayName = "Basic Scenario: Simple Image File")]
+    public void TestArchive_BasicScenario(string referenceFilePath)
     {
         // 1. Create a new archive
         // 2. Add a file to it
@@ -39,9 +41,11 @@ public class AegisArchiveTests
             // The achive should be created in unlocked state.
             Assert.IsFalse(archive.IsLocked);
 
+            using var referenceFileStream = File.OpenRead(referenceFilePath);
+
             file = archive.PutFile(
                 new AegisVirtualFilePath("text.txt"),
-                File.OpenRead(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath));
+                referenceFileStream);
 
             var extractPath1 = Path.Combine(this.WorkingDirectory, "Text_out1.txt");
             using (var extractStream = File.OpenWrite(extractPath1))
@@ -50,7 +54,7 @@ public class AegisArchiveTests
             }
 
             ArchiveTestHelpers.CompareFileToReference(
-                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                referenceFilePath: referenceFilePath,
                 testFilePath: extractPath1,
                 deleteTestFile: true);
         }
@@ -72,14 +76,91 @@ public class AegisArchiveTests
         }
 
         ArchiveTestHelpers.CompareFileToReference(
-            referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+            referenceFilePath: referenceFilePath,
             testFilePath: extractPath2,
             deleteTestFile: true);
     }
 
     [TestMethod]
+    [Description("Tests adding and extracting a large file.")]
+    public void TestArchive_LargeFile()
+    {
+        // The size of the large file to create -- 10 mb
+        const int LargeFileSizeInKB = 10_240;
+
+        var largeFilePath = Path.Combine(this.WorkingDirectory, "LargeFile.bin");
+
+        using (var file = File.OpenWrite(largeFilePath))
+        {
+            var randomKB = new byte[1024];
+            new Random().NextBytes(randomKB);
+
+            for (int i = 0; i < LargeFileSizeInKB; i++)
+            {
+                file.Write(randomKB);
+            }
+        }
+
+        // Run the basic scenario test on the large file.
+        this.TestArchive_BasicScenario(largeFilePath);
+
+        // Clean up the large file.
+        File.Delete(largeFilePath);
+    }
+
+    [TestMethod]
+    [Description("Tests deleting a file from the archive.")]
     public void TestArchive_DeleteFile()
     {
-        // TODO
+        // 1. Create a new archive, add a file to it
+        // 2. Delete the file from the archive, ensure it's gone
+        // 3. Close and reopen the archive
+        // 4. Make sure the file is still deleted
+
+        AegisFileInfo file = null;
+
+        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory))
+        {
+            // The achive should be created in unlocked state.
+            Assert.IsFalse(archive.IsLocked);
+
+            file = archive.PutFile(
+                new AegisVirtualFilePath("text.txt"),
+                File.OpenRead(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath));
+
+            archive.RemoveFile(file.Path);
+
+            Assert.IsNull(
+                archive.GetFileInfo(file.Path),
+                "The deleted file was found in archive, searching with v-path!");
+            Assert.IsNull(
+                archive.GetFileInfo(file.FileId),
+                "The deleted file was found in archive, searching with file ID!");
+        }
+
+        using var reopenedArchive = AegisArchive.Load(
+            ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory));
+        reopenedArchive.Unlock(ArchiveTestHelpers.DefaultPasswordUserSecret);
+
+        Assert.IsNull(
+            reopenedArchive.GetFileInfo(file.Path),
+            "The deleted file was found in reopened archive, searching with v-path!");
+        Assert.IsNull(
+            reopenedArchive.GetFileInfo(file.FileId),
+            "The deleted file was found in reopened archive, searching with file ID!");
+    }
+
+    [TestMethod]
+    [Description("Tests an arhcive containing multiple files.")]
+    public void TestArchive_MultipleFiles()
+    {
+        // TODO: Implement this test
+    }
+
+    [TestMethod]
+    [Description("Tests authorizing a second key on an archive.")]
+    public void TestArchive_AuthorizeSecondKey()
+    {
+        // TODO: Implement this test
     }
 }

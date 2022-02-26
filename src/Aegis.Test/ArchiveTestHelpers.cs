@@ -19,6 +19,11 @@ public static class ArchiveTestHelpers
         /// The path to a basic text sample file for use in tests.
         /// </summary>
         public const string SimpleTextFilePath = @"SampleFiles\SimpleTextFile.txt";
+
+        /// <summary>
+        /// The path to a basic JPG for use in tests.
+        /// </summary>
+        public const string SimpleImageFilePath = @"SampleFiles\SimpleImage.jpg";
     }
 
     /// <summary>
