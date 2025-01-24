@@ -41,7 +41,7 @@ internal static class UserKeyAuthorizationExtensions
         var additionalData = Encoding.UTF8.GetBytes(newKeyParams.FriendlyName + userKey.KeyId);
 
         var cryptoStrategy = CryptoHelpers.GetCryptoStrategy(securitySettings.EncryptionAlgo);
-        var encryptedArchiveKey = userKey.EncryptSecret(cryptoStrategy, archiveKey, additionalData);
+        var encryptedArchiveKey = userKey.WrapSecret(cryptoStrategy, archiveKey, additionalData);
 
         return new UserKeyAuthorization
         {

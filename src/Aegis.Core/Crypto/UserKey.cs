@@ -1,5 +1,4 @@
-﻿using Aegis.Core.CredentialsInterface;
-using Aegis.Models;
+﻿using Aegis.Models;
 
 namespace Aegis.Core.Crypto;
 

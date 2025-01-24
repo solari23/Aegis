@@ -2,6 +2,7 @@
 
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
+using Aegis.Core.Crypto;
 using Aegis.Models;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;

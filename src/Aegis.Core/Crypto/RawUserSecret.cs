@@ -1,6 +1,4 @@
-﻿using Aegis.Core.Crypto;
-
-namespace Aegis.Core.CredentialsInterface;
+﻿namespace Aegis.Core.Crypto;
 
 /// <summary>
 /// Container for a user secret used to derive user keys.

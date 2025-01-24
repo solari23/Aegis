@@ -3,6 +3,7 @@ using System.Text;
 
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
+using Aegis.Core.Crypto;
 using Aegis.Models;
 
 namespace Aegis.CredentialsInterface;

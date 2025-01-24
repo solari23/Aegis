@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using Aegis.Core.Crypto;
 using Aegis.Models;
 
 namespace Aegis.Core.CredentialsInterface;
