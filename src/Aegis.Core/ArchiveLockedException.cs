@@ -51,17 +51,4 @@ public class ArchiveLockedException : Exception
     {
         // Deserialize any internal properties using info.GetValue
     }
-
-    /// <summary>
-    /// Serializes internal state to the <see cref="SerializationInfo"/> object.
-    /// </summary>
-    /// <param name="info">Details of the serialization.</param>
-    /// <param name="context">Stream context.</param>
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        ArgCheck.NotNull(info);
-
-        // Serialize any internal properties using info.AddValue
-        base.GetObjectData(info, context);
-    }
 }

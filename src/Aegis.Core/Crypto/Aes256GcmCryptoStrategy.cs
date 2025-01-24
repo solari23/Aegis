@@ -24,7 +24,7 @@ internal class Aes256GcmCryptoStrategy : ICryptoStrategy
         var cipherText = new byte[plainText.Length];
         var authTag = new byte[this.AlgorithmProperties.AuthTagSizeInBytes];
 
-        using var algo = new AesGcm(key);
+        using var algo = new AesGcm(key, this.AlgorithmProperties.AuthTagSizeInBytes);
         algo.Encrypt(iv, plainText, cipherText, authTag, optionalAssociatedData);
 
         return EncryptedPacketExtensions.CreateNewEncryptedPacket(cipherText, iv, authTag);
@@ -41,7 +41,7 @@ internal class Aes256GcmCryptoStrategy : ICryptoStrategy
         // Containers to hold crypto operation outputs.
         var plainText = new byte[encryptedData.CipherText.Count];
 
-        using var algo = new AesGcm(key);
+        using var algo = new AesGcm(key, this.AlgorithmProperties.AuthTagSizeInBytes);
         algo.Decrypt(
             encryptedData.IV.ToArray(),
             encryptedData.CipherText.ToArray(),
