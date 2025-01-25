@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
 using Aegis.Core.Crypto;
@@ -60,14 +60,48 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
         var possibleThumbprints = possibleSecretMetadata
             .Select(md => (md as RsaKeyFromCertificateSecretMetadata)?.Thumbprint)
             .Where(t => t is not null)
-            .ToHashSet();
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         if (!TryGetCertificateFromStore(possibleThumbprints, out var certificate))
         {
-            // TODO: Let the user pick a PFX file + enter password.
-            throw new AegisUserErrorException(
-                "No authorized certificates available in the certificate store.",
-                isRecoverable: true);
+            var pfxPathPrompt = new InputPrompt(
+                this.IO,
+                "Enter path to certificate PFX file: ",
+                validator: File.Exists);
+            var pfxPath = pfxPathPrompt.GetValue();
+
+            var pfxPasswordPrompt = new InputPrompt(
+                this.IO,
+                "Enter password for PFX: ",
+                isConfidentialInput: true,
+                allowEmptyInput: true);
+            var pfxPassword = pfxPasswordPrompt.GetValue();
+
+            try
+            {
+                certificate = new X509Certificate2(pfxPath, pfxPassword, X509KeyStorageFlags.Exportable);
+            }
+            catch (CryptographicException e)
+            {
+                throw new AegisUserErrorException(
+                    "The password to the PFX file is not correct.",
+                    isRecoverable: true,
+                    innerException: e);
+            }
+
+            if (!certificate.HasPrivateKey)
+            {
+                throw new AegisUserErrorException(
+                    "The PFX file does not contain a private key.",
+                    isRecoverable: true);
+            }
+
+            if (!possibleThumbprints.Contains(certificate.Thumbprint))
+            {
+                throw new AegisUserErrorException(
+                    "The key for the certificate is not authorized.",
+                    isRecoverable: true);
+            }
         }
 
         return RawUserSecret.FromCertificate(certificate);
