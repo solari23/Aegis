@@ -17,11 +17,13 @@ public class InputPrompt
     /// <param name="isConfidentialInput">
     /// Whether or not the input is confidential. If so, the input is not displayed as it is typed on the console.
     /// </param>
-    /// <param name="options">An optional value validator.</param>
+    /// <param name="allowEmptyInput">Whether or not to allow empty input.</param>
+    /// <param name="validator">An optional value validator.</param>
     public InputPrompt(
         IOStreamSet ioStreamSet,
         string prompt,
         bool isConfidentialInput = false,
+        bool allowEmptyInput = false,
         Func<string, bool> validator = null)
     {
         ArgCheck.NotNull(ioStreamSet);
@@ -30,6 +32,7 @@ public class InputPrompt
         this.IO = ioStreamSet;
         this.Prompt = prompt;
         this.IsConfidentialInput = isConfidentialInput;
+        this.AllowEmptyInput = allowEmptyInput;
         this.Validator = validator;
     }
 
@@ -47,6 +50,11 @@ public class InputPrompt
     /// Gets whether or not the input is confidential.
     /// </summary>
     private bool IsConfidentialInput { get; }
+
+    /// <summary>
+    /// Gets whether or not empty input is allowed.
+    /// </summary>
+    private bool AllowEmptyInput { get; }
 
     /// <summary>
     /// Gets the optional value validator.
@@ -69,7 +77,7 @@ public class InputPrompt
                 ? this.GetConfidentialInput()
                 : this.IO.In.ReadLine();
 
-            if (!string.IsNullOrWhiteSpace(input)
+            if ((!string.IsNullOrWhiteSpace(input) || this.AllowEmptyInput)
                 && (this.Validator is null || this.Validator.Invoke(input)))
             {
                 value = input;
