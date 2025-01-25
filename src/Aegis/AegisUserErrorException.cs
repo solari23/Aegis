@@ -9,7 +9,7 @@ public class AegisUserErrorException : Exception
     /// Initializes a new instance of the <see cref="AegisUserErrorException"/> class.
     /// </summary>
     /// <param name="message">The error message.</param>
-    /// <param name="isRecoverable">Whether or not the program can recover from the error.</param>
+    /// <param name="isRecoverable">Whether or not the program can recover from the error when in REPL mode.</param>
     /// <param name="innerException">The cause of the error.</param>
     public AegisUserErrorException(string message, bool isRecoverable = true, Exception innerException = null)
         : base(message, innerException)
