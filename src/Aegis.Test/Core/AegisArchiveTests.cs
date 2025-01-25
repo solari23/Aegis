@@ -26,6 +26,8 @@ public class AegisArchiveTests
     [Description("Tests adding and extracting a single file.")]
     [DataRow(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath, SecretKind.Password, DisplayName = "Basic Scenario: Simple Text File, Password Secret")]
     [DataRow(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath, SecretKind.Password, DisplayName = "Basic Scenario: Simple Image File, Password Secret")]
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath, SecretKind.RsaKeyFromCertificate, DisplayName = "Basic Scenario: Simple Text File, RSA Certificate Secret")]
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath, SecretKind.RsaKeyFromCertificate, DisplayName = "Basic Scenario: Simple Image File, RSA Certificate Secret")]
     public void TestArchive_BasicScenario(string referenceFilePath, SecretKind secretKind)
     {
         // 1. Create a new archive
@@ -94,7 +96,7 @@ public class AegisArchiveTests
         using (var file = File.OpenWrite(largeFilePath))
         {
             var randomKB = new byte[1024];
-            new Random().NextBytes(randomKB);
+            Random.Shared.NextBytes(randomKB);
 
             for (int i = 0; i < LargeFileSizeInKB; i++)
             {

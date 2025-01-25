@@ -51,11 +51,11 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
     }
 
     /// <inheritdoc />
-    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
+    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> _)
     {
         var passwordPrompt = new InputPrompt(this.IO, "Enter the password: ", isConfidentialInput: true);
         var password = passwordPrompt.GetValue();
 
-        return new RawUserSecret(Encoding.UTF8.GetBytes(password));
+        return RawUserSecret.FromPasswordString(password);
     }
 }

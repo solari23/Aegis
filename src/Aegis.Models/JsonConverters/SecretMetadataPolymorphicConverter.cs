@@ -25,7 +25,8 @@ public class SecretMetadataPolymorphicConverter : JsonConverter<SecretMetadata>
     internal static ReadOnlyDictionary<SecretKind, Type> TypeDiscriminatorMappings { get; }
         = new ReadOnlyDictionary<SecretKind, Type>(new Dictionary<SecretKind, Type>
         {
-                { SecretKind.Password, typeof(PasswordSecretMetadata) }
+            { SecretKind.Password, typeof(PasswordSecretMetadata) },
+            { SecretKind.RsaKeyFromCertificate, typeof(RsaKeyFromCertificateSecretMetadata) },
         });
 
     /// <inheritdoc />

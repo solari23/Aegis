@@ -13,5 +13,16 @@ public enum SecretKind
     /// <summary>
     /// A user-chosen password.
     /// </summary>
+    /// <remarks>
+    /// The raw key used to protect the archive is the Utf8 encoding of the password string.
+    /// </remarks>
     Password = 1,
+
+    /// <summary>
+    /// An RSA key from a certificate.
+    /// </summary>
+    /// <remarks>
+    /// The raw key used to protect the archive is the private exponent 'D' of the RSA key.
+    /// </remarks>
+    RsaKeyFromCertificate = 2,
 }
