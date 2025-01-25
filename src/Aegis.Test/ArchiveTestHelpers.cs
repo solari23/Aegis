@@ -1,8 +1,4 @@
-﻿using System.Text;
-
-using Aegis.Core;
-using Aegis.Core.CredentialsInterface;
-using Aegis.Core.Crypto;
+﻿using Aegis.Core;
 using Aegis.Models;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,20 +24,9 @@ public static class ArchiveTestHelpers
     }
 
     /// <summary>
-    /// The default password for test archives.
-    /// </summary>
-    public const string DefaultPassword = "P@$$w3rd";
-
-    /// <summary>
     /// The default file name for test archives.
     /// </summary>
     public const string DefaultTestArchiveName = "TestArchive.ags";
-
-    /// <summary>
-    /// Gets the <see cref="DefaultPassword"/> as a <see cref="RawUserSecret"/>.
-    /// </summary>
-    public static RawUserSecret DefaultPasswordUserSecret =>
-        new RawUserSecret(Encoding.UTF8.GetBytes(DefaultPassword));
 
     public static SecureArchiveFileSettings GetTestArchiveFileSettings(string workingDirectory, string archiveName = null) =>
         new SecureArchiveFileSettings(
@@ -53,17 +38,14 @@ public static class ArchiveTestHelpers
     /// The password for the archive will be <see cref="DefaultPassword"/>.
     /// </summary>
     /// <param name="workingDirectory">The working directory where the archive will be created.</param>
+    /// <param name="initialSecretKind">The type of secret to use when initially creating the archive.</param>
     /// <param name="archiveName">The name of the archive (Optional. Default: <see cref="DefaultTestArchiveName"/>.)</param>
     /// <returns>The new archive, which will be open and unlocked.</returns>
-    public static AegisArchive CreateNewEmptyArchive(string workingDirectory, string archiveName = null) =>
+    public static AegisArchive CreateNewEmptyArchive(string workingDirectory, SecretKind initialSecretKind, string archiveName = null) =>
         AegisArchive.CreateNew(
             GetTestArchiveFileSettings(workingDirectory, archiveName),
             new SecureArchiveCreationParameters(
-                new UserKeyAuthorizationParameters(DefaultPasswordUserSecret)
-                {
-                    FriendlyName = "TestPassword",
-                    SecretMetadata = new PasswordSecretMetadata(),
-                }));
+                TestSecrets.GetDefaultUserKeyAuthorizationParameters(initialSecretKind)));
 
     /// <summary>
     /// Compares a test file to a reference file and asserts that they match.

@@ -2,6 +2,7 @@
 
 using Aegis.Core;
 using Aegis.Core.FileSystem;
+using Aegis.Models;
 
 namespace Aegis.Test.Core;
 
@@ -23,9 +24,9 @@ public class AegisArchiveTests
 
     [TestMethod]
     [Description("Tests adding and extracting a single file.")]
-    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath, DisplayName = "Basic Scenario: Simple Text File")]
-    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath, DisplayName = "Basic Scenario: Simple Image File")]
-    public void TestArchive_BasicScenario(string referenceFilePath)
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath, SecretKind.Password, DisplayName = "Basic Scenario: Simple Text File, Password Secret")]
+    [DataRow(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath, SecretKind.Password, DisplayName = "Basic Scenario: Simple Image File, Password Secret")]
+    public void TestArchive_BasicScenario(string referenceFilePath, SecretKind secretKind)
     {
         // 1. Create a new archive
         // 2. Add a file to it
@@ -36,7 +37,7 @@ public class AegisArchiveTests
 
         AegisFileInfo file = null;
 
-        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory))
+        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory, secretKind))
         {
             // The achive should be created in unlocked state.
             Assert.IsFalse(archive.IsLocked);
@@ -66,7 +67,7 @@ public class AegisArchiveTests
         Assert.IsTrue(reopenedArchive.IsLocked);
         Assert.ThrowsException<ArchiveLockedException>(() => reopenedArchive.GetFileInfo(file.FileId));
 
-        reopenedArchive.Unlock(ArchiveTestHelpers.DefaultPasswordUserSecret);
+        reopenedArchive.Unlock(TestSecrets.GetDefaultUserSecret(secretKind));
         Assert.IsFalse(reopenedArchive.IsLocked);
 
         var extractPath2 = Path.Combine(this.WorkingDirectory, "Text_out2.txt");
@@ -102,7 +103,7 @@ public class AegisArchiveTests
         }
 
         // Run the basic scenario test on the large file.
-        this.TestArchive_BasicScenario(largeFilePath);
+        this.TestArchive_BasicScenario(largeFilePath, SecretKind.Password);
 
         // Clean up the large file.
         File.Delete(largeFilePath);
@@ -119,7 +120,7 @@ public class AegisArchiveTests
 
         AegisFileInfo file = null;
 
-        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory))
+        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory, SecretKind.Password))
         {
             // The achive should be created in unlocked state.
             Assert.IsFalse(archive.IsLocked);
@@ -140,7 +141,7 @@ public class AegisArchiveTests
 
         using var reopenedArchive = AegisArchive.Load(
             ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory));
-        reopenedArchive.Unlock(ArchiveTestHelpers.DefaultPasswordUserSecret);
+        reopenedArchive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.Password));
 
         Assert.IsNull(
             reopenedArchive.GetFileInfo(file.Path),
