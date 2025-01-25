@@ -13,12 +13,12 @@ public class ConfirmationPrompt
     /// Maps potential confirmation responses to whether or not they indicate confirmation.
     /// </summary>
     private static ReadOnlyDictionary<string, bool> ConfirmationResponseStrings { get; }
-        = new ReadOnlyDictionary<string, bool>(new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+        = new(new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
         {
-                { "yes", true },
-                { "y", true },
-                { "no", false },
-                { "n", false },
+            { "yes", true },
+            { "y", true },
+            { "no", false },
+            { "n", false },
         });
 
     /// <summary>

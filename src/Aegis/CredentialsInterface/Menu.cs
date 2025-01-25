@@ -67,7 +67,7 @@ public class Menu<TIdentifier>
         var input = inputPrompt.GetValue();
         var selectedIndex = int.Parse(input);
 
-        return this.Options[selectedIndex].Id;
+        return this.Options[selectedIndex - 1].Id;
     }
 
     /// <summary>

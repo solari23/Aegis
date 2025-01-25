@@ -25,7 +25,8 @@ public partial class AegisInterface
 
         this.ArchiveUnlocker = new ArchiveUnlocker(
             new SecretSelector(ioStreamSet),
-            new PasswordEntryInterface(ioStreamSet));
+            new PasswordEntryInterface(ioStreamSet),
+            new CertificatePickerInterface(ioStreamSet));
     }
 
     /// <summary>

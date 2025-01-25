@@ -38,8 +38,7 @@ public sealed class ArchiveUnlocker
     /// Gets the collection of registered secret entry user interfaces,
     /// keyed by their respective <see cref="SecretKind"/>.
     /// </summary>
-    private Dictionary<SecretKind, IUserSecretEntryInterface> SecretEntryInterfaces { get; }
-        = new Dictionary<SecretKind, IUserSecretEntryInterface>();
+    private Dictionary<SecretKind, IUserSecretEntryInterface> SecretEntryInterfaces { get; } = [];
 
     /// <summary>
     /// Registers a <see cref="IUserSecretEntryInterface"/> that can be used to retrieve user secrets from the user.
@@ -59,9 +58,9 @@ public sealed class ArchiveUnlocker
                 nameof(secretEntryInterface));
         }
 
-        if (this.SecretEntryInterfaces.ContainsKey(secretEntryInterface.ProvidedSecretKind))
+        if (this.SecretEntryInterfaces.TryGetValue(secretEntryInterface.ProvidedSecretKind, out IUserSecretEntryInterface existingInterface))
         {
-            var existingProviderType = this.SecretEntryInterfaces[secretEntryInterface.ProvidedSecretKind].GetType();
+            var existingProviderType = existingInterface.GetType();
             throw new ArgumentException(
                 $"Can't register interface for secret kind '{secretEntryInterface.ProvidedSecretKind}' since one of type {existingProviderType.FullName} is already registered.");
         }
