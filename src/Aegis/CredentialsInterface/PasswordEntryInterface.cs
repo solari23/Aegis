@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;

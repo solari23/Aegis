@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
-
-namespace Aegis.Core.CredentialsInterface;
+﻿namespace Aegis.Core.CredentialsInterface;
 
 /// <summary>
 /// Exception to be thrown by user interface implementations when the user cancels a prompt.
@@ -36,18 +33,5 @@ public class SecretInterfaceOperationCancelledException : Exception
         : base(message, innerException)
     {
         // Empty.
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SecretInterfaceOperationCancelledException"/> class.
-    /// </summary>
-    /// <param name="info">The SerializationInfo to populate with data.</param>
-    /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
-    /// <remarks>
-    /// This overload is required to properly implement <see cref="ISerializable"/>.
-    /// </remarks>
-    protected SecretInterfaceOperationCancelledException(SerializationInfo info, StreamingContext context)
-    {
-        // Deserialize any internal properties using info.GetValue
     }
 }

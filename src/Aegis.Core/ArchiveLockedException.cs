@@ -1,12 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
-
-namespace Aegis.Core;
+﻿namespace Aegis.Core;
 
 /// <summary>
-/// Exception thrown when an read or write API call is made on a <see cref="SecureArchive"/> that is locked.
+/// Exception thrown when an read or write API call is made on a <see cref="AegisArchive"/> that is locked.
 /// </summary>
-[Serializable]
 public class ArchiveLockedException : Exception
 {
     /// <summary>
@@ -37,18 +33,5 @@ public class ArchiveLockedException : Exception
         : base(message, innerException)
     {
         // Empty.
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ArchiveLockedException"/> class.
-    /// </summary>
-    /// <param name="info">The SerializationInfo to populate with data.</param>
-    /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
-    /// <remarks>
-    /// This overload is required to properly implement <see cref="ISerializable"/>.
-    /// </remarks>
-    protected ArchiveLockedException(SerializationInfo info, StreamingContext context)
-    {
-        // Deserialize any internal properties using info.GetValue
     }
 }

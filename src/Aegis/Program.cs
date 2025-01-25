@@ -20,7 +20,7 @@ public class Program
             if (args is null || args.Length == 0)
             {
                 // No arguments -> signal to start REPL mode.
-                args = new string[] { ReplHelpers.StartReplVerb };
+                args = [ReplHelpers.StartReplVerb];
             }
 
             var ioStreams = new IOStreamSet(

@@ -1,12 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
-
-namespace Aegis.Core;
+﻿namespace Aegis.Core;
 
 /// <summary>
 /// Exception thrown when a requested entity isn't found in the <see cref="AegisArchive"/>.
 /// </summary>
-[Serializable]
 public class EntityNotFoundException : Exception
 {
     /// <summary>
@@ -37,18 +33,5 @@ public class EntityNotFoundException : Exception
         : base(message, innerException)
     {
         // Empty.
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EntityNotFoundException"/> class.
-    /// </summary>
-    /// <param name="info">The SerializationInfo to populate with data.</param>
-    /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
-    /// <remarks>
-    /// This overload is required to properly implement <see cref="ISerializable"/>.
-    /// </remarks>
-    protected EntityNotFoundException(SerializationInfo info, StreamingContext context)
-    {
-        // Deserialize any internal properties using info.GetValue
     }
 }

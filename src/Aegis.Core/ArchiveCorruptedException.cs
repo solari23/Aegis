@@ -1,11 +1,8 @@
-﻿using System.Runtime.Serialization;
-
-namespace Aegis.Core;
+﻿namespace Aegis.Core;
 
 /// <summary>
-/// Exception thrown when a <see cref="SecureArchive"/> is found to be corrupted.
+/// Exception thrown when a <see cref="AegisArchive"/> is found to be corrupted.
 /// </summary>
-[Serializable]
 public class ArchiveCorruptedException : Exception
 {
     /// <summary>
@@ -36,18 +33,5 @@ public class ArchiveCorruptedException : Exception
         : base(message, innerException)
     {
         // Empty.
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ArchiveCorruptedException"/> class.
-    /// </summary>
-    /// <param name="info">The SerializationInfo to populate with data.</param>
-    /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
-    /// <remarks>
-    /// This overload is required to properly implement <see cref="ISerializable"/>.
-    /// </remarks>
-    protected ArchiveCorruptedException(SerializationInfo info, StreamingContext context)
-    {
-        // Deserialize any internal properties using info.GetValue
     }
 }

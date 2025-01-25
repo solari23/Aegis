@@ -1,11 +1,8 @@
-﻿using System.Runtime.Serialization;
-
-namespace Aegis.Core;
+﻿namespace Aegis.Core;
 
 /// <summary>
 /// Exception thrown when Aegis encounters an internal error. This indicates a bug in the Aegis library.
 /// </summary>
-[Serializable]
 public class AegisInternalErrorException : Exception
 {
     /// <summary>
@@ -36,18 +33,5 @@ public class AegisInternalErrorException : Exception
         : base(message, innerException)
     {
         // Empty.
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AegisInternalErrorException"/> class.
-    /// </summary>
-    /// <param name="info">The SerializationInfo to populate with data.</param>
-    /// <param name="context">The destination <see cref="StreamingContext"/> for this serialization.</param>
-    /// <remarks>
-    /// This overload is required to properly implement <see cref="ISerializable"/>.
-    /// </remarks>
-    protected AegisInternalErrorException(SerializationInfo info, StreamingContext context)
-    {
-        // Deserialize any internal properties using info.GetValue
     }
 }

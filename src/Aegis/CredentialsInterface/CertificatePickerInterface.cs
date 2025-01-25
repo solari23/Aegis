@@ -62,7 +62,12 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
             .Where(t => t is not null)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (!TryGetCertificateFromStore(possibleThumbprints, out var certificate))
+        if (TryGetCertificateFromStore(possibleThumbprints, out var certificate))
+        {
+            this.IO.Out.WriteLine(
+                $"Using certificate {certificate.Subject} with thumbprint {certificate.Thumbprint} from CurrentUser\\My store.");
+        }
+        else
         {
             var pfxPathPrompt = new InputPrompt(
                 this.IO,
