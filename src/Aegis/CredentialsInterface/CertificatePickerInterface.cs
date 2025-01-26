@@ -39,17 +39,21 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
     {
-        var subjectNamePrompt = new InputPrompt(this.IO, "Enter a subject name for the new certificate: ");
-        var newCertSubjectName = subjectNamePrompt.GetValue();
+        var useExistingCertPrompt = new ConfirmationPrompt(this.IO, "Would you like to use an existing certificate?");
+        var useExistingCert = useExistingCertPrompt.GetConfirmation();
 
-        using var newCertificate = CreateNewCertificateInStore(newCertSubjectName);
+        using var certificate = useExistingCert
+            ? PromptForCertificatePfx(this.IO)
+            : CreateNewCertificateInStore(this.IO);
 
-        return new UserKeyAuthorizationParameters(RawUserSecret.FromCertificate(newCertificate))
+        var certSubjectName = certificate.GetNameInfo(X509NameType.SimpleName, false);
+
+        return new UserKeyAuthorizationParameters(RawUserSecret.FromCertificate(certificate))
         {
-            FriendlyName = newCertSubjectName,
+            FriendlyName = certSubjectName,
             SecretMetadata = new RsaKeyFromCertificateSecretMetadata
             {
-                Thumbprint = newCertificate.Thumbprint,
+                Thumbprint = certificate.Thumbprint,
             },
         };
     }
@@ -69,37 +73,7 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
         }
         else
         {
-            var pfxPathPrompt = new InputPrompt(
-                this.IO,
-                "Enter path to certificate PFX file: ",
-                validator: File.Exists);
-            var pfxPath = pfxPathPrompt.GetValue();
-
-            var pfxPasswordPrompt = new InputPrompt(
-                this.IO,
-                "Enter password for PFX: ",
-                isConfidentialInput: true,
-                allowEmptyInput: true);
-            var pfxPassword = pfxPasswordPrompt.GetValue();
-
-            try
-            {
-                certificate = new X509Certificate2(pfxPath, pfxPassword, X509KeyStorageFlags.Exportable);
-            }
-            catch (CryptographicException e)
-            {
-                throw new AegisUserErrorException(
-                    "The password to the PFX file is not correct.",
-                    isRecoverable: true,
-                    innerException: e);
-            }
-
-            if (!certificate.HasPrivateKey)
-            {
-                throw new AegisUserErrorException(
-                    "The PFX file does not contain a private key.",
-                    isRecoverable: true);
-            }
+            certificate = PromptForCertificatePfx(this.IO);
 
             if (!possibleThumbprints.Contains(certificate.Thumbprint))
             {
@@ -112,8 +86,11 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
         return RawUserSecret.FromCertificate(certificate);
     }
 
-    private static X509Certificate2 CreateNewCertificateInStore(string subjectName)
+    private static X509Certificate2 CreateNewCertificateInStore(IOStreamSet ioStreamSet)
     {
+        var subjectNamePrompt = new InputPrompt(ioStreamSet, "Enter a subject name for the new certificate: ");
+        var subjectName = subjectNamePrompt.GetValue();
+
         if (!subjectName.StartsWith("CN="))
         {
             subjectName = $"CN={subjectName}";
@@ -140,6 +117,45 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
         certStore.Close();
 
         return exportableCert;
+    }
+
+    private static X509Certificate2 PromptForCertificatePfx(IOStreamSet ioStreamSet)
+    {
+        var pfxPathPrompt = new InputPrompt(
+            ioStreamSet,
+            "Enter path to certificate PFX file: ",
+            validator: File.Exists);
+        var pfxPath = pfxPathPrompt.GetValue();
+
+        var pfxPasswordPrompt = new InputPrompt(
+            ioStreamSet,
+            "Enter password for PFX: ",
+            isConfidentialInput: true,
+            allowEmptyInput: true);
+        var pfxPassword = pfxPasswordPrompt.GetValue();
+
+        X509Certificate2 certificate = null;
+
+        try
+        {
+            certificate = new X509Certificate2(pfxPath, pfxPassword, X509KeyStorageFlags.Exportable);
+        }
+        catch (CryptographicException e)
+        {
+            throw new AegisUserErrorException(
+                "The password to the PFX file is not correct.",
+                isRecoverable: true,
+                innerException: e);
+        }
+
+        if (!certificate.HasPrivateKey)
+        {
+            throw new AegisUserErrorException(
+                "The PFX file does not contain a private key.",
+                isRecoverable: true);
+        }
+
+        return certificate;
     }
 
     private static bool TryGetCertificateFromStore(
