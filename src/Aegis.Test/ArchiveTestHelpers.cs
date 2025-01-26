@@ -22,6 +22,11 @@ public static class ArchiveTestHelpers
         /// The path to a basic JPG for use in tests.
         /// </summary>
         public const string SimpleImageFilePath = @"SampleFiles\SimpleImage.jpg";
+
+        /// <summary>
+        /// The path to an existing Aegis archive file with known contents, used for compatibility tests.
+        /// </summary>
+        public const string KnownArchiveFile = @"SampleFiles\KnownArchive.ags";
     }
 
     /// <summary>
