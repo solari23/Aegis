@@ -81,6 +81,12 @@ public class AegisVirtualFilePath : IEquatable<AegisVirtualFilePath>, IComparabl
     /// <inheritdoc/>
     public override int GetHashCode() => this.FullPath.GetHashCode(StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Allows implicit conversion of strings to <see cref="AegisVirtualFilePath"/> for cleane code.
+    /// </summary>
+    /// <param name="path">The string representation of the virtual path.</param>
+    public static implicit operator AegisVirtualFilePath(string path) => new AegisVirtualFilePath(path);
+
     #region Implementation of IEquatable and IComparable
 
     /// <inheritdoc/>
