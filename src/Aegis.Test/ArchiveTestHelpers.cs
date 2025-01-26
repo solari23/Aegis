@@ -1,4 +1,5 @@
 ﻿using Aegis.Core;
+using Aegis.Core.FileSystem;
 using Aegis.Models;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -81,5 +82,28 @@ public static class ArchiveTestHelpers
         {
             File.Delete(testFilePath);
         }
+    }
+
+    /// <summary>
+    /// Simplifies the process of extracting a file from an archive and verifying its contents against a reference file.
+    /// </summary>
+    public static void ExtractAndCheckFileContents(
+        AegisArchive archive,
+        AegisFileInfo file,
+        string extractionDirectory,
+        string referenceFilePath)
+    {
+        var extractFullPath = Path.Combine(extractionDirectory, Guid.NewGuid().ToString("N"));
+
+        // The 'using' block ensures that the file write handle is closed before we read for comparison.
+        using (var extractStream = File.OpenWrite(extractFullPath))
+        {
+            archive.ExtractFile(file, extractStream);
+        }
+
+        CompareFileToReference(
+            referenceFilePath: referenceFilePath,
+            testFilePath: extractFullPath,
+            deleteTestFile: true);
     }
 }
