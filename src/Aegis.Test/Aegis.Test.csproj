@@ -20,10 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SampleFiles\SimpleImage.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="SampleFiles\SimpleTextFile.txt">
+    <None Update="SampleFiles\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -157,13 +157,192 @@ public class AegisArchiveTests
     [Description("Tests an arhcive containing multiple files.")]
     public void TestArchive_MultipleFiles()
     {
-        // TODO: Implement this test
+        // 1. Create a new archive, add 2 files to it
+        // 2. Extract the files, ensure they are identical to originals
+        // 3. Close and reopen the archive
+        // 4. Extract the files, ensure they are identical to originals
+        // 5. Delete one of the files
+        // 6. Ensure the other file is still in the archive
+
+        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory, SecretKind.Password))
+        {
+            // The achive should be created in unlocked state.
+            Assert.IsFalse(archive.IsLocked);
+
+            AegisFileInfo file1 = archive.PutFile(
+                new AegisVirtualFilePath("txt/text.txt"),
+                File.OpenRead(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath));
+
+            AegisFileInfo file2 = archive.PutFile(
+                new AegisVirtualFilePath("img/img.jpg"),
+                File.OpenRead(ArchiveTestHelpers.SampleFiles.SimpleImageFilePath));
+
+            var extractPath1 = Path.Combine(this.WorkingDirectory, "Text_out1.txt");
+            using (var extractStream = File.OpenWrite(extractPath1))
+            {
+                archive.ExtractFile(file1, extractStream);
+            }
+
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                testFilePath: extractPath1,
+                deleteTestFile: true);
+
+            var extractPath2 = Path.Combine(this.WorkingDirectory, "Img_out1.jpg");
+            using (var extractStream = File.OpenWrite(extractPath2))
+            {
+                archive.ExtractFile(file2, extractStream);
+            }
+
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleImageFilePath,
+                testFilePath: extractPath2,
+                deleteTestFile: true);
+        }
+   
+        using (var reopenedArchive = AegisArchive.Load(
+            ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory)))
+        {
+            reopenedArchive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.Password));
+
+            AegisFileInfo file1 = reopenedArchive.GetFileInfo(
+                new AegisVirtualFilePath("txt/text.txt"));
+            AegisFileInfo file2 = reopenedArchive.GetFileInfo(
+                new AegisVirtualFilePath("img/img.jpg"));
+
+            var extractPath1 = Path.Combine(this.WorkingDirectory, "Text_out2.txt");
+            using (var extractStream = File.OpenWrite(extractPath1))
+            {
+                reopenedArchive.ExtractFile(file1, extractStream);
+            }
+
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                testFilePath: extractPath1,
+                deleteTestFile: true);
+
+            var extractPath2 = Path.Combine(this.WorkingDirectory, "Img_out2.jpg");
+            using (var extractStream = File.OpenWrite(extractPath2))
+            {
+                reopenedArchive.ExtractFile(file2, extractStream);
+            }
+
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleImageFilePath,
+                testFilePath: extractPath2,
+                deleteTestFile: true);
+
+            reopenedArchive.RemoveFile(file2.Path);
+            Assert.IsNull(
+                reopenedArchive.GetFileInfo(file2.Path),
+                "The deleted file was found in archive, searching with v-path!");
+            Assert.IsNull(
+                reopenedArchive.GetFileInfo(file2.FileId),
+                "The deleted file was found in archive, searching with file ID!");
+
+            Assert.IsNotNull(
+                reopenedArchive.GetFileInfo(file1.Path),
+                "The retained file was not found after the other was deleted, searching with v-path!");
+            Assert.IsNotNull(
+                reopenedArchive.GetFileInfo(file1.FileId),
+                "The retained file was not found after the other was deleted, searching with file ID!");
+
+            var extractPath3 = Path.Combine(this.WorkingDirectory, "Text_out3.txt");
+            using (var extractStream = File.OpenWrite(extractPath3))
+            {
+                reopenedArchive.ExtractFile(file1, extractStream);
+            }
+
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                testFilePath: extractPath3,
+                deleteTestFile: true);
+        }
     }
 
     [TestMethod]
     [Description("Tests authorizing a second key on an archive.")]
     public void TestArchive_AuthorizeSecondKey()
     {
-        // TODO: Implement this test
+        // 1. Create a new archive with password
+        // 2. Add a file to it
+        // 3. Authorize a certificate key
+        // 4. Close the archive
+        // 5. Reopen the archive with the password
+        // 6. Close the archive
+        // 7. Reopen the archive with the certificate key
+        // 8. Extract the file and verify it matches the original
+        // 9. De-authorize the password
+        // 10. Close the archive
+        // 11. Attempt to open with password - should fail
+        // 12. Reopen the archive with the certificate key.
+        // 13. Extract the file and verify it matches the original
+
+        AegisFileInfo file = null;
+
+        // 1 -> 4
+        using (var archive = ArchiveTestHelpers.CreateNewEmptyArchive(this.WorkingDirectory, SecretKind.Password))
+        {
+            file = archive.PutFile(
+                new AegisVirtualFilePath("txt/text.txt"),
+                File.OpenRead(ArchiveTestHelpers.SampleFiles.SimpleTextFilePath));
+
+            archive.AuthorizeNewKey(
+                TestSecrets.GetDefaultUserKeyAuthorizationParameters(SecretKind.RsaKeyFromCertificate));
+        }
+
+        // 5 -> 6
+        using (var archive = AegisArchive.Load(ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory)))
+        {
+            Assert.IsTrue(archive.IsLocked);
+
+            archive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.Password));
+            Assert.IsFalse(archive.IsLocked);
+            Assert.IsNotNull(archive.GetFileInfo(file.FileId));
+        }
+
+        // 7 -> 10
+        using (var archive = AegisArchive.Load(ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory)))
+        {
+            Assert.IsTrue(archive.IsLocked);
+            archive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.RsaKeyFromCertificate));
+            Assert.IsFalse(archive.IsLocked);
+
+            var extractPath = Path.Combine(this.WorkingDirectory, "Text_out1.txt");
+            using (var extractStream = File.OpenWrite(extractPath))
+            {
+                archive.ExtractFile(file, extractStream);
+            }
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                testFilePath: extractPath,
+                deleteTestFile: true);
+
+            var passwordAuthorizationRecord = archive
+                .GetUserKeyAuthorizations()
+                .Where(az => az.SecretMetadata.SecretKind == SecretKind.Password).First();
+            archive.RevokeKey(passwordAuthorizationRecord.AuthorizationId);
+        }
+
+        // 11 -> 13
+        using (var archive = AegisArchive.Load(ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory)))
+        {
+            Assert.ThrowsException<UnauthorizedException>(
+                () => archive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.Password)));
+            Assert.IsTrue(archive.IsLocked);
+
+            archive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.RsaKeyFromCertificate));
+            Assert.IsFalse(archive.IsLocked);
+
+            var extractPath = Path.Combine(this.WorkingDirectory, "Text_out2.txt");
+            using (var extractStream = File.OpenWrite(extractPath))
+            {
+                archive.ExtractFile(file, extractStream);
+            }
+            ArchiveTestHelpers.CompareFileToReference(
+                referenceFilePath: ArchiveTestHelpers.SampleFiles.SimpleTextFilePath,
+                testFilePath: extractPath,
+                deleteTestFile: true);
+        }
     }
 }
