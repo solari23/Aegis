@@ -88,6 +88,10 @@ public class CompatibilityTests
 
         // Run checks with new password.
         CheckKnownFileExtractions(testArchiveFileSettings, newPasswordSecret, this.WorkingDirectory);
+
+        // If we made it this far, the test has passed.
+        // No need to keep the test archive around for debugging, so clean it up.
+        File.Delete(testArchivePath);
     }
 
     private static void CheckKnownFileExtractions(
