@@ -28,7 +28,7 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
     // GUID *pCancellationId; ==> Not Supported.
 
-    // TODO: Add support for WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS.pAllowCredentialList
+    // TODO [P1]: Add support for WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS.pAllowCredentialList
     // PWEBAUTHN_CREDENTIAL_LIST pAllowCredentialList ==> Not Supported.
 
     public uint dwCredLargeBlobOperation = 0;

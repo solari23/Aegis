@@ -14,6 +14,7 @@ namespace Aegis.Passkeys.Windows;
 [SupportedOSPlatform("windows")]
 internal class WindowsPasskeyProvider : IPasskeyProvider
 {
+    // TODO [Fit & Finish]: Remove debug methods.
     #region Debug To Delete
     public void Dbg1()
     {
@@ -46,7 +47,6 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
             credentialListHandle?.Dispose();
         }
     }
-
     public void Dbg2()
     {
         var collectedClientData = CollectedClientData.ForGetAssertionCall(
@@ -140,7 +140,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
             if (hr != HResult.S_OK)
             {
                 string errorString = Win32Interop.WebAuthNGetErrorName(hr);
-                // TODO: Throw meaningful exception.
+                // TODO [Fit & Finish]: Throw meaningful exception.
                 throw new Exception();
             }
 
@@ -148,7 +148,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
             if (assertion.pHmacSecret is null)
             {
-                // TODO: Throw meaningful exception.
+                // TODO [Fit & Finish]: Throw meaningful exception.
                 throw new Exception();
             }
 

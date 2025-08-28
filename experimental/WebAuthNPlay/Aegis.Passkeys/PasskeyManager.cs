@@ -10,8 +10,11 @@ namespace Aegis.Passkeys;
 /// </summary>
 public class PasskeyManager
 {
-    public void Do() => this.PasskeyProvider.Dbg1();
-    public void Do2() => this.PasskeyProvider.Dbg2();
+    // TODO [Fit & Finish]: Remove debug methods.
+    [SupportedOSPlatform("windows")]
+    public void Do() => new WindowsPasskeyProvider().Dbg1();
+    [SupportedOSPlatform("windows")]
+    public void Do2() => new WindowsPasskeyProvider().Dbg2();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PasskeyManager"/> class.
@@ -56,5 +59,19 @@ public class PasskeyManager
     /// <param name="secondSalt">An optional second salt to use in the HMAC secret generation.</param>
     /// <returns>The generated HMAC secrets.</returns>
     public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
-        => this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt);
+    {
+        ArgumentNullException.ThrowIfNull(rpInfo);
+
+        if (salt.InternalSecretData.Length != 32)
+        {
+            throw new ArgumentException("The salt must be exactly 32 bytes long.", nameof(salt));
+        }
+
+        if (secondSalt is not null && secondSalt.InternalSecretData.Length != 32)
+        {
+            throw new ArgumentException("The second salt must be exactly 32 bytes long.", nameof(secondSalt));
+        }
+
+        return this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt);
+    }
 }
