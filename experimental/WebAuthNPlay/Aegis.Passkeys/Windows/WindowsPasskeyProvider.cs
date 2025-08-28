@@ -104,4 +104,67 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
     /// <inheritdoc />
     public bool IsHmacSecretSupported() => Win32ApiVersion.Value >= WEBAUTHN_API_VERSION.WEBAUTHN_API_VERSION_6;
+
+    /// <inheritdoc />
+    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
+    {
+        var collectedClientData = CollectedClientData.ForGetAssertionCall(
+            challenge: RandomNumberGenerator.GetBytes(32),  // We don't need the actual assertion, so just use a random challenge.
+            origin: rpInfo.Origin);
+        WEBAUTHN_CLIENT_DATA clientData = new()
+        {
+            clientDataJSON = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(collectedClientData)),
+        };
+        WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS options = new()
+        {
+            pHmacSecretSaltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES
+            {
+                pGlobalHmacSalt = new WEBAUTHN_HMAC_SECRET_SALT
+                {
+                    first = salt.InternalSecretData,
+                    second = secondSalt?.InternalSecretData,
+                },
+            }
+        };
+
+        WEBAUTHN_ASSERTION.SafeHandle? assertionSafeHandle = null;
+        try
+        {
+            HResult hr = Win32Interop.WebAuthNAuthenticatorGetAssertion(
+                this.WindowHandle,
+                rpInfo.Id,
+                ref clientData,
+                ref options,
+                out assertionSafeHandle);
+
+            if (hr != HResult.S_OK)
+            {
+                string errorString = Win32Interop.WebAuthNGetErrorName(hr);
+                // TODO: Throw meaningful exception.
+                throw new Exception();
+            }
+
+            var assertion = assertionSafeHandle.ToManaged()!.Value;
+
+            if (assertion.pHmacSecret is null)
+            {
+                // TODO: Throw meaningful exception.
+                throw new Exception();
+            }
+
+            var hmacSecretFirst = new HmacSecret(assertion.pHmacSecret.Value.first);
+            var hmacSecretSecond = assertion.pHmacSecret.Value.second is null
+                ? null
+                : new HmacSecret(assertion.pHmacSecret.Value.second);
+            return new GetHmacSecretResponse
+            {
+                First = hmacSecretFirst,
+                Second = hmacSecretSecond,
+            };
+        }
+        finally
+        {
+            assertionSafeHandle?.Dispose();
+        }
+    }
 }

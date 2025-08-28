@@ -13,16 +13,26 @@ public class PasskeyManager
     public void Do() => this.PasskeyProvider.Dbg1();
     public void Do2() => this.PasskeyProvider.Dbg2();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PasskeyManager"/> class.
+    /// </summary>
     public PasskeyManager()
     {
         if (OperatingSystem.IsWindowsVersionAtLeast(10))
         {
             this.PasskeyProvider = new WindowsPasskeyProvider();
         }
-
-        this.PasskeyProvider = new UnsupportedOSPasskeyProvider();
+        else
+        {
+            this.PasskeyProvider = new UnsupportedOSPasskeyProvider();
+        }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PasskeyManager"/> class with a window handle.
+    /// </summary>
+    /// <param name="windowHandlePointer">The pointer to the window handle (HWND) to use for UI prompts.</param>
+    /// <remarks>This constructor is only supported on Windows platforms.</remarks>
     [SupportedOSPlatform("windows")]
     public PasskeyManager(IntPtr windowHandlePointer)
     {
@@ -37,4 +47,14 @@ public class PasskeyManager
     /// </summary>
     /// <returns>True if HMAC secrets are supported, false otherwise.</returns>
     public bool IsHmacSecretSupported() => this.PasskeyProvider.IsHmacSecretSupported();
+
+    /// <summary>
+    /// Generates an HMAC secret from a passkey authenticator.
+    /// </summary>
+    /// <param name="rpInfo">Details about the Relying Party requesting the secret.</param>
+    /// <param name="salt">The first salt to use in the HMAC secret generation.</param>
+    /// <param name="secondSalt">An optional second salt to use in the HMAC secret generation.</param>
+    /// <returns>The generated HMAC secrets.</returns>
+    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
+        => this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt);
 }

@@ -51,4 +51,10 @@ internal static partial class Win32Interop
     public static partial HResult WebAuthNGetPlatformCredentialList(
         ref WEBAUTHN_GET_CREDENTIALS_OPTIONS pGetCredentialsOptions,
         out WEBAUTHN_CREDENTIAL_DETAILS_LIST.SafeHandle ppCredentialDetailsList);
+
+    /// <summary>
+    /// https://learn.microsoft.com/en-us/windows/win32/api/webauthn/nf-webauthn-webauthngeterrorname
+    /// </summary>
+    [LibraryImport("webauthn.dll", StringMarshalling = StringMarshalling.Utf16), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial ConstString WebAuthNGetErrorName(HResult hr);
 }

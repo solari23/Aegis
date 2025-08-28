@@ -10,4 +10,8 @@ internal class UnsupportedOSPasskeyProvider : IPasskeyProvider
 
     /// <inheritdoc />
     public bool IsHmacSecretSupported() => false;
+
+    /// <inheritdoc />
+    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
+        => throw new NotImplementedException();
 }
