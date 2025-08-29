@@ -8,7 +8,7 @@ internal readonly struct SizePrefixedArrayStruct(uint numElements, nint pointer)
 
     public static unsafe void Free(nint ptr) => NativeMemory.Free((void*)ptr);
 
-    public static unsafe SizePrefixedArrayStruct FromContiguousArray<TManaged, TUnmanaged>(
+    public static unsafe SizePrefixedArrayStruct FromArrayToContiguous<TManaged, TUnmanaged>(
         TManaged[] input,
         Func<TManaged, TUnmanaged> elementMarshaller)
         where TManaged : struct

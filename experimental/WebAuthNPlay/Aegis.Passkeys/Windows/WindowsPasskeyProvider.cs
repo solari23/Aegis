@@ -33,7 +33,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     public bool IsHmacSecretSupported() => Win32ApiVersion.Value >= WEBAUTHN_API_VERSION.WEBAUTHN_API_VERSION_6;
 
     /// <inheritdoc />
-    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
+    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt)
     {
         var collectedClientData = CollectedClientData.ForGetAssertionCall(
             challenge: RandomNumberGenerator.GetBytes(32),  // We don't need the actual assertion, so just use a random challenge.
@@ -42,6 +42,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
         {
             clientDataJSON = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(collectedClientData)),
         };
+
         WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS options = new()
         {
             pHmacSecretSaltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES

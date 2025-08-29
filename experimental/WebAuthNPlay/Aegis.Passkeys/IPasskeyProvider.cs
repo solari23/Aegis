@@ -10,7 +10,7 @@ internal interface IPasskeyProvider
     /// <summary>
     /// Generates an HMAC secret from a passkey authenticator.
     /// </summary>
-    GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null);
+    GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt);
 
     /// <summary>
     /// Makes a new passkey credential with an HMAC secret.

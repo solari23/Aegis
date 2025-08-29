@@ -33,7 +33,7 @@ internal struct WEBAUTHN_COSE_CREDENTIAL_PARAMETERS
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS managed)
         {
-            var marshalledCredentialParameters = SizePrefixedArrayStruct.FromContiguousArray(
+            var marshalledCredentialParameters = SizePrefixedArrayStruct.FromArrayToContiguous(
                 managed.credentialParameters,
                 WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.ConvertToUnmanaged);
 

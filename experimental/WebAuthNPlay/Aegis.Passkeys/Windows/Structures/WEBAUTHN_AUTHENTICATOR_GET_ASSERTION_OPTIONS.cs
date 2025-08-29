@@ -111,11 +111,11 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                 dwVersion = managed.dwVersion,
                 dwTimeoutMilliseconds = managed.dwTimeoutMilliseconds,
 
-                CredentialList = SizePrefixedArrayStruct.FromContiguousArray(
+                CredentialList = SizePrefixedArrayStruct.FromArrayToContiguous(
                     managed.CredentialList,
                     WEBAUTHN_CREDENTIAL.Marshaller.ConvertToUnmanaged),
 
-                Extensions = SizePrefixedArrayStruct.FromContiguousArray(
+                Extensions = SizePrefixedArrayStruct.FromArrayToContiguous(
                     managed.Extensions,
                     WEBAUTHN_EXTENSION.Marshaller.ConvertToUnmanaged),
 
