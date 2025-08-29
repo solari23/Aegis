@@ -12,7 +12,6 @@ internal struct WEBAUTHN_EXTENSION
     // PVOID pvExtension;
     public byte[]? extension;
 
-
     [CustomMarshaller(typeof(WEBAUTHN_EXTENSION), MarshalMode.ManagedToUnmanagedIn, typeof(Marshaller))]
     [CustomMarshaller(typeof(WEBAUTHN_EXTENSION), MarshalMode.ManagedToUnmanagedOut, typeof(Marshaller))]
     internal static unsafe class Marshaller

@@ -14,7 +14,9 @@ internal struct ConstString
     {
         internal struct Unmanaged
         {
+#pragma warning disable 0649
             public ushort* pstr;
+#pragma warning restore 0649
         }
 
         public static ConstString ConvertToManaged(Unmanaged unmanaged)

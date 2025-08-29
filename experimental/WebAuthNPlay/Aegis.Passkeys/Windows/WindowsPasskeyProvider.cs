@@ -49,41 +49,51 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     }
     public void Dbg2()
     {
-        var collectedClientData = CollectedClientData.ForGetAssertionCall(
-            challenge: RandomNumberGenerator.GetBytes(32),
-            origin: "https://github.com");
+        WEBAUTHN_RP_ENTITY_INFORMATION rp = new()
+        {
+            pwszId = "alkerTestRP.local",
+            pwszName = "Alker Test RP",
+        };
+        WEBAUTHN_USER_ENTITY_INFORMATION user = new()
+        {
+            pwszName = "alkerUser",
+            pwszDisplayName = "Alker User",
+            id = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF],
+        };
+        WEBAUTHN_COSE_CREDENTIAL_PARAMETERS credParams = WEBAUTHN_COSE_CREDENTIAL_PARAMETERS.MakeDefault();
 
+        var collectedClientData = CollectedClientData.ForMakeCredentialCall(
+            challenge: RandomNumberGenerator.GetBytes(32),
+            origin: "https://alkerTestRP.local");
         WEBAUTHN_CLIENT_DATA clientData = new()
         {
             clientDataJSON = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(collectedClientData)),
         };
-        WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS options = new();
-        options.pHmacSecretSaltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES
+
+        WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS options = new()
         {
-            pGlobalHmacSalt = new WEBAUTHN_HMAC_SECRET_SALT
-            {
-                first = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF,
-                         0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF],
-                second = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF,
-                          0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xED],
-            }
+            dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
+            dwUserVerificationRequirement = UserVerificationRequirement.Discouraged,
+            bEnablePrf = true,
         };
 
-        WEBAUTHN_ASSERTION.SafeHandle? assertionSafeHandle = null;
+        WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
         try
         {
-            HResult hr = Win32Interop.WebAuthNAuthenticatorGetAssertion(
+            HResult hr = Win32Interop.WebAuthNAuthenticatorMakeCredential(
                 this.WindowHandle,
-                "alkerTestRP.local",
+                ref rp,
+                ref user,
+                ref credParams,
                 ref clientData,
                 ref options,
-                out assertionSafeHandle);
+                out attestationSafeHandle);
 
-            var assertion = assertionSafeHandle.ToManaged();
+            var attestation = attestationSafeHandle.ToManaged();
         }
         finally
         {
-            assertionSafeHandle?.Dispose();
+            attestationSafeHandle?.Dispose();
         }
     }
     #endregion

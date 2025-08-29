@@ -8,5 +8,6 @@ internal enum HResult : uint
 
     NTE_PERM = 0x80090010,
     NTE_NOT_FOUND = 0x80090011,
+    NTE_INVALID_PARAMETER = 0x80090027,
     NTE_USER_CANCELLED = 0x80090036,
 }

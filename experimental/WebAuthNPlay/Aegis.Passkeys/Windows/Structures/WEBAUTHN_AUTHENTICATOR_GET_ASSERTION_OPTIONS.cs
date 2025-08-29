@@ -26,7 +26,7 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
     // BOOL *pbU2fAppId ==> Not Supported.
 
-    // GUID *pCancellationId; ==> Not Supported.
+    // GUID *pCancellationId ==> Not Supported.
 
     // TODO [P1]: Add support for WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS.pAllowCredentialList
     // PWEBAUTHN_CREDENTIAL_LIST pAllowCredentialList ==> Not Supported.
@@ -87,9 +87,9 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
             public uint cbCredLargeBlob;
             public IntPtr pbCredLargeBlob;
             public IntPtr pHmacSecretSaltValues;
-            public bool bBrowserInPrivateMode;
+            public int bBrowserInPrivateMode;
             public IntPtr pLinkedDevice;
-            public bool bAutoFill;
+            public int bAutoFill;
             public uint cbJsonExt;
             public IntPtr pbJsonExt;
         }
@@ -130,9 +130,9 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                 cbCredLargeBlob = marshalledCredLargeBlob.NumElements,
                 pbCredLargeBlob = marshalledCredLargeBlob.Pointer,
                 pHmacSecretSaltValues = marshalledHmacSecretValues,
-                bBrowserInPrivateMode = managed.bBrowserInPrivateMode,
+                bBrowserInPrivateMode = managed.bBrowserInPrivateMode ? 1 : 0,
                 pLinkedDevice = IntPtr.Zero,            // Not Supported.
-                bAutoFill = managed.bAutoFill,
+                bAutoFill = managed.bAutoFill ? 1 : 0,
                 cbJsonExt = marshalledJsonExt.NumElements,
                 pbJsonExt = marshalledJsonExt.Pointer,
             };
@@ -154,7 +154,6 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                     *(WEBAUTHN_HMAC_SECRET_SALT_VALUES.Marshaller.Unmanaged*)unmanaged.pHmacSecretSaltValues);
                 NativeMemory.Free((void*)unmanaged.pHmacSecretSaltValues);
             }
-            
         }
     }
 }
