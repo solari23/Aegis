@@ -11,4 +11,8 @@ internal class UnsupportedOSPasskeyProvider : IPasskeyProvider
     /// <inheritdoc />
     public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
         => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public MakeCredentialResponse MakeCredentialWithHmacSecret(RelyingPartyInfo rpInfo, UserEntityInfo userInfo, UserVerificationRequirement userVerificationRequirement)
+        => throw new NotImplementedException();
 }

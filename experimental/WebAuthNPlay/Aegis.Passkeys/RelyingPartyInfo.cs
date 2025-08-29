@@ -22,4 +22,9 @@ public class RelyingPartyInfo
     /// A human-friendly name for the Relying Party (optional).
     /// </summary>
     public string? DisplayName { get; init; }
+
+    /// <summary>
+    /// A URL to an icon image (optional).
+    /// </summary>
+    public string? IconUrl { get; init; }
 }

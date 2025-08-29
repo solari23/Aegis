@@ -1,4 +1,6 @@
-﻿using Aegis.Passkeys;
+﻿using System.Text;
+
+using Aegis.Passkeys;
 
 namespace WebAuthNPlay
 {
@@ -6,11 +8,32 @@ namespace WebAuthNPlay
     {
         static void Main(string[] args)
         {
-            var pkman = new PasskeyManager();
-            //pkman.Do();
-            pkman.Do2();
-            return;
+            MakeCredential();
+            GetHmacSecret();
+        }
 
+        static Identifier MakeCredential()
+        {
+            var pkman = new PasskeyManager();
+            var rpInfo = new RelyingPartyInfo
+            {
+                Id = "alkerTestRP.local",
+                DisplayName = "Alker Test RP",
+                Origin = "https://alkerTestRP.local",
+            };
+            var userInfo = new UserEntityInfo
+            {
+                Id = new Identifier(Encoding.UTF8.GetBytes("alker@alkerTestRP.local")),
+                Name = "alker@alkerTestRP.local",
+                DisplayName = "Alker User",
+            };
+            var makeCredResponse = pkman.MakeCredentialWithHmacSecret(rpInfo, userInfo);
+            return makeCredResponse.NewCredentialId;
+        }
+
+        static void GetHmacSecret()
+        {
+            var pkman = new PasskeyManager();
             using var hmacSalt = new HmacSecret(
                 [
                     0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF,

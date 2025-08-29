@@ -15,102 +15,6 @@ namespace Aegis.Passkeys.Windows;
 [SupportedOSPlatform("windows")]
 internal class WindowsPasskeyProvider : IPasskeyProvider
 {
-    // TODO [Fit & Finish]: Remove debug methods.
-    #region Debug To Delete
-    public void Dbg1()
-    {
-        Console.WriteLine($"VNum: {Win32Interop.WebAuthNGetApiVersionNumber()}");
-
-        WEBAUTHN_GET_CREDENTIALS_OPTIONS getCredOptions = new()
-        {
-            pwszRpId = "login.microsoft.com",
-            bBrowserInPrivateMode = false,
-        };
-
-        WEBAUTHN_CREDENTIAL_DETAILS_LIST.SafeHandle? credentialListHandle = null;
-        try
-        {
-            var foo = BitConverter.IsLittleEndian;
-            HResult hr = Win32Interop.WebAuthNGetPlatformCredentialList(ref getCredOptions, out credentialListHandle);
-            var credsList = credentialListHandle.ToManaged()?.credentials!;
-
-            foreach (var cred in credsList)
-            {
-                Console.WriteLine("CRED: ");
-                Console.WriteLine($"    RP_ID: {cred.pRpInformation.pwszId}");
-                Console.WriteLine($"    RP_Name: {cred.pRpInformation.pwszName}");
-                Console.WriteLine($"    USER_Name: {cred.pUserInformation.pwszName}");
-                Console.WriteLine($"    USER_DName: {cred.pUserInformation.pwszDisplayName}");
-            }
-        }
-        finally
-        {
-            credentialListHandle?.Dispose();
-        }
-    }
-    public void Dbg2()
-    {
-        WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
-        {
-            pwszId = "alkerTestRP.local",
-            pwszName = "Alker Test RP",
-        };
-        WEBAUTHN_USER_ENTITY_INFORMATION userEntityInfo = new()
-        {
-            pwszName = "alkerUser",//@alkerTestRP.local",
-            pwszDisplayName = "Alker User",
-            id = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEE],
-        };
-        WEBAUTHN_COSE_CREDENTIAL_PARAMETERS credentialParams = WEBAUTHN_COSE_CREDENTIAL_PARAMETERS.MakeDefault();
-
-        var collectedClientData = CollectedClientData.ForMakeCredentialCall(
-            challenge: RandomNumberGenerator.GetBytes(32),
-            origin: "https://alkerTestRP.local");
-        WEBAUTHN_CLIENT_DATA clientData = new()
-        {
-            clientDataJSON = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(collectedClientData)),
-        };
-
-        WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS options = new()
-        {
-            bRequireResidentKey = true,
-            //dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
-            dwUserVerificationRequirement = UserVerificationRequirement.Discouraged,
-
-            dwFlags = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG,
-
-            Extensions = [new HmacSecretExtensions.Input().ToRawExtensionData()],
-        };
-
-        WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
-        try
-        {
-            HResult hr = Win32Interop.WebAuthNAuthenticatorMakeCredential(
-                this.WindowHandle,
-                ref rpEntityInfo,
-                ref userEntityInfo,
-                ref credentialParams,
-                ref clientData,
-                ref options,
-                out attestationSafeHandle);
-
-            var attestation = attestationSafeHandle.ToManaged()!.Value;
-
-            var hmacSecretExtension = OutputExtension.ParseRawExtensions(attestation.Extensions)
-                .Where(ext => ext is HmacSecretExtensions.Output)
-                .FirstOrDefault() as HmacSecretExtensions.Output;
-            if (hmacSecretExtension is null || !hmacSecretExtension.WasHmacCredentialMade)
-            {
-                throw new Exception();
-            }
-        }
-        finally
-        {
-            attestationSafeHandle?.Dispose();
-        }
-    }
-    #endregion
-
     public WindowsPasskeyProvider() : this(Win32Interop.GetForegroundWindow())
     {
         // Empty.
@@ -188,6 +92,95 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
         finally
         {
             assertionSafeHandle?.Dispose();
+        }
+    }
+
+    /// <inheritdoc />
+    public MakeCredentialResponse MakeCredentialWithHmacSecret(
+        RelyingPartyInfo rpInfo,
+        UserEntityInfo userInfo,
+        UserVerificationRequirement userVerificationRequirement)
+    {
+        WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
+        {
+            pwszId = rpInfo.Id,
+            pwszName = rpInfo.DisplayName,
+            pwszIcon = rpInfo.IconUrl,
+        };
+
+        WEBAUTHN_USER_ENTITY_INFORMATION userEntityInfo = new()
+        {
+            id = userInfo.Id.internalValue,
+            pwszName = userInfo.Name,
+            pwszDisplayName = userInfo.DisplayName,
+            pwszIcon = userInfo.IconUrl,
+        };
+
+        WEBAUTHN_COSE_CREDENTIAL_PARAMETERS credentialParams = WEBAUTHN_COSE_CREDENTIAL_PARAMETERS.MakeDefault();
+
+        var collectedClientData = CollectedClientData.ForMakeCredentialCall(
+            challenge: RandomNumberGenerator.GetBytes(32), // We don't need the actual assertion, so just use a random challenge.
+            origin: rpInfo.Origin);
+        WEBAUTHN_CLIENT_DATA clientData = new()
+        {
+            clientDataJSON = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(collectedClientData)),
+        };
+
+        WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS options = new()
+        {
+            // A resident key is required to make this work.
+            bRequireResidentKey = true,
+
+            // HMAC Secret is not implemented by Windows platform. We're looking for a YubiKey.
+            dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
+
+            // Add the extension to create HMAC secret.
+            dwFlags = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG,
+            Extensions = [new HmacSecretExtensions.Input().ToRawExtensionData()],
+
+            // Other options.
+            dwUserVerificationRequirement = userVerificationRequirement,
+        };
+
+        WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
+        try
+        {
+            HResult hr = Win32Interop.WebAuthNAuthenticatorMakeCredential(
+                this.WindowHandle,
+                ref rpEntityInfo,
+                ref userEntityInfo,
+                ref credentialParams,
+                ref clientData,
+                ref options,
+                out attestationSafeHandle);
+
+            if (hr != HResult.S_OK)
+            {
+                string errorString = Win32Interop.WebAuthNGetErrorName(hr);
+                // TODO [Fit & Finish]: Throw meaningful exception.
+                throw new Exception();
+            }
+
+            var attestation = attestationSafeHandle.ToManaged()!.Value;
+
+            var hmacSecretExtension = OutputExtension.ParseRawExtensions(attestation.Extensions)
+                .Where(ext => ext is HmacSecretExtensions.Output)
+                .FirstOrDefault() as HmacSecretExtensions.Output;
+            if (hmacSecretExtension is null || !hmacSecretExtension.WasHmacCredentialMade)
+            {
+                // TODO [Fit & Finish]: Throw meaningful exception.
+                throw new Exception();
+            }
+
+            var response = new MakeCredentialResponse
+            {
+                NewCredentialId = new Identifier(attestation.credentialId),
+            };
+            return response;
+        }
+        finally
+        {
+            attestationSafeHandle?.Dispose();
         }
     }
 }

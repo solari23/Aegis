@@ -9,7 +9,7 @@ internal struct WEBAUTHN_RP_ENTITY_INFORMATION()
 
     public string pwszId = string.Empty;
 
-    public string pwszName = string.Empty;
+    public string? pwszName = string.Empty;
 
     public string? pwszIcon;
 

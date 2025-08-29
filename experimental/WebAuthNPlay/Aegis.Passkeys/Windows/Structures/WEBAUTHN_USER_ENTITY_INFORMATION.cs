@@ -17,7 +17,7 @@ internal struct WEBAUTHN_USER_ENTITY_INFORMATION()
 
     public string? pwszIcon = null;
 
-    public string pwszDisplayName = string.Empty;
+    public string? pwszDisplayName = string.Empty;
 
     [CustomMarshaller(typeof(WEBAUTHN_USER_ENTITY_INFORMATION), MarshalMode.ManagedToUnmanagedRef, typeof(Marshaller))]
     internal static unsafe class Marshaller

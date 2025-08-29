@@ -10,12 +10,6 @@ namespace Aegis.Passkeys;
 /// </summary>
 public class PasskeyManager
 {
-    // TODO [Fit & Finish]: Remove debug methods.
-    [SupportedOSPlatform("windows")]
-    public void Do() => new WindowsPasskeyProvider().Dbg1();
-    [SupportedOSPlatform("windows")]
-    public void Do2() => new WindowsPasskeyProvider().Dbg2();
-
     /// <summary>
     /// Initializes a new instance of the <see cref="PasskeyManager"/> class.
     /// </summary>
@@ -73,5 +67,26 @@ public class PasskeyManager
         }
 
         return this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt);
+    }
+
+    /// <summary>
+    /// Makes a new passkey credential with an HMAC secret.
+    /// 
+    /// The user may save the created passkey to a device that does not support HMAC secrets.
+    /// In that case, this method will throw.
+    /// </summary>
+    /// <param name="rpInfo">Details about the Relying Party that the credential will be registered for.</param>
+    /// <param name="userInfo">Details about the user that the credential will be registered for.</param>
+    /// <param name="userVerificationRequirement">A requested <see cref="UserVerificationRequirement"/>, which may not necessarily be honoured.</param>
+    /// <returns>A <see cref="MakeCredentialResponse"/> object instance with information about the newly created credential.</returns>
+    public MakeCredentialResponse MakeCredentialWithHmacSecret(
+        RelyingPartyInfo rpInfo,
+        UserEntityInfo userInfo,
+        UserVerificationRequirement userVerificationRequirement = UserVerificationRequirement.Discouraged)
+    {
+        ArgumentNullException.ThrowIfNull(rpInfo);
+        ArgumentNullException.ThrowIfNull(userInfo);
+
+        return this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, userVerificationRequirement);
     }
 }
