@@ -9,7 +9,6 @@ namespace WebAuthNPlay
             var pkman = new PasskeyManager();
             //pkman.Do();
             pkman.Do2();
-
             return;
 
             using var hmacSalt = new HmacSecret(

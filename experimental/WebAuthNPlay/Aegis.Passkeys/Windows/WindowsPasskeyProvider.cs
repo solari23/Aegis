@@ -5,6 +5,7 @@ using System.Text;
 
 using Aegis.Passkeys.WebAuthNInterop;
 using Aegis.Passkeys.Windows.Structures;
+using Aegis.Passkeys.Windows.Extensions;
 
 namespace Aegis.Passkeys.Windows;
 
@@ -49,18 +50,18 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     }
     public void Dbg2()
     {
-        WEBAUTHN_RP_ENTITY_INFORMATION rp = new()
+        WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
         {
             pwszId = "alkerTestRP.local",
             pwszName = "Alker Test RP",
         };
-        WEBAUTHN_USER_ENTITY_INFORMATION user = new()
+        WEBAUTHN_USER_ENTITY_INFORMATION userEntityInfo = new()
         {
-            pwszName = "alkerUser",
+            pwszName = "alkerUser",//@alkerTestRP.local",
             pwszDisplayName = "Alker User",
-            id = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF],
+            id = [0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEE],
         };
-        WEBAUTHN_COSE_CREDENTIAL_PARAMETERS credParams = WEBAUTHN_COSE_CREDENTIAL_PARAMETERS.MakeDefault();
+        WEBAUTHN_COSE_CREDENTIAL_PARAMETERS credentialParams = WEBAUTHN_COSE_CREDENTIAL_PARAMETERS.MakeDefault();
 
         var collectedClientData = CollectedClientData.ForMakeCredentialCall(
             challenge: RandomNumberGenerator.GetBytes(32),
@@ -72,9 +73,13 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
         WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS options = new()
         {
-            dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
+            bRequireResidentKey = true,
+            //dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
             dwUserVerificationRequirement = UserVerificationRequirement.Discouraged,
-            bEnablePrf = true,
+
+            dwFlags = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG,
+
+            Extensions = [new HmacSecretExtensions.Input().ToRawExtensionData()],
         };
 
         WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
@@ -82,14 +87,22 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
         {
             HResult hr = Win32Interop.WebAuthNAuthenticatorMakeCredential(
                 this.WindowHandle,
-                ref rp,
-                ref user,
-                ref credParams,
+                ref rpEntityInfo,
+                ref userEntityInfo,
+                ref credentialParams,
                 ref clientData,
                 ref options,
                 out attestationSafeHandle);
 
-            var attestation = attestationSafeHandle.ToManaged();
+            var attestation = attestationSafeHandle.ToManaged()!.Value;
+
+            var hmacSecretExtension = OutputExtension.ParseRawExtensions(attestation.Extensions)
+                .Where(ext => ext is HmacSecretExtensions.Output)
+                .FirstOrDefault() as HmacSecretExtensions.Output;
+            if (hmacSecretExtension is null || !hmacSecretExtension.WasHmacCredentialMade)
+            {
+                throw new Exception();
+            }
         }
         finally
         {

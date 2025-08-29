@@ -28,24 +28,26 @@ internal struct WEBAUTHN_RP_ENTITY_INFORMATION()
 
         public static WEBAUTHN_RP_ENTITY_INFORMATION ConvertToManaged(Unmanaged unmanaged)
         {
-            return new WEBAUTHN_RP_ENTITY_INFORMATION
+            var ret = new WEBAUTHN_RP_ENTITY_INFORMATION
             {
                 dwVersion = unmanaged.dwVersion,
                 pwszId = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszId)!,
                 pwszName = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszName)!,
                 pwszIcon = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszIcon)!,
             };
+            return ret;
         }
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_RP_ENTITY_INFORMATION managed)
         {
-            return new Unmanaged
+            var ret = new Unmanaged
             {
                 dwVersion = 1,
                 pwszId = Utf16StringMarshaller.ConvertToUnmanaged(managed.pwszId),
                 pwszName = Utf16StringMarshaller.ConvertToUnmanaged(managed.pwszName),
                 pwszIcon = Utf16StringMarshaller.ConvertToUnmanaged(managed.pwszIcon),
             };
+            return ret;
         }
 
         public static void Free(Unmanaged unmanaged)
