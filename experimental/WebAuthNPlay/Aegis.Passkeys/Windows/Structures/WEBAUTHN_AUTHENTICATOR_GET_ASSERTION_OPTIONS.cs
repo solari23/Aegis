@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices.Marshalling;
 
 using Aegis.Passkeys.Marshalling;
+using Aegis.Passkeys.WebAuthNInterop;
 
 namespace Aegis.Passkeys.Windows.Structures;
 

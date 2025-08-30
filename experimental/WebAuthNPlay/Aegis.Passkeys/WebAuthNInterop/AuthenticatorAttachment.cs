@@ -1,4 +1,4 @@
-﻿namespace Aegis.Passkeys;
+﻿namespace Aegis.Passkeys.WebAuthNInterop;
 
 /// <summary>
 /// This enumeration’s values describe authenticators' attachment modalities.

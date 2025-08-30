@@ -1,4 +1,4 @@
-﻿namespace Aegis.Passkeys;
+﻿namespace Aegis.Passkeys.WebAuthNInterop;
 
 /// <summary>
 /// WebAuthn Relying Parties may use AttestationConveyancePreference to specify their preference regarding attestation conveyance during credential generation.

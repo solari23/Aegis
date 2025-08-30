@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Versioning;
 
+using Aegis.Passkeys.WebAuthNInterop;
 using Aegis.Passkeys.Windows;
 using Aegis.Passkeys.Windows.Structures;
 

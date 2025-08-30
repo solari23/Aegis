@@ -1,4 +1,6 @@
-﻿namespace Aegis.Passkeys;
+﻿using Aegis.Passkeys.WebAuthNInterop;
+
+namespace Aegis.Passkeys;
 
 /// <summary>
 /// Implementation of <see cref="IPasskeyProvider"/> for unsupported operating systems.

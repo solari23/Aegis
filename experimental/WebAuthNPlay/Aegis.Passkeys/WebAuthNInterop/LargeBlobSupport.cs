@@ -1,4 +1,4 @@
-﻿namespace Aegis.Passkeys;
+﻿namespace Aegis.Passkeys.WebAuthNInterop;
 
 /// <summary>
 /// Large blob storage extension which RPs can query to store and retrieve large blobs of data on the authenticator.

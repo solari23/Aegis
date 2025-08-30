@@ -1,4 +1,4 @@
-﻿namespace Aegis.Passkeys;
+﻿namespace Aegis.Passkeys.WebAuthNInterop;
 
 /// <summary>
 /// A WebAuthn Relying Party may require user verification for some of its operations but not for others, and may use this type to express its needs.
