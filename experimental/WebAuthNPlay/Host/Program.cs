@@ -23,7 +23,7 @@ namespace WebAuthNPlay
             };
             var userInfo = new UserEntityInfo
             {
-                Id = new Identifier(Encoding.UTF8.GetBytes("alker@alkerTestRP.local")),
+                Id = new Identifier(Encoding.UTF8.GetBytes("alker@alkerTestRP.localxxx")),
                 Name = "alker@alkerTestRP.local",
                 DisplayName = "Alker User",
             };

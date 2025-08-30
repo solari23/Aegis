@@ -28,7 +28,7 @@ internal struct WEBAUTHN_CREDENTIAL()
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_CREDENTIAL managed)
         {
-            var marshalledId = SizePrefixedArrayStruct.FromBytes(managed.id);
+            var marshalledId = SizePrefixedByteArray.From(managed.id);
 
             return new Unmanaged
             {
@@ -62,7 +62,7 @@ internal struct WEBAUTHN_CREDENTIAL()
             var ret = new WEBAUTHN_CREDENTIAL
             {
                 dwVersion = version,
-                id = reader.ReadSizePrefixedArrayStruct().ToByteArray()!,
+                id = reader.ReadSizePrefixedBytes()!,
                 pwszCredentialType = reader.ReadPWSTR()!,
             };
             return ret;
@@ -70,7 +70,7 @@ internal struct WEBAUTHN_CREDENTIAL()
 
         public static void Free(Unmanaged unmanaged)
         {
-            SizePrefixedArrayStruct.Free(unmanaged.pbId);
+            SizePrefixedByteArray.Free(unmanaged.pbId);
             Utf16StringMarshaller.Free(unmanaged.pwszCredentialType);
         }
     }

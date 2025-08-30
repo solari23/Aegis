@@ -33,7 +33,7 @@ internal struct WEBAUTHN_COSE_CREDENTIAL_PARAMETERS
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS managed)
         {
-            var marshalledCredentialParameters = SizePrefixedArrayStruct.FromArrayToContiguous(
+            var marshalledCredentialParameters = SizePrefixedContiguousStuctArray.From(
                 managed.credentialParameters,
                 WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.ConvertToUnmanaged);
 
@@ -49,8 +49,8 @@ internal struct WEBAUTHN_COSE_CREDENTIAL_PARAMETERS
         {
             var ret = new WEBAUTHN_COSE_CREDENTIAL_PARAMETERS
             {
-                credentialParameters = new SizePrefixedArrayStruct(unmanaged.cCredentialParameters, unmanaged.pCredentialParameters)
-                    .ToManagedFromContiguousArray<WEBAUTHN_COSE_CREDENTIAL_PARAMETER, WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.Unmanaged>(
+                credentialParameters = new SizePrefixedContiguousStuctArray(unmanaged.cCredentialParameters, unmanaged.pCredentialParameters)
+                    .ToManagedArray<WEBAUTHN_COSE_CREDENTIAL_PARAMETER, WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.Unmanaged>(
                         WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.ConvertToManaged)
                     ?? [],
             };
@@ -59,7 +59,8 @@ internal struct WEBAUTHN_COSE_CREDENTIAL_PARAMETERS
 
         public static void Free(Unmanaged unmanaged)
         {
-            SizePrefixedArrayStruct.Free(unmanaged.pCredentialParameters);
+            new SizePrefixedContiguousStuctArray(unmanaged.cCredentialParameters, unmanaged.pCredentialParameters)
+                .Free<WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.Unmanaged>(WEBAUTHN_COSE_CREDENTIAL_PARAMETER.Marshaller.Free);
         }
     }
 }

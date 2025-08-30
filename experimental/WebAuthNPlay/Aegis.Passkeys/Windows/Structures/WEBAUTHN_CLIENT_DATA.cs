@@ -29,7 +29,7 @@ internal struct WEBAUTHN_CLIENT_DATA()
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_CLIENT_DATA managed)
         {
-            var marshalledClientDataJson = SizePrefixedArrayStruct.FromBytes(managed.clientDataJSON);
+            var marshalledClientDataJson = SizePrefixedByteArray.From(managed.clientDataJSON);
 
             return new Unmanaged
             {
@@ -45,14 +45,14 @@ internal struct WEBAUTHN_CLIENT_DATA()
             return new WEBAUTHN_CLIENT_DATA
             {
                 dwVersion = unmanaged.dwVersion,
-                clientDataJSON = new SizePrefixedArrayStruct(unmanaged.cbClientDataJSON, unmanaged.pbClientDataJSON).ToByteArray()!,
+                clientDataJSON = new SizePrefixedByteArray(unmanaged.cbClientDataJSON, unmanaged.pbClientDataJSON).ToManagedArray()!,
                 pwszHashAlgId = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszHashAlgId)!,
             };
         }
 
         public static void Free(Unmanaged unmanaged)
         {
-            Marshal.FreeHGlobal(unmanaged.pbClientDataJSON);
+            SizePrefixedByteArray.Free(unmanaged.pbClientDataJSON);
             Utf16StringMarshaller.Free(unmanaged.pwszHashAlgId);
         }
     }

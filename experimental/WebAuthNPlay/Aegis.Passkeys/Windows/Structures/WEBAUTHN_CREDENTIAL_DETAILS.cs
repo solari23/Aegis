@@ -38,7 +38,7 @@ internal struct WEBAUTHN_CREDENTIAL_DETAILS
             return new WEBAUTHN_CREDENTIAL_DETAILS
             {
                 dwVersion = unmanaged.dwVersion,
-                credentialID = new SizePrefixedArrayStruct(unmanaged.cbCredentialID, unmanaged.pbCredentialID).ToByteArray(),
+                credentialID = new SizePrefixedByteArray(unmanaged.cbCredentialID, unmanaged.pbCredentialID).ToManagedArray(),
 
                 pRpInformation = unmanaged.pRpInformation == IntPtr.Zero
                     ? default

@@ -33,11 +33,14 @@ internal struct WEBAUTHN_CREDENTIAL_DETAILS_LIST
             }
 
             var reader = new MarshalledMemoryReader(this.handle);
+
+            uint cCredentialDetails = reader.ReadUInt32();
+            IntPtr ppCredentialDetails = reader.ReadIntPtr();
+
             var ret = new WEBAUTHN_CREDENTIAL_DETAILS_LIST
             {
-                credentials = reader
-                    .ReadSizePrefixedArrayStruct()
-                    .ToManagedFromArrayOfPointers<WEBAUTHN_CREDENTIAL_DETAILS, WEBAUTHN_CREDENTIAL_DETAILS.Marshaller.Unmanaged>(
+                credentials = new SizePrefixedStructPointerArray(cCredentialDetails, ppCredentialDetails)
+                    .ToManagedArray<WEBAUTHN_CREDENTIAL_DETAILS, WEBAUTHN_CREDENTIAL_DETAILS.Marshaller.Unmanaged>(
                         WEBAUTHN_CREDENTIAL_DETAILS.Marshaller.ConvertToManaged),
             };
             return ret;

@@ -66,13 +66,13 @@ internal struct WEBAUTHN_ASSERTION()
 
             var ret = new WEBAUTHN_ASSERTION();
             ret.dwVersion = version;
-            ret.authenticatorData = reader.ReadSizePrefixedArrayStruct().ToByteArray();
-            ret.signature = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.authenticatorData = reader.ReadSizePrefixedBytes();
+            ret.signature = reader.ReadSizePrefixedBytes();
 
             ret.Credential = reader.ReadStruct<WEBAUTHN_CREDENTIAL, WEBAUTHN_CREDENTIAL.Marshaller.Unmanaged>(
                 WEBAUTHN_CREDENTIAL.Marshaller.ConvertToManaged);
 
-            ret.userId = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.userId = reader.ReadSizePrefixedBytes();
 
             if (version < 2)
             {
@@ -80,13 +80,14 @@ internal struct WEBAUTHN_ASSERTION()
                 return ret;
             }
 
-            ret.Extensions = reader
-                .ReadSizePrefixedArrayStruct()
-                .ToManagedFromContiguousArray<WEBAUTHN_EXTENSION, WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
+            uint cExtensions = reader.ReadUInt32();
+            IntPtr pExtensions = reader.ReadIntPtr();
+            ret.Extensions = new SizePrefixedContiguousStuctArray(cExtensions, pExtensions)
+                .ToManagedArray<WEBAUTHN_EXTENSION, WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
                     WEBAUTHN_EXTENSION.Marshaller.ConvertToManaged)
                 ?? [];
 
-            ret.credLargeBlob = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.credLargeBlob = reader.ReadSizePrefixedBytes();
 
             ret.dwCredLargeBlobStatus = reader.ReadUInt32();
 
@@ -113,7 +114,7 @@ internal struct WEBAUTHN_ASSERTION()
                 return ret;
             }
 
-            ret.unsignedExtensionOutputs = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.unsignedExtensionOutputs = reader.ReadSizePrefixedBytes();
 
             return ret;
         }

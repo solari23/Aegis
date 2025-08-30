@@ -74,8 +74,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
         {
             public uint dwVersion;
             public uint dwTimeoutMilliseconds;
-            public SizePrefixedArrayStruct CredentialList;
-            public SizePrefixedArrayStruct Extensions;
+            public SizePrefixedContiguousStuctArray CredentialList;
+            public SizePrefixedContiguousStuctArray Extensions;
             public uint dwAuthenticatorAttachment;
             public uint dwUserVerificationRequirement;
             public uint dwFlags;
@@ -96,8 +96,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
         public static unsafe Unmanaged ConvertToUnmanaged(WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS managed)
         {
-            var marshalledCredLargeBlob = SizePrefixedArrayStruct.FromBytes(managed.credLargeBlob);
-            var marshalledJsonExt = SizePrefixedArrayStruct.FromBytes(managed.jsonExt);
+            var marshalledCredLargeBlob = SizePrefixedByteArray.From(managed.credLargeBlob);
+            var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
 
             IntPtr marshalledHmacSecretValues = IntPtr.Zero;
             if (managed.pHmacSecretSaltValues.HasValue)
@@ -111,11 +111,11 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                 dwVersion = managed.dwVersion,
                 dwTimeoutMilliseconds = managed.dwTimeoutMilliseconds,
 
-                CredentialList = SizePrefixedArrayStruct.FromArrayToContiguous(
+                CredentialList = SizePrefixedContiguousStuctArray.From(
                     managed.CredentialList,
                     WEBAUTHN_CREDENTIAL.Marshaller.ConvertToUnmanaged),
 
-                Extensions = SizePrefixedArrayStruct.FromArrayToContiguous(
+                Extensions = SizePrefixedContiguousStuctArray.From(
                     managed.Extensions,
                     WEBAUTHN_EXTENSION.Marshaller.ConvertToUnmanaged),
 
@@ -143,10 +143,14 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
         public static void Free(Unmanaged unmanaged)
         {
-            unmanaged.CredentialList.Free();
-            unmanaged.Extensions.Free();
-            Marshal.FreeHGlobal(unmanaged.pbCredLargeBlob);
-            Marshal.FreeHGlobal(unmanaged.pbJsonExt);
+            unmanaged.CredentialList.Free<WEBAUTHN_CREDENTIAL.Marshaller.Unmanaged>(
+                WEBAUTHN_CREDENTIAL.Marshaller.Free);
+
+            unmanaged.Extensions.Free<WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
+                WEBAUTHN_EXTENSION.Marshaller.Free);
+
+            SizePrefixedByteArray.Free(unmanaged.pbCredLargeBlob);
+            SizePrefixedByteArray.Free(unmanaged.pbJsonExt);
 
             if (unmanaged.pHmacSecretSaltValues != IntPtr.Zero)
             {

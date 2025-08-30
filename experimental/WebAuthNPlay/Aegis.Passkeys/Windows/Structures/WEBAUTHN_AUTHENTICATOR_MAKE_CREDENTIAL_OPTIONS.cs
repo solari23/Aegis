@@ -52,8 +52,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
         {
             public uint dwVersion;
             public uint dwTimeoutMilliseconds;
-            public SizePrefixedArrayStruct CredentialList;
-            public SizePrefixedArrayStruct Extensions;
+            public SizePrefixedContiguousStuctArray CredentialList;
+            public SizePrefixedContiguousStuctArray Extensions;
             public uint dwAuthenticatorAttachment;
             public int bRequireResidentKey;
             public uint dwUserVerificationRequirement;
@@ -73,18 +73,18 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS managed)
         {
-            var marshalledJsonExt = SizePrefixedArrayStruct.FromBytes(managed.jsonExt);
+            var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
 
             var ret = new Unmanaged
             {
                 dwVersion = managed.dwVersion,
                 dwTimeoutMilliseconds = managed.dwTimeoutMilliseconds,
 
-                CredentialList = SizePrefixedArrayStruct.FromArrayToContiguous(
+                CredentialList = SizePrefixedContiguousStuctArray.From(
                     managed.CredentialList,
                     WEBAUTHN_CREDENTIAL.Marshaller.ConvertToUnmanaged),
 
-                Extensions = SizePrefixedArrayStruct.FromArrayToContiguous(
+                Extensions = SizePrefixedContiguousStuctArray.From(
                     managed.Extensions,
                     WEBAUTHN_EXTENSION.Marshaller.ConvertToUnmanaged),
 
@@ -112,9 +112,11 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
 
         public static void Free(Unmanaged unmanaged)
         {
-            unmanaged.CredentialList.Free();
-            unmanaged.Extensions.Free();
-            SizePrefixedArrayStruct.Free(unmanaged.pbJsonExt);
+            unmanaged.CredentialList.Free<WEBAUTHN_CREDENTIAL.Marshaller.Unmanaged>(
+                WEBAUTHN_CREDENTIAL.Marshaller.Free);
+            unmanaged.Extensions.Free<WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
+                WEBAUTHN_EXTENSION.Marshaller.Free);
+            SizePrefixedByteArray.Free(unmanaged.pbJsonExt);
         }
     }
 }

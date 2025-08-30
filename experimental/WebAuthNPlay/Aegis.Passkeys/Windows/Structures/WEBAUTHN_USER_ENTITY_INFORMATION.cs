@@ -39,7 +39,7 @@ internal struct WEBAUTHN_USER_ENTITY_INFORMATION()
             return new WEBAUTHN_USER_ENTITY_INFORMATION
             {
                 dwVersion = unmanaged.dwVersion,
-                id = new SizePrefixedArrayStruct(unmanaged.cbId, unmanaged.pbId).ToByteArray(),
+                id = new SizePrefixedByteArray(unmanaged.cbId, unmanaged.pbId).ToManagedArray(),
                 pwszName = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszName)!,
                 pwszIcon = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszIcon)!,
                 pwszDisplayName = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszDisplayName)!,
@@ -48,7 +48,7 @@ internal struct WEBAUTHN_USER_ENTITY_INFORMATION()
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_USER_ENTITY_INFORMATION managed)
         {
-            var marshalledId = SizePrefixedArrayStruct.FromBytes(managed.id);
+            var marshalledId = SizePrefixedByteArray.From(managed.id);
 
             var ret = new Unmanaged
             {
@@ -64,7 +64,7 @@ internal struct WEBAUTHN_USER_ENTITY_INFORMATION()
 
         public static void Free(Unmanaged unmanaged)
         {
-            SizePrefixedArrayStruct.Free(unmanaged.pbId);
+            SizePrefixedByteArray.Free(unmanaged.pbId);
             Utf16StringMarshaller.Free(unmanaged.pwszName);
             Utf16StringMarshaller.Free(unmanaged.pwszIcon);
             Utf16StringMarshaller.Free(unmanaged.pwszDisplayName);

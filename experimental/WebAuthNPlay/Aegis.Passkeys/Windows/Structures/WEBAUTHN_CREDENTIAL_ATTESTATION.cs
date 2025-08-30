@@ -79,12 +79,12 @@ internal struct WEBAUTHN_CREDENTIAL_ATTESTATION()
             var ret = new WEBAUTHN_CREDENTIAL_ATTESTATION();
             ret.dwVersion = version;
             ret.pwszFormatType = reader.ReadPWSTR() ?? string.Empty;
-            ret.authenticatorData = reader.ReadSizePrefixedArrayStruct().ToByteArray();
-            ret.attestation = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.authenticatorData = reader.ReadSizePrefixedBytes();
+            ret.attestation = reader.ReadSizePrefixedBytes();
             ret.dwAttestationDecodeType = reader.ReadUInt32();
             ret.attestationDecode = reader.ReadIntPtr();
-            ret.attestationObject = reader.ReadSizePrefixedArrayStruct().ToByteArray();
-            ret.credentialId = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.attestationObject = reader.ReadSizePrefixedBytes();
+            ret.credentialId = reader.ReadSizePrefixedBytes();
 
             if (version < 2)
             {
@@ -92,9 +92,10 @@ internal struct WEBAUTHN_CREDENTIAL_ATTESTATION()
                 return ret;
             }
 
-            ret.Extensions = reader
-                .ReadSizePrefixedArrayStruct()
-                .ToManagedFromContiguousArray<WEBAUTHN_EXTENSION, WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
+            uint cExtensions = reader.ReadUInt32();
+            IntPtr pExtensions = reader.ReadIntPtr();
+            ret.Extensions = new SizePrefixedContiguousStuctArray(cExtensions, pExtensions)
+                .ToManagedArray<WEBAUTHN_EXTENSION, WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
                     WEBAUTHN_EXTENSION.Marshaller.ConvertToManaged)
                 ?? [];
 
@@ -130,7 +131,7 @@ internal struct WEBAUTHN_CREDENTIAL_ATTESTATION()
                 return ret;
             }
 
-            ret.unsignedExtensionOutputs = reader.ReadSizePrefixedArrayStruct().ToByteArray();
+            ret.unsignedExtensionOutputs = reader.ReadSizePrefixedBytes();
 
             if (version < 7)
             {

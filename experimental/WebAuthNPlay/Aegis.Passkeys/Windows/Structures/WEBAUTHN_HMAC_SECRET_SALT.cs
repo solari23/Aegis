@@ -28,8 +28,8 @@ internal struct WEBAUTHN_HMAC_SECRET_SALT
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_HMAC_SECRET_SALT managed)
         {
-            var marshalledFirst = SizePrefixedArrayStruct.FromBytes(managed.first);
-            var marshalledSecond = SizePrefixedArrayStruct.FromBytes(managed.second);
+            var marshalledFirst = SizePrefixedByteArray.From(managed.first);
+            var marshalledSecond = SizePrefixedByteArray.From(managed.second);
 
             var ret = new Unmanaged
             {
@@ -47,14 +47,14 @@ internal struct WEBAUTHN_HMAC_SECRET_SALT
 
             if (unmanaged.cbFirst > 0)
             {
-                var first = new SizePrefixedArrayStruct(unmanaged.cbFirst, unmanaged.pbFirst);
-                managed.first = first.ToByteArray()!;
+                var first = new SizePrefixedByteArray(unmanaged.cbFirst, unmanaged.pbFirst);
+                managed.first = first.ToManagedArray()!;
             }
 
             if (unmanaged.cbSecond > 0)
             {
-                var second = new SizePrefixedArrayStruct(unmanaged.cbSecond, unmanaged.pbSecond);
-                managed.second = second.ToByteArray()!;
+                var second = new SizePrefixedByteArray(unmanaged.cbSecond, unmanaged.pbSecond);
+                managed.second = second.ToManagedArray()!;
             }
 
             return managed;
@@ -62,8 +62,8 @@ internal struct WEBAUTHN_HMAC_SECRET_SALT
 
         public static void Free(Unmanaged unmanaged)
         {
-            SizePrefixedArrayStruct.Free(unmanaged.pbFirst);
-            SizePrefixedArrayStruct.Free(unmanaged.pbSecond);
+            SizePrefixedByteArray.Free(unmanaged.pbFirst);
+            SizePrefixedByteArray.Free(unmanaged.pbSecond);
         }
     }
 }

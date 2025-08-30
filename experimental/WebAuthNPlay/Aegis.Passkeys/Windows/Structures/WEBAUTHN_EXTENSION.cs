@@ -25,7 +25,7 @@ internal struct WEBAUTHN_EXTENSION
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_EXTENSION managed)
         {
-            var marshalledExtension = SizePrefixedArrayStruct.FromBytes(managed.extension);
+            var marshalledExtension = SizePrefixedByteArray.From(managed.extension);
 
             return new Unmanaged
             {
@@ -40,7 +40,7 @@ internal struct WEBAUTHN_EXTENSION
             var ret = new WEBAUTHN_EXTENSION
             {
                 pwszExtensionIdentifier = Utf16StringMarshaller.ConvertToManaged(unmanaged.pwszExtensionIdentifier)!,
-                extension = new SizePrefixedArrayStruct(unmanaged.cbExtension, unmanaged.pvExtension).ToByteArray(),
+                extension = new SizePrefixedByteArray(unmanaged.cbExtension, unmanaged.pvExtension).ToManagedArray(),
             };
             return ret;
         }
@@ -48,7 +48,7 @@ internal struct WEBAUTHN_EXTENSION
         public static void Free(Unmanaged unmanaged)
         {
             Utf16StringMarshaller.Free(unmanaged.pwszExtensionIdentifier);
-            SizePrefixedArrayStruct.Free(unmanaged.pvExtension);
+            SizePrefixedByteArray.Free(unmanaged.pvExtension);
         }
     }
 }

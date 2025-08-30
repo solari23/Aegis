@@ -33,11 +33,18 @@ internal class MarshalledMemoryReader
         return ret;
     }
 
-    public SizePrefixedArrayStruct ReadSizePrefixedArrayStruct()
+    //public SizePrefixedArrayStruct ReadSizePrefixedArrayStruct()
+    //{
+    //    uint numElements = this.ReadUInt32();
+    //    nint ptr = this.ReadIntPtr();
+    //    return new SizePrefixedArrayStruct(numElements, ptr);
+    //}
+
+    public byte[]? ReadSizePrefixedBytes()
     {
         uint numElements = this.ReadUInt32();
         nint ptr = this.ReadIntPtr();
-        return new SizePrefixedArrayStruct(numElements, ptr);
+        return new SizePrefixedByteArray(numElements, ptr).ToManagedArray();
     }
 
     public unsafe TStruct ReadStruct<TStruct, TUnmanaged>(Func<nint, TStruct> marshaller)
