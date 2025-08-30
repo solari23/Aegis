@@ -1,7 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 
-using static Aegis.Passkeys.Windows.Structures.WEBAUTHN_RP_ENTITY_INFORMATION.Marshaller;
-
 namespace Aegis.Passkeys.Marshalling;
 
 /// <summary>

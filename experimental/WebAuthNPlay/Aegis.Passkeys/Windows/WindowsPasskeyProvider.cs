@@ -1,11 +1,11 @@
 ﻿using System.Runtime.Versioning;
 using System.Security.Cryptography;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 using Aegis.Passkeys.WebAuthNInterop;
-using Aegis.Passkeys.Windows.Structures;
 using Aegis.Passkeys.Windows.Extensions;
+using Aegis.Passkeys.Windows.Structures;
 
 namespace Aegis.Passkeys.Windows;
 
@@ -81,20 +81,15 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
                 ref clientData,
                 ref options,
                 out assertionSafeHandle);
-
-            if (hr != HResult.S_OK)
-            {
-                string errorString = Win32Interop.WebAuthNGetErrorName(hr);
-                // TODO [Fit & Finish]: Throw meaningful exception.
-                throw new Exception();
-            }
+            HandleError(hr);
 
             var assertion = assertionSafeHandle.ToManaged()!.Value;
 
             if (assertion.pHmacSecret is null)
             {
-                // TODO [Fit & Finish]: Throw meaningful exception.
-                throw new Exception();
+                throw new PasskeyOperationFailedException(
+                    PasskeyFailureCode.PasskeyDoesNotSupportHmac,
+                    "The passkey selected by the user does not support HMAC secrets.");
             }
 
             var hmacSecretFirst = new HmacSecret(assertion.pHmacSecret.Value.first);
@@ -171,13 +166,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
                 ref clientData,
                 ref options,
                 out attestationSafeHandle);
-
-            if (hr != HResult.S_OK)
-            {
-                string errorString = Win32Interop.WebAuthNGetErrorName(hr);
-                // TODO [Fit & Finish]: Throw meaningful exception.
-                throw new Exception();
-            }
+            HandleError(hr);
 
             var attestation = attestationSafeHandle.ToManaged()!.Value;
 
@@ -186,8 +175,9 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
                 .FirstOrDefault() as HmacSecretExtensions.Output;
             if (hmacSecretExtension is null || !hmacSecretExtension.WasHmacCredentialMade)
             {
-                // TODO [Fit & Finish]: Throw meaningful exception.
-                throw new Exception();
+                throw new PasskeyOperationFailedException(
+                    PasskeyFailureCode.PasskeyDoesNotSupportHmac,
+                    "The passkey registered by the user does not support HMAC secrets.");
             }
 
             var response = new MakeCredentialResponse
@@ -199,6 +189,30 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
         finally
         {
             attestationSafeHandle?.Dispose();
+        }
+    }
+
+    private static void HandleError(HResult hr)
+    {
+        if (hr == HResult.S_OK)
+        {
+            return;
+        }
+
+        switch (hr)
+        {
+            case HResult.E_CANCELLED:
+            case HResult.NTE_USER_CANCELLED:
+                throw new PasskeyOperationFailedException(
+                    PasskeyFailureCode.OperationCancelled,
+                    "The user cancelled the passkey operation.");
+            default:
+                string errorString = Win32Interop.WebAuthNGetErrorName(hr);
+                throw new PasskeyOperationFailedException(
+                    PasskeyFailureCode.PasskeyIneropFailed,
+                    $"The passkey operation failed with error: {errorString} ({hr}).",
+                    (int)hr,
+                    errorString);
         }
     }
 }
