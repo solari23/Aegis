@@ -1,0 +1,18 @@
+﻿namespace Aegis.Passkeys.Windows.Structures;
+
+internal enum WEBAUTHN_COSE_ALGORITHM : Int32
+{
+    Unknown = 0,
+
+    ECDSA_P256_WITH_SHA256 = -7,
+    ECDSA_P384_WITH_SHA384 = -35,
+    ECDSA_P521_WITH_SHA512 = -36,
+
+    RSASSA_PKCS1_V1_5_WITH_SHA256 = -257,
+    RSASSA_PKCS1_V1_5_WITH_SHA384 = -258,
+    RSASSA_PKCS1_V1_5_WITH_SHA512 = -259,
+
+    RSA_PSS_WITH_SHA256 = -37,
+    RSA_PSS_WITH_SHA384 = -38,
+    RSA_PSS_WITH_SHA512 = -39,
+}

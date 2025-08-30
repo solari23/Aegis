@@ -62,7 +62,6 @@ public sealed class RawUserSecret : Secret
 
         if (rsaKeyPrivateExponent is null)
         {
-            
             try
             {
                 // In CNG, 'exportable' seems to only work if the key is/was encrypted.
@@ -93,10 +92,32 @@ public sealed class RawUserSecret : Secret
     }
 
     /// <summary>
+    /// Helps to copy the given key data into a <see cref="RawUserSecret"/>.
+    /// </summary>
+    /// <param name="keyData">The certificate to extract the secret from.</param>
+    /// <returns>The corresponding <see cref="RawUserSecret"/>.</returns>
+    /// <remarks>
+    /// The given key data is copied into the new <see cref="RawUserSecret"/> instance
+    /// and it is the caller's responsibility to safely dispose of the original data.
+    /// </remarks>
+    public static RawUserSecret CopyFromBytes(ReadOnlySpan<byte> keyData)
+    {
+        if (keyData.Length == 0)
+        {
+            throw new InvalidSecretException("Input key data can not be empty.");
+        }
+
+        var copiedKeyData = new byte[keyData.Length];
+        keyData.CopyTo(copiedKeyData);
+
+        return new RawUserSecret(copiedKeyData);
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="RawUserSecret"/> class.
     /// </summary>
     /// <param name="keyData">The raw archive encryption key.</param>
-    public RawUserSecret(byte[] keyData)
+    private RawUserSecret(byte[] keyData)
         : base(keyData)
     {
         // Empty.
