@@ -3,17 +3,11 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Aegis.Passkeys.Marshalling;
 
-internal class MarshalledMemoryReader
+internal class MarshalledMemoryReader(nint handle)
 {
-    public MarshalledMemoryReader(nint handle)
-    {
-        this.Handle = handle;
-        this.offset = 0;
-    }
+    public nint Handle { get; } = handle;
 
-    public nint Handle { get; }
-
-    private int offset;
+    private int offset = 0;
 
     public unsafe nint ReadIntPtr()
     {
@@ -32,13 +26,6 @@ internal class MarshalledMemoryReader
         this.offset += sizeof(int);
         return ret;
     }
-
-    //public SizePrefixedArrayStruct ReadSizePrefixedArrayStruct()
-    //{
-    //    uint numElements = this.ReadUInt32();
-    //    nint ptr = this.ReadIntPtr();
-    //    return new SizePrefixedArrayStruct(numElements, ptr);
-    //}
 
     public byte[]? ReadSizePrefixedBytes()
     {
@@ -78,10 +65,5 @@ internal class MarshalledMemoryReader
         nint ptr = this.ReadIntPtr();
         var ret = Utf16StringMarshaller.ConvertToManaged((ushort*)ptr);
         return ret;
-    }
-
-    public void IncrementOffset(int amount)
-    {
-        this.offset += amount;
     }
 }
