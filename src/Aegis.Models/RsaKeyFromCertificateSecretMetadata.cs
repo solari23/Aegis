@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Aegis.Models;
 
 /// <summary>
-/// Metadata for password secrets.
+/// Metadata for secrets derived from certificate RSA keys.
 /// </summary>
 public class RsaKeyFromCertificateSecretMetadata : SecretMetadata
 {
