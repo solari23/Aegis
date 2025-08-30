@@ -53,6 +53,8 @@ internal readonly struct SizePrefixedContiguousStuctArray(uint numElements, nint
             nint currentItemPointer = this.Pointer + i * itemSize;
             elementFreeFunction(*(TUnmanaged*)currentItemPointer);
         }
+
+        NativeMemory.Free((void*)this.Pointer);
     }
 
     public unsafe TManaged[]? ToManagedArray<TManaged, TUnmanaged>(

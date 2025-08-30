@@ -28,8 +28,7 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
     // GUID *pCancellationId ==> Not Supported.
 
-    // TODO [P1]: Add support for WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS.pAllowCredentialList
-    // PWEBAUTHN_CREDENTIAL_LIST pAllowCredentialList ==> Not Supported.
+    public WEBAUTHN_CREDENTIAL_LIST? pAllowCredentialList = null;
 
     public uint dwCredLargeBlobOperation = 0;
 
@@ -99,6 +98,13 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
             var marshalledCredLargeBlob = SizePrefixedByteArray.From(managed.credLargeBlob);
             var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
 
+            IntPtr marshalledAllowCredentialList = IntPtr.Zero;
+            if (managed.pAllowCredentialList is not null)
+            {
+                var marshalledStruct = WEBAUTHN_CREDENTIAL_LIST.Marshaller.ConvertToUnmanaged(managed.pAllowCredentialList.Value);
+                marshalledAllowCredentialList = MarshalHelper.StructToPtr(marshalledStruct);
+            }
+
             IntPtr marshalledHmacSecretValues = IntPtr.Zero;
             if (managed.pHmacSecretSaltValues.HasValue)
             {
@@ -125,7 +131,7 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                 pwszU2fAppId = (ushort*)IntPtr.Zero,    // Not Supported.
                 pbU2fAppId = IntPtr.Zero,               // Not Supported.
                 pCancellationId = IntPtr.Zero,          // Not Supported.
-                pAllowCredentialList = IntPtr.Zero,     // Not Supported.
+                pAllowCredentialList = marshalledAllowCredentialList,
                 dwCredLargeBlobOperation = managed.dwCredLargeBlobOperation,
                 cbCredLargeBlob = marshalledCredLargeBlob.NumElements,
                 pbCredLargeBlob = marshalledCredLargeBlob.Pointer,
@@ -151,6 +157,13 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 
             SizePrefixedByteArray.Free(unmanaged.pbCredLargeBlob);
             SizePrefixedByteArray.Free(unmanaged.pbJsonExt);
+
+            if (unmanaged.pAllowCredentialList != IntPtr.Zero)
+            {
+                WEBAUTHN_CREDENTIAL_LIST.Marshaller.Free(
+                    *(WEBAUTHN_CREDENTIAL_LIST.Marshaller.Unmanaged*)unmanaged.pAllowCredentialList);
+                NativeMemory.Free((void*)unmanaged.pAllowCredentialList);
+            }
 
             if (unmanaged.pHmacSecretSaltValues != IntPtr.Zero)
             {

@@ -51,8 +51,15 @@ public class PasskeyManager
     /// <param name="rpInfo">Details about the Relying Party requesting the secret.</param>
     /// <param name="salt">The first salt to use in the HMAC secret generation.</param>
     /// <param name="secondSalt">An optional second salt to use in the HMAC secret generation.</param>
+    /// <param name="allowedCredentialIds">
+    ///     An optional list of allowed credential <see cref="Identifier"/>s from which to get the assertion.
+    /// </param>
     /// <returns>The generated HMAC secrets.</returns>
-    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt = null)
+    public GetHmacSecretResponse GetHmacSecret(
+        RelyingPartyInfo rpInfo,
+        HmacSecret salt,
+        HmacSecret? secondSalt = null,
+        IReadOnlyList<Identifier>? allowedCredentialIds = null)
     {
         ArgumentNullException.ThrowIfNull(rpInfo);
 
@@ -66,7 +73,7 @@ public class PasskeyManager
             throw new ArgumentException("The second salt must be exactly 32 bytes long.", nameof(secondSalt));
         }
 
-        return this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt);
+        return this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt, allowedCredentialIds ?? []);
     }
 
     /// <summary>

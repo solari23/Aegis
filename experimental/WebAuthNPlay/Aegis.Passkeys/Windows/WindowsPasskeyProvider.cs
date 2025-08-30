@@ -33,7 +33,11 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     public bool IsHmacSecretSupported() => Win32ApiVersion.Value >= WEBAUTHN_API_VERSION.WEBAUTHN_API_VERSION_6;
 
     /// <inheritdoc />
-    public GetHmacSecretResponse GetHmacSecret(RelyingPartyInfo rpInfo, HmacSecret salt, HmacSecret? secondSalt)
+    public GetHmacSecretResponse GetHmacSecret(
+        RelyingPartyInfo rpInfo,
+        HmacSecret salt,
+        HmacSecret? secondSalt,
+        IReadOnlyList<Identifier> allowedCredentialIds)
     {
         var collectedClientData = CollectedClientData.ForGetAssertionCall(
             challenge: RandomNumberGenerator.GetBytes(32),  // We don't need the actual assertion, so just use a random challenge.
@@ -54,6 +58,19 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
                 },
             }
         };
+
+        if (allowedCredentialIds.Any())
+        {
+            options.pAllowCredentialList = new WEBAUTHN_CREDENTIAL_LIST
+            {
+                Credentials = allowedCredentialIds
+                    .Select(id => new WEBAUTHN_CREDENTIAL_EX
+                    {
+                        id = id.internalValue,
+                    })
+                    .ToArray(),
+            };
+        }
 
         WEBAUTHN_ASSERTION.SafeHandle? assertionSafeHandle = null;
         try

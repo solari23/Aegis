@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 
+using static Aegis.Passkeys.Windows.Structures.WEBAUTHN_RP_ENTITY_INFORMATION.Marshaller;
+
 namespace Aegis.Passkeys.Marshalling;
 
 /// <summary>
@@ -24,18 +26,45 @@ internal readonly struct SizePrefixedStructPointerArray(uint numElements, nint p
             return Empty;
         }
 
-        // TODO: Implement SizePrefixedStructPointerArray.From
-        throw new NotImplementedException();
+        uint numElements = (uint)input.Length;
+        nint* pointerArray = (nint*)NativeMemory.Alloc((nuint)(sizeof(nint) * numElements));
+
+        // To reduce the number of allocations, we'll marshal the TManaged structs into
+        // contiguous memory.
+        TUnmanaged* unmanagedArray = (TUnmanaged*)NativeMemory.Alloc((nuint)(sizeof(TUnmanaged) * numElements));
+
+        for (int i = 0; i < numElements; i++)
+        {
+            unmanagedArray[i] = elementMarshaller(input[i]);
+            pointerArray[i] = (nint)(&unmanagedArray[i]);
+        }
+
+        return new SizePrefixedStructPointerArray(numElements, (nint)pointerArray);
     }
 
     public readonly uint NumElements = numElements;
 
     public readonly nint Pointer = pointer;
 
-    public unsafe void Free()
+    public unsafe void Free<TUnmanaged>(Action<TUnmanaged> elementFreeFunction)
+        where TUnmanaged : unmanaged
     {
-        // TODO: Implement SizePrefixedStructPointerArray.Free
-        throw new NotImplementedException();
+        if (this.Pointer == nint.Zero)
+        {
+            return;
+        }
+
+        for (int i = 0; i < this.NumElements; i++)
+        {
+            nint currentItem = this.Pointer + i * sizeof(nint);
+            elementFreeFunction(**(TUnmanaged**)currentItem);
+        }
+
+        // Free the contiguous struct array.
+        NativeMemory.Free((void*)*(nint*)this.Pointer);
+
+        // Free the pointer array.
+        NativeMemory.Free((void*)this.Pointer);
     }
 
     public unsafe TManaged[]? ToManagedArray<TManaged, TUnmanaged>(
