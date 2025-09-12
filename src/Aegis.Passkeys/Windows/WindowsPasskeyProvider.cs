@@ -12,6 +12,11 @@ namespace Aegis.Passkeys.Windows;
 /// <summary>
 /// Provides access to passkey functionality on Windows platforms.
 /// </summary>
+/// <remarks>
+/// Win32 WebAuthN API documentation is somewhat sparse.
+/// A good reference is chromium integration here:
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/device/fido/win/
+/// </remarks>
 [SupportedOSPlatform("windows")]
 internal class WindowsPasskeyProvider : IPasskeyProvider
 {
@@ -112,6 +117,8 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     public MakeCredentialResponse MakeCredentialWithHmacSecret(
         RelyingPartyInfo rpInfo,
         UserEntityInfo userInfo,
+        HmacSecret? salt,
+        HmacSecret? secondSalt,
         UserVerificationRequirement userVerificationRequirement)
     {
         WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
@@ -154,6 +161,15 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
             // Other options.
             dwUserVerificationRequirement = userVerificationRequirement,
         };
+
+        if (salt is not null)
+        {
+            options.pPRFGlobalEval = new WEBAUTHN_HMAC_SECRET_SALT
+            {
+                first = salt.InternalSecretData,
+                second = secondSalt?.InternalSecretData,
+            };
+        }
 
         WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
         try

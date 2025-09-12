@@ -17,5 +17,5 @@ internal interface IPasskeyProvider
     /// <summary>
     /// Makes a new passkey credential with an HMAC secret.
     /// </summary>
-    MakeCredentialResponse MakeCredentialWithHmacSecret(RelyingPartyInfo rpInfo, UserEntityInfo userInfo, UserVerificationRequirement userVerificationRequirement);
+    MakeCredentialResponse MakeCredentialWithHmacSecret(RelyingPartyInfo rpInfo, UserEntityInfo userInfo, HmacSecret? salt, HmacSecret? secondSalt, UserVerificationRequirement userVerificationRequirement);
 }
