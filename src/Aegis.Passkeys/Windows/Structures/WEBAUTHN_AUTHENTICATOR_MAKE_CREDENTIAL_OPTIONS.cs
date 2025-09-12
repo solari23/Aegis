@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices.Marshalling;
+﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 
 using Aegis.Passkeys.Marshalling;
 using Aegis.Passkeys.WebAuthNInterop;
@@ -8,7 +9,7 @@ namespace Aegis.Passkeys.Windows.Structures;
 [NativeMarshalling(typeof(Marshaller))]
 internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
 {
-    private uint dwVersion = 7;
+    private uint dwVersion = 8;
 
     public uint dwTimeoutMilliseconds = 60_000;
 
@@ -46,6 +47,33 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
     // PBYTE pbJsonExt;
     public byte[]? jsonExt = null;
 
+    private WEBAUTHN_HMAC_SECRET_SALT? _pPRFGlobalEval = null;
+    public WEBAUTHN_HMAC_SECRET_SALT? pPRFGlobalEval
+    {
+        readonly get => this._pPRFGlobalEval;
+        set
+        {
+            if (value is null)
+            {
+                // Unset flag.
+                dwFlags &= ~WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG;
+                bEnablePrf = false;
+            }
+            else
+            {
+                // Set flag.
+                dwFlags |= WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG;
+                bEnablePrf = true;
+            }
+            _pPRFGlobalEval = value;
+        }
+    }
+
+    // DWORD cCredentialHints ==> Not Supported.
+    // LPCWSTR *ppwszCredentialHints ==> Not Supported.
+
+    public bool bAutoFill = false;
+
     [CustomMarshaller(typeof(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS), MarshalMode.ManagedToUnmanagedRef, typeof(Marshaller))]
     internal static unsafe class Marshaller
     {
@@ -70,11 +98,22 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
             public IntPtr pLinkedDevice;
             public uint cbJsonExt;
             public IntPtr pbJsonExt;
+            public IntPtr pPRFGlobalEval;
+            public uint cCredentialHints;
+            public IntPtr ppwszCredentialHints;
+            public int bAutoFill;
         }
 
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS managed)
         {
             var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
+
+            var marshalledPRFGlobalEval = IntPtr.Zero;
+            if (managed.pPRFGlobalEval.HasValue)
+            {
+                var marshalledStruct = WEBAUTHN_HMAC_SECRET_SALT.Marshaller.ConvertToUnmanaged(managed.pPRFGlobalEval.Value);
+                marshalledPRFGlobalEval = MarshalHelper.StructToPtr(marshalledStruct);
+            }
 
             var ret = new Unmanaged
             {
@@ -104,6 +143,10 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
                 pLinkedDevice = IntPtr.Zero, // Not Supported.
                 cbJsonExt = marshalledJsonExt.NumElements,
                 pbJsonExt = marshalledJsonExt.Pointer,
+                pPRFGlobalEval = marshalledPRFGlobalEval,
+                cCredentialHints = 0, // Not Supported.
+                ppwszCredentialHints = IntPtr.Zero, // Not Supported.
+                bAutoFill = managed.bAutoFill ? 1 : 0,
             };
             return ret;
         }
@@ -117,7 +160,15 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
                 WEBAUTHN_CREDENTIAL.Marshaller.Free);
             unmanaged.Extensions.Free<WEBAUTHN_EXTENSION.Marshaller.Unmanaged>(
                 WEBAUTHN_EXTENSION.Marshaller.Free);
+
             SizePrefixedByteArray.Free(unmanaged.pbJsonExt);
+
+            if (unmanaged.pPRFGlobalEval != IntPtr.Zero)
+            {
+                WEBAUTHN_HMAC_SECRET_SALT.Marshaller.Free(
+                    *(WEBAUTHN_HMAC_SECRET_SALT.Marshaller.Unmanaged*)unmanaged.pPRFGlobalEval);
+                NativeMemory.Free((void*)unmanaged.pPRFGlobalEval);
+            }
         }
     }
 }

@@ -85,16 +85,38 @@ public class PasskeyManager
     /// </summary>
     /// <param name="rpInfo">Details about the Relying Party that the credential will be registered for.</param>
     /// <param name="userInfo">Details about the user that the credential will be registered for.</param>
+    /// <param name="salt">An salt to use to optionally generate an HMAC secret as part of credential creation.</param>
+    /// <param name="secondSalt">An optional second salt to use in the HMAC secret generation. If provided, <paramref name="salt"/> is required too.</param>
     /// <param name="userVerificationRequirement">A requested <see cref="UserVerificationRequirement"/>, which may not necessarily be honoured.</param>
     /// <returns>A <see cref="MakeCredentialResponse"/> object instance with information about the newly created credential.</returns>
     public MakeCredentialResponse MakeCredentialWithHmacSecret(
         RelyingPartyInfo rpInfo,
         UserEntityInfo userInfo,
+        HmacSecret? salt = null,
+        HmacSecret? secondSalt = null,
         UserVerificationRequirement userVerificationRequirement = UserVerificationRequirement.Discouraged)
     {
         ArgumentNullException.ThrowIfNull(rpInfo);
         ArgumentNullException.ThrowIfNull(userInfo);
 
-        return this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, userVerificationRequirement);
+        if (salt is not null && salt.InternalSecretData.Length != 32)
+        {
+            throw new ArgumentException("The salt must be exactly 32 bytes long.", nameof(salt));
+        }
+
+        if (secondSalt is not null)
+        {
+            if (salt is null)
+            {
+                throw new ArgumentException("The first salt must be provided if a second salt is provided.", nameof(salt));
+            }
+
+            if (secondSalt.InternalSecretData.Length != 32)
+            {
+                throw new ArgumentException("The second salt must be exactly 32 bytes long.", nameof(secondSalt));
+            }
+        }
+
+        return this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, salt, secondSalt, userVerificationRequirement);
     }
 }

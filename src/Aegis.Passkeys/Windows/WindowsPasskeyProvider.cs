@@ -12,6 +12,11 @@ namespace Aegis.Passkeys.Windows;
 /// <summary>
 /// Provides access to passkey functionality on Windows platforms.
 /// </summary>
+/// <remarks>
+/// Win32 WebAuthN API documentation is somewhat sparse.
+/// A good reference is chromium integration here:
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/device/fido/win/
+/// </remarks>
 [SupportedOSPlatform("windows")]
 internal class WindowsPasskeyProvider : IPasskeyProvider
 {
@@ -31,6 +36,14 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
     /// <inheritdoc />
     public bool IsHmacSecretSupported() => Win32ApiVersion.Value >= WEBAUTHN_API_VERSION.WEBAUTHN_API_VERSION_6;
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Support was added in Win11 25H2. Prior to that, the MakeCredential API would bootstrap the PRF
+    /// functionality but would not return an HMAC secret. A second call to GetAssertion would be needed.
+    /// </remarks>
+    public bool IsHmacGenerationDuringMakeCredentialSupported()
+        => Win32ApiVersion.Value >= WEBAUTHN_API_VERSION.WEBAUTHN_API_VERSION_9;
 
     /// <inheritdoc />
     public GetHmacSecretResponse GetHmacSecret(
@@ -112,6 +125,8 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
     public MakeCredentialResponse MakeCredentialWithHmacSecret(
         RelyingPartyInfo rpInfo,
         UserEntityInfo userInfo,
+        HmacSecret? salt,
+        HmacSecret? secondSalt,
         UserVerificationRequirement userVerificationRequirement)
     {
         WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
@@ -155,6 +170,15 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
             dwUserVerificationRequirement = userVerificationRequirement,
         };
 
+        if (salt is not null)
+        {
+            options.pPRFGlobalEval = new WEBAUTHN_HMAC_SECRET_SALT
+            {
+                first = salt.InternalSecretData,
+                second = secondSalt?.InternalSecretData,
+            };
+        }
+
         WEBAUTHN_CREDENTIAL_ATTESTATION.SafeHandle? attestationSafeHandle = null;
         try
         {
@@ -180,9 +204,37 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
                     "The passkey registered by the user does not support HMAC secrets.");
             }
 
+            HmacSecret? firstHmac = null;
+            if (salt is not null)
+            {
+                if (attestation.pHmacSecret?.first is null)
+                {
+                    throw new PasskeyOperationFailedException(
+                        PasskeyFailureCode.PasskeyIneropFailed,
+                        "The desired HMAC for the first salt was not created. This is unexpected.");
+                }
+
+                firstHmac = new HmacSecret(attestation.pHmacSecret.Value.first);
+            }
+
+            HmacSecret? secondHmac = null;
+            if (secondSalt is not null)
+            {
+                if (attestation.pHmacSecret?.second is null)
+                {
+                    throw new PasskeyOperationFailedException(
+                        PasskeyFailureCode.PasskeyIneropFailed,
+                        "The desired HMAC for the second salt was not created. This is unexpected.");
+                }
+
+                secondHmac = new HmacSecret(attestation.pHmacSecret.Value.second);
+            }
+
             var response = new MakeCredentialResponse
             {
                 NewCredentialId = new Identifier(attestation.credentialId),
+                FirstHmac = firstHmac,
+                SecondHmac = secondHmac,
             };
             return response;
         }

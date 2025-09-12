@@ -12,6 +12,11 @@ public class HmacSecret : IDisposable
     public HmacSecret(byte[] secretData)
     {
         ArgumentNullException.ThrowIfNull(secretData);
+        if (secretData.Length != 32)
+        {
+            throw new ArgumentException("The secret data must be exactly 32 bytes long.", nameof(secretData));
+        }
+
         this.InternalSecretData = new byte[secretData.Length];
         Array.Copy(secretData, this.InternalSecretData, secretData.Length);
     }
