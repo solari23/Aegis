@@ -40,6 +40,14 @@ internal struct WEBAUTHN_ASSERTION()
     // PBYTE pbUnsignedExtensionOutputs
     public byte[]? unsignedExtensionOutputs = null;
 
+    // DWORD cbClientDataJSON
+    // PBYTE pbClientDataJSON
+    public byte[]? clientDataJSON = null;
+
+    // DWORD cbAuthenticationResponseJSON
+    // PBYTE pbAuthenticationResponseJSON
+    public byte[]? authenticationResponseJSON = null;
+
     internal unsafe class SafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         public SafeHandle() : base(ownsHandle: true)
@@ -115,6 +123,15 @@ internal struct WEBAUTHN_ASSERTION()
             }
 
             ret.unsignedExtensionOutputs = reader.ReadSizePrefixedBytes();
+
+            if (version < 6)
+            {
+                // Fields below were added in version 6+.
+                return ret;
+            }
+
+            ret.clientDataJSON = reader.ReadSizePrefixedBytes();
+            ret.authenticationResponseJSON = reader.ReadSizePrefixedBytes();
 
             return ret;
         }

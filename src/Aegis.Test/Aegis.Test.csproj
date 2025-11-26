@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Aegis.Core\Aegis.Core.csproj" />
     <ProjectReference Include="..\Aegis.Models\Aegis.Models.csproj" />
+    <ProjectReference Include="..\Aegis.Passkeys\Aegis.Passkeys.csproj" />
   </ItemGroup>
 
   <ItemGroup>
