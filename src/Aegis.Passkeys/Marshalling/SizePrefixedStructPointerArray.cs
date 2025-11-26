@@ -11,8 +11,6 @@ internal readonly struct SizePrefixedStructPointerArray(uint numElements, nint p
 {
     public static SizePrefixedStructPointerArray Empty => new(0, nint.Zero);
 
-    public static unsafe void Free(nint ptr) => NativeMemory.Free((void*)ptr);
-
     public static unsafe SizePrefixedStructPointerArray From<TManaged, TUnmanaged>(
         TManaged[] input,
         Func<TManaged, TUnmanaged> elementMarshaller)

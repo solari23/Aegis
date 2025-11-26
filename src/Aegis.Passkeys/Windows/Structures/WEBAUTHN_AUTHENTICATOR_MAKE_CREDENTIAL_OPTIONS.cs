@@ -43,8 +43,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
 
     // PCTAPCBOR_HYBRID_STORAGE_LINKED_DATA pLinkedDevice ==> Not Supported.
 
-    // DWORD cbJsonExt;
-    // PBYTE pbJsonExt;
+    // DWORD cbJsonExt
+    // PBYTE pbJsonExt
     public byte[]? jsonExt = null;
 
     private WEBAUTHN_HMAC_SECRET_SALT? _pPRFGlobalEval = null;
@@ -69,8 +69,9 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
         }
     }
 
-    // DWORD cCredentialHints ==> Not Supported.
-    // LPCWSTR *ppwszCredentialHints ==> Not Supported.
+    // DWORD cCredentialHints
+    // LPCWSTR *ppwszCredentialHints
+    public string[]? credentialHints = null;
 
     public bool bAutoFill = false;
 
@@ -107,6 +108,7 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
         public static Unmanaged ConvertToUnmanaged(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS managed)
         {
             var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
+            var marshalledCredentialHints = SizePrefixedStringArray.From(managed.credentialHints);
 
             var marshalledPRFGlobalEval = IntPtr.Zero;
             if (managed.pPRFGlobalEval.HasValue)
@@ -144,8 +146,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
                 cbJsonExt = marshalledJsonExt.NumElements,
                 pbJsonExt = marshalledJsonExt.Pointer,
                 pPRFGlobalEval = marshalledPRFGlobalEval,
-                cCredentialHints = 0, // Not Supported.
-                ppwszCredentialHints = IntPtr.Zero, // Not Supported.
+                cCredentialHints = marshalledCredentialHints.NumElements,
+                ppwszCredentialHints = marshalledCredentialHints.Pointer,
                 bAutoFill = managed.bAutoFill ? 1 : 0,
             };
             return ret;
@@ -169,6 +171,9 @@ internal struct WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS()
                     *(WEBAUTHN_HMAC_SECRET_SALT.Marshaller.Unmanaged*)unmanaged.pPRFGlobalEval);
                 NativeMemory.Free((void*)unmanaged.pPRFGlobalEval);
             }
+
+            new SizePrefixedStringArray(unmanaged.cCredentialHints, unmanaged.ppwszCredentialHints)
+                .Free();
         }
     }
 }

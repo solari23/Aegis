@@ -62,6 +62,10 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
         WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS options = new()
         {
+            // HMAC Secret is not implemented by Windows platform. We're looking for a YubiKey.
+            dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
+            credentialHints = [PublicKeyCredentialHint.SecurityKey],
+
             pHmacSecretSaltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES
             {
                 pGlobalHmacSalt = new WEBAUTHN_HMAC_SECRET_SALT
@@ -161,6 +165,7 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
 
             // HMAC Secret is not implemented by Windows platform. We're looking for a YubiKey.
             dwAuthenticatorAttachment = AuthenticatorAttachment.CrossPlatform,
+            credentialHints = [PublicKeyCredentialHint.SecurityKey],
 
             // Add the extension to create HMAC secret.
             dwFlags = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_FLAGS.WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG,

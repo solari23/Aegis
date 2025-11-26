@@ -9,7 +9,7 @@ namespace Aegis.Passkeys.Windows.Structures;
 [NativeMarshalling(typeof(Marshaller))]
 internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
 {
-    private uint dwVersion = 7;
+    private uint dwVersion = 8;
 
     public uint dwTimeoutMilliseconds = 60_000;
 
@@ -67,6 +67,10 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
     // PBYTE pbJsonExt
     public byte[]? jsonExt = null;
 
+    // DWORD cCredentialHints
+    // LPCWSTR *ppwszCredentialHints
+    public string[]? credentialHints = null;
+
     [CustomMarshaller(typeof(WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS), MarshalMode.ManagedToUnmanagedRef, typeof(Marshaller))]
     internal static unsafe class Marshaller
     {
@@ -92,12 +96,15 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
             public int bAutoFill;
             public uint cbJsonExt;
             public IntPtr pbJsonExt;
+            public uint cCredentialHints;
+            public IntPtr ppwszCredentialHints;
         }
 
         public static unsafe Unmanaged ConvertToUnmanaged(WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS managed)
         {
             var marshalledCredLargeBlob = SizePrefixedByteArray.From(managed.credLargeBlob);
             var marshalledJsonExt = SizePrefixedByteArray.From(managed.jsonExt);
+            var marshalledCredentialHints = SizePrefixedStringArray.From(managed.credentialHints);
 
             IntPtr marshalledAllowCredentialList = IntPtr.Zero;
             if (managed.pAllowCredentialList is not null)
@@ -142,6 +149,8 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                 bAutoFill = managed.bAutoFill ? 1 : 0,
                 cbJsonExt = marshalledJsonExt.NumElements,
                 pbJsonExt = marshalledJsonExt.Pointer,
+                cCredentialHints = marshalledCredentialHints.NumElements,
+                ppwszCredentialHints = marshalledCredentialHints.Pointer,
             };
         }
 
@@ -172,6 +181,9 @@ internal struct WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS()
                     *(WEBAUTHN_HMAC_SECRET_SALT_VALUES.Marshaller.Unmanaged*)unmanaged.pHmacSecretSaltValues);
                 NativeMemory.Free((void*)unmanaged.pHmacSecretSaltValues);
             }
+
+            new SizePrefixedStringArray(unmanaged.cCredentialHints, unmanaged.ppwszCredentialHints)
+                .Free();
         }
     }
 }
