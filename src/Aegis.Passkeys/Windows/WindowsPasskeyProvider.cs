@@ -133,6 +133,12 @@ internal class WindowsPasskeyProvider : IPasskeyProvider
         HmacSecret? secondSalt,
         UserVerificationRequirement userVerificationRequirement)
     {
+        if ((salt is not null || secondSalt is not null)
+            && !this.IsHmacGenerationDuringMakeCredentialSupported())
+        {
+            throw new NotSupportedException("HMAC secret generation during MakeCredential is not supported on this platform.");
+        }
+
         WEBAUTHN_RP_ENTITY_INFORMATION rpEntityInfo = new()
         {
             pwszId = rpInfo.Id,

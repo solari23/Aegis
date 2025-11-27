@@ -79,7 +79,7 @@ public class PasskeyManager
 
     /// <summary>
     /// Makes a new passkey credential with an HMAC secret.
-    /// 
+    ///
     /// The user may save the created passkey to a device that does not support HMAC secrets.
     /// In that case, this method will throw.
     /// </summary>
@@ -117,6 +117,21 @@ public class PasskeyManager
             }
         }
 
-        return this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, salt, secondSalt, userVerificationRequirement);
+        var makeCredentialResponse = this.PasskeyProvider.IsHmacGenerationDuringMakeCredentialSupported()
+            ? this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, salt, secondSalt, userVerificationRequirement)
+            : this.PasskeyProvider.MakeCredentialWithHmacSecret(rpInfo, userInfo, null, null, userVerificationRequirement);
+
+        if (salt is not null && makeCredentialResponse.FirstHmac is null)
+        {
+            var hmacSecretResult = this.PasskeyProvider.GetHmacSecret(rpInfo, salt, secondSalt, [makeCredentialResponse.NewCredentialId]);
+            makeCredentialResponse = new MakeCredentialResponse
+            {
+                NewCredentialId = makeCredentialResponse.NewCredentialId,
+                FirstHmac = hmacSecretResult.First,
+                SecondHmac = hmacSecretResult.Second,
+            };
+        }
+
+        return makeCredentialResponse;
     }
 }
