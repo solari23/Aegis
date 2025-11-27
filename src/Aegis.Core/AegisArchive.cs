@@ -59,9 +59,9 @@ public sealed class AegisArchive : IDisposable
                 SecuritySettings = creationParameters.SecuritySettings,
                 CreateTime = currentTime,
                 LastModifiedTime = currentTime,
-                KeyDerivationSalt = new List<byte>(keyDerivationSalt),
+                KeyDerivationSalt = keyDerivationSalt,
                 AuthCanary = authCanary,
-                UserKeyAuthorizations = new List<UserKeyAuthorization> { firstUserKeyAuthorization },
+                UserKeyAuthorizations = [firstUserKeyAuthorization],
             };
 
             tempArchive = new AegisArchive
@@ -459,7 +459,7 @@ public sealed class AegisArchive : IDisposable
             .Where(k => k.AuthorizationId == authorizationId)
             .ToArray();
 
-        if (!matchingAuthorizations.Any())
+        if (matchingAuthorizations.Length == 0)
         {
             throw new EntityNotFoundException(
                 $"Authorization with ID '{authorizationId}' was not found.");

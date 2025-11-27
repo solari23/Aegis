@@ -27,11 +27,11 @@ internal static class EncryptedPacketExtensions
 
         return new EncryptedPacket
         {
-            CipherText = new List<byte>(cipherText.ToArray()),
-            IV = new List<byte>(iv.ToArray()),
+            CipherText = cipherText.ToArray(),
+            IV = iv.ToArray(),
             AuthTag = authTag.IsEmpty
-                ? new List<byte>()
-                : new List<byte>(authTag.ToArray()),
+                ? []
+                : authTag.ToArray(),
         };
     }
 
@@ -39,7 +39,7 @@ internal static class EncryptedPacketExtensions
     /// Gets whether or the <see cref="EncryptedPacket"/> is empty.
     /// </summary>
     /// <param name="packet">The target <see cref="EncryptedPacket"/> instance.</param>
-    public static bool IsEmpty(this EncryptedPacket packet) => packet?.CipherText?.Count == 0;
+    public static bool IsEmpty(this EncryptedPacket packet) => packet?.CipherText?.Length == 0;
 
     /// <summary>
     /// Writes the <see cref="EncryptedPacket"/> in pure binary form to the given stream.

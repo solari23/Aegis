@@ -52,9 +52,8 @@ public class SecureArchiveMetadata
     /// single archive to be in the custody of more than a few people. With stronger
     /// secret types (e.g. cryptographic keys), this won't be a problem at all.
     /// </remarks>
-    [JsonConverter(typeof(JsonByteListBase64Converter))]
-    [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Required for serialization framework.")]
-    public List<byte> KeyDerivationSalt { get; set; }
+    [JsonConverter(typeof(ByteArrayBase64JsonConverter))]
+    public byte[] KeyDerivationSalt { get; set; }
 
     /// <summary>
     /// The archive ID encrypted with the archive key. This field is used to
@@ -65,7 +64,6 @@ public class SecureArchiveMetadata
     /// <summary>
     /// The list of keys that are authorized to unlock the archive.
     /// </summary>
-    [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Required for serialization framework.")]
     public List<UserKeyAuthorization> UserKeyAuthorizations { get; set; }
 
     /// <summary>
