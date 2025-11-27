@@ -28,6 +28,9 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public SecretKind ProvidedSecretKind => SecretKind.RsaKeyFromCertificate;
 
+    /// <inheritdoc />
+    public bool IsCurrentPlatformSupported() => true;
+
     /// <summary>
     /// Gets the IO streams.
     /// </summary>

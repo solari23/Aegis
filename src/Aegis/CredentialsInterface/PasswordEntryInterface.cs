@@ -26,6 +26,9 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public SecretKind ProvidedSecretKind => SecretKind.Password;
 
+    /// <inheritdoc />
+    public bool IsCurrentPlatformSupported() => true;
+
     /// <summary>
     /// Gets the IO streams.
     /// </summary>

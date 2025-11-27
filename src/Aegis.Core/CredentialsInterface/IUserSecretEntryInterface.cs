@@ -16,6 +16,11 @@ public interface IUserSecretEntryInterface
     SecretKind ProvidedSecretKind { get; }
 
     /// <summary>
+    /// Gets whether or not the current platform is supported by the <see cref="IUserSecretEntryInterface"/>.
+    /// </summary>
+    bool IsCurrentPlatformSupported();
+
+    /// <summary>
     /// Queries the secret provider to check if it can provide a secret based
     /// on that secret's metadata.
     /// </summary>

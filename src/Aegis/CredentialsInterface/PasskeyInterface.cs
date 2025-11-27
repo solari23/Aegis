@@ -28,6 +28,9 @@ public class PasskeyInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public SecretKind ProvidedSecretKind => SecretKind.PasskeyHmacSecret;
 
+    /// <inheritdoc />
+    public bool IsCurrentPlatformSupported() => this.PasskeyManager.IsHmacSecretSupported();
+
     /// <summary>
     /// Gets the IO streams.
     /// </summary>
