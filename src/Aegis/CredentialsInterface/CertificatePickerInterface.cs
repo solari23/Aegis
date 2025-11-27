@@ -106,9 +106,9 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
         using var cert = csr.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(1000));
 
         // Export and recreate the certificate to make it correctly exportable.
-        var exportableCert = new X509Certificate2(
+        var exportableCert = X509CertificateLoader.LoadPkcs12(
             cert.Export(X509ContentType.Pfx),
-            (string)null,  // No password
+            password: null,  // No password
             X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.UserKeySet);
 
         using X509Store certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
@@ -138,7 +138,7 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
 
         try
         {
-            certificate = new X509Certificate2(pfxPath, pfxPassword, X509KeyStorageFlags.Exportable);
+            certificate = X509CertificateLoader.LoadPkcs12FromFile(pfxPath, pfxPassword, X509KeyStorageFlags.Exportable);
         }
         catch (CryptographicException e)
         {

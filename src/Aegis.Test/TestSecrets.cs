@@ -30,7 +30,7 @@ public static class TestSecrets
     {
         SecretKind.Password => RawUserSecret.FromPasswordString(DefaultPassword),
         SecretKind.RsaKeyFromCertificate => RawUserSecret.FromCertificate(
-            new X509Certificate2(Convert.FromBase64String(DefaultRsaCertificatePfx), (string)null, X509KeyStorageFlags.Exportable)),
+            X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(DefaultRsaCertificatePfx), null, X509KeyStorageFlags.Exportable)),
         _ => throw new Exception($"SecretKind {secretKind} not supported by this helper."),
     };
 
