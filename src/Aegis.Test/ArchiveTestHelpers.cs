@@ -71,9 +71,9 @@ public static class ArchiveTestHelpers
         var referenceFileBytes = File.ReadAllBytes(referenceFilePath);
         var testFileBytes = File.ReadAllBytes(testFilePath);
 
-        Assert.AreEqual(
+        Assert.HasCount(
             referenceFileBytes.Length,
-            testFileBytes.Length, $"The test file at path '{testFilePath}' does not have the expected size!");
+            testFileBytes, $"The test file at path '{testFilePath}' does not have the expected size!");
 
         for (int i = 0; i < testFileBytes.Length; i++)
         {

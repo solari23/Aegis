@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using AegisVirtualFilePath = Aegis.Core.FileSystem.AegisVirtualFilePath;
+﻿using AegisVirtualFilePath = Aegis.Core.FileSystem.AegisVirtualFilePath;
 
 namespace Aegis.Test.Core.FileSystem;
 
@@ -16,7 +14,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/foo.ags", vpath.FullPath);
-        Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(0, vpath.DirectoryPath.Components);
         Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
@@ -24,7 +22,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"/foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/foo.ags", vpath.FullPath);
-        Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(0, vpath.DirectoryPath.Components);
         Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
@@ -32,7 +30,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"\foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/foo.ags", vpath.FullPath);
-        Assert.AreEqual(0, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(0, vpath.DirectoryPath.Components);
         Assert.AreEqual("/", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("<root>", vpath.DirectoryPath.DisplayName);
 
@@ -40,7 +38,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"dir/foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-        Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(1, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
@@ -49,7 +47,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"/dir/foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-        Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(1, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
@@ -58,7 +56,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"\dir\foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-        Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(1, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
@@ -67,7 +65,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"/dir\foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-        Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(1, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
@@ -76,7 +74,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"\dir/foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir/foo.ags", vpath.FullPath);
-        Assert.AreEqual(1, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(1, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("/dir", vpath.DirectoryPath.FullPath);
         Assert.AreEqual("dir", vpath.DirectoryPath.DisplayName);
@@ -85,7 +83,7 @@ public class AegisVirtualFilePathTests
         vpath = new AegisVirtualFilePath(@"/dir1/dir2/foo.ags");
         Assert.AreEqual("foo.ags", vpath.FileName);
         Assert.AreEqual("/dir1/dir2/foo.ags", vpath.FullPath);
-        Assert.AreEqual(2, vpath.DirectoryPath.Components.Length);
+        Assert.HasCount(2, vpath.DirectoryPath.Components);
         Assert.AreEqual("dir1", vpath.DirectoryPath.Components[0]);
         Assert.AreEqual("dir2", vpath.DirectoryPath.Components[1]);
         Assert.AreEqual("/dir1/dir2", vpath.DirectoryPath.FullPath);
@@ -96,20 +94,20 @@ public class AegisVirtualFilePathTests
     public void TestConstruction_RejectEmptyPath()
     {
         // Check empty strings.
-        Assert.ThrowsException<ArgumentNullException>(() => new AegisVirtualFilePath(null));
-        Assert.ThrowsException<ArgumentNullException>(() => new AegisVirtualFilePath(string.Empty));
-        Assert.ThrowsException<ArgumentNullException>(() => new AegisVirtualFilePath(" "));
-        Assert.ThrowsException<ArgumentNullException>(() => new AegisVirtualFilePath("\n"));
-        Assert.ThrowsException<ArgumentNullException>(() => new AegisVirtualFilePath("\t"));
+        Assert.ThrowsExactly<ArgumentNullException>(() => new AegisVirtualFilePath(null));
+        Assert.ThrowsExactly<ArgumentNullException>(() => new AegisVirtualFilePath(string.Empty));
+        Assert.ThrowsExactly<ArgumentNullException>(() => new AegisVirtualFilePath(" "));
+        Assert.ThrowsExactly<ArgumentNullException>(() => new AegisVirtualFilePath("\n"));
+        Assert.ThrowsExactly<ArgumentNullException>(() => new AegisVirtualFilePath("\t"));
 
         // Check paths containing only separators.
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"/"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"//"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"\"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"\\"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"\"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"\/"));
-        Assert.ThrowsException<ArgumentException>(() => new AegisVirtualFilePath(@"/\"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"/"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"//"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"\"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"\\"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"\"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"\/"));
+        Assert.ThrowsExactly<ArgumentException>(() => new AegisVirtualFilePath(@"/\"));
     }
 
     [TestMethod]
@@ -183,7 +181,7 @@ public class AegisVirtualFilePathTests
 
         // Check equality for just one null reference.
         vpath1 = null;
-        Assert.AreEqual(null, vpath1);
+        Assert.IsNull(vpath1);
 
         // Both references are null.
         vpath1 = null;
@@ -281,8 +279,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // File with path -- compare to self.
         vpath1 = new AegisVirtualFilePath("/dir/foo.ags");
@@ -319,8 +317,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // Mismatching files with paths -- directory names mismatch -- compare to each other.
         vpath1 = new AegisVirtualFilePath("/dir/foo.ags");
@@ -333,8 +331,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
     }
 
     [TestMethod]
@@ -365,7 +363,7 @@ public class AegisVirtualFilePathTests
         Assert.IsTrue(null < vpath1);
         Assert.IsTrue(vpath1 > null);
         Assert.IsFalse(null > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(null) > 0);
+        Assert.IsGreaterThan(0, vpath1.CompareTo(null));
     }
 
     [TestMethod]
@@ -434,8 +432,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // Directory paths are siblings (path1 preceeds path2).
         vpath1 = new AegisVirtualFilePath("/dir1/dir2/foo.ags");
@@ -448,8 +446,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // One directory name is shorter than the other (path1 preceeds path2).
         vpath1 = new AegisVirtualFilePath("/d/foo.ags");
@@ -462,8 +460,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // Directory paths are unrelated (path1 preceeds path2).
         vpath1 = new AegisVirtualFilePath("/dir1/foo.ags");
@@ -476,8 +474,8 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
 
         // Bare file vs path -- similar to being in parent directory (path1 preceeds path2).
         vpath1 = new AegisVirtualFilePath("foo.ags");
@@ -490,7 +488,7 @@ public class AegisVirtualFilePathTests
         Assert.IsFalse(vpath2 < vpath1);
         Assert.IsFalse(vpath1 > vpath2);
         Assert.IsTrue(vpath2 > vpath1);
-        Assert.IsTrue(vpath1.CompareTo(vpath2) < 0);
-        Assert.IsTrue(vpath2.CompareTo(vpath1) > 0);
+        Assert.IsLessThan(0, vpath1.CompareTo(vpath2));
+        Assert.IsGreaterThan(0, vpath2.CompareTo(vpath1));
     }
 }

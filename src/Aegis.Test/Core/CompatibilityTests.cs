@@ -43,7 +43,7 @@ public class CompatibilityTests
         {
             // Check the authorization records for the pre-existing secrets.
             var authorizations = archive.GetUserKeyAuthorizations();
-            Assert.AreEqual(2, authorizations.Count);
+            Assert.HasCount(2, authorizations);
 
             var passwordKeyRecord = authorizations[0];
             Assert.IsInstanceOfType(passwordKeyRecord.SecretMetadata, typeof(PasswordSecretMetadata));

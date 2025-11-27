@@ -58,7 +58,7 @@ public class AegisArchiveTests
 
         // The archive is open but still locked. Make sure the flags are set accordingly.
         Assert.IsTrue(reopenedArchive.IsLocked);
-        Assert.ThrowsException<ArchiveLockedException>(() => reopenedArchive.GetFileInfo(file.FileId));
+        Assert.ThrowsExactly<ArchiveLockedException>(() => reopenedArchive.GetFileInfo(file.FileId));
 
         reopenedArchive.Unlock(TestSecrets.GetDefaultUserSecret(secretKind));
         Assert.IsFalse(reopenedArchive.IsLocked);
@@ -253,7 +253,7 @@ public class AegisArchiveTests
         // 11 -> 13
         using (var archive = AegisArchive.Load(ArchiveTestHelpers.GetTestArchiveFileSettings(this.WorkingDirectory)))
         {
-            Assert.ThrowsException<UnauthorizedException>(
+            Assert.ThrowsExactly<UnauthorizedException>(
                 () => archive.Unlock(TestSecrets.GetDefaultUserSecret(SecretKind.Password)));
             Assert.IsTrue(archive.IsLocked);
 
