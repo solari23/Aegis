@@ -20,7 +20,6 @@ internal class Pbkdf2Sha256KeyDerivationStrategy : IKeyDerivationStrategy
         ArgCheck.NotEmpty(salt);
         ArgCheck.GreaterThanZero(workFactor);
 
-        using var kdf = new Rfc2898DeriveBytes(secret.ToArray(), salt.ToArray(), workFactor, HashAlgorithmName.SHA256);
-        return kdf.GetBytes(numBytesToDerive);
+        return Rfc2898DeriveBytes.Pbkdf2(secret.ToArray(), salt.ToArray(), workFactor, HashAlgorithmName.SHA256, numBytesToDerive);
     }
 }
