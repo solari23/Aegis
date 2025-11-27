@@ -19,9 +19,9 @@ public class VirtualFileTreeTests
         visitor = new VirtualFileTreeTestVisitor();
         tree.TraverseNodes(visitor);
         Assert.AreEqual(0, visitor.PreOrderHits);
-        Assert.AreEqual(0, visitor.PreOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PreOrderVisitFiles);
         Assert.AreEqual(0, visitor.PostOrderHits);
-        Assert.AreEqual(0, visitor.PostOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PostOrderVisitFiles);
 
         // Add a file to the root, make sure visitor sees it.
         tree.Add(rootFile1);
@@ -37,9 +37,9 @@ public class VirtualFileTreeTests
         visitor = new VirtualFileTreeTestVisitor();
         tree.TraverseNodes(visitor);
         Assert.AreEqual(0, visitor.PreOrderHits);
-        Assert.AreEqual(0, visitor.PreOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PreOrderVisitFiles);
         Assert.AreEqual(0, visitor.PostOrderHits);
-        Assert.AreEqual(0, visitor.PostOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PostOrderVisitFiles);
 
         // Add both files to the root, visitor should see them in alphabetical order.
         tree.Add(rootFile1);
@@ -86,9 +86,9 @@ public class VirtualFileTreeTests
         visitor = new VirtualFileTreeTestVisitor();
         tree.TraverseNodes(visitor);
         Assert.AreEqual(0, visitor.PreOrderHits);
-        Assert.AreEqual(0, visitor.PreOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PreOrderVisitFiles);
         Assert.AreEqual(0, visitor.PostOrderHits);
-        Assert.AreEqual(0, visitor.PostOrderVisitFiles.Count);
+        Assert.IsEmpty(visitor.PostOrderVisitFiles);
 
         // Add all the files -- check the pre/post order traversal
         // across the 4 directories.
@@ -161,7 +161,7 @@ public class VirtualFileTreeTests
 
     private void CheckFileOrder(List<AegisFileInfo> fileList, params AegisFileInfo[] expectedFileOrder)
     {
-        Assert.AreEqual(expectedFileOrder.Length, fileList.Count);
+        Assert.HasCount(expectedFileOrder.Length, fileList);
 
         for (int i = 0; i < fileList.Count; i++)
         {
