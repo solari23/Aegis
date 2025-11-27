@@ -39,7 +39,7 @@ internal class Aes256GcmCryptoStrategy : ICryptoStrategy
         ArgCheck.HasLength(this.AlgorithmProperties.KeySizeInBytes, key);
 
         // Containers to hold crypto operation outputs.
-        var plainText = new byte[encryptedData.CipherText.Count];
+        var plainText = new byte[encryptedData.CipherText.Length];
 
         using var algo = new AesGcm(key, this.AlgorithmProperties.AuthTagSizeInBytes);
         algo.Decrypt(
