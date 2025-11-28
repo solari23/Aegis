@@ -27,6 +27,7 @@ public class SecretMetadataPolymorphicConverter : JsonConverter<SecretMetadata>
         {
             { SecretKind.Password, typeof(PasswordSecretMetadata) },
             { SecretKind.RsaKeyFromCertificate, typeof(RsaKeyFromCertificateSecretMetadata) },
+            { SecretKind.PasskeyHmacSecret, typeof(PasskeyHmacSecretMetadata) },
         });
 
     /// <inheritdoc />

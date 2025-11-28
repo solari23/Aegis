@@ -29,7 +29,7 @@ public sealed class AegisArchive : IDisposable
         ArgCheck.IsValid(creationParameters);
 
         var currentTime = DateTimeOffset.UtcNow;
-        var archiveId = Guid.NewGuid();
+        var archiveId = creationParameters.ArchiveId;
 
         ArchiveKey tempArchiveKey = null;
 
@@ -150,6 +150,11 @@ public sealed class AegisArchive : IDisposable
     {
         // Hidden ctor.
     }
+
+    /// <summary>
+    /// Gets the unique identifier of the archive.
+    /// </summary>
+    public Guid Id => this.ArchiveMetadata.Id;
 
     /// <summary>
     /// Gets the name of the archive file.

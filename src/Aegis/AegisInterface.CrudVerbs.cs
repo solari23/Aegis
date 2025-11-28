@@ -70,8 +70,9 @@ namespace Aegis
                     }
                 }
 
-                using var firstUserKeyAuthorization = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams();
-                using var createParameters = new SecureArchiveCreationParameters(firstUserKeyAuthorization);
+                var archiveId = Guid.NewGuid();
+                using var firstUserKeyAuthorization = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams(archiveId);
+                using var createParameters = new SecureArchiveCreationParameters(firstUserKeyAuthorization, archiveId);
 
                 using var archive = AegisArchive.CreateNew(archiveFileSettings, createParameters);
 
@@ -317,7 +318,7 @@ namespace Aegis
         /// <returns>Whether or not the operation was handled.</returns>
         private bool AuthorizeVerb(AuthorizeVerbOptions options)
         {
-            using var newAuthorizationParams = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams();
+            using var newAuthorizationParams = this.ArchiveUnlocker.GetNewUserKeyAuthorizationParams(this.Archive.Id);
             this.Archive.AuthorizeNewKey(newAuthorizationParams);
 
             return true;

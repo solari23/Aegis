@@ -14,12 +14,19 @@ public sealed class SecureArchiveCreationParameters : IDisposable, IValidatableO
     /// Initializes a new instance of the <see cref="SecureArchiveCreationParameters"/> class.
     /// </summary>
     /// <param name="firstKeyAuthorizationParam">The parameters to authorize the first user key.</param>
-    public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstKeyAuthorizationParam)
+    /// <param name="archiveId">The unique identifier for the new archive (optional; if not provided, a random new Guid is generated).</param>
+    public SecureArchiveCreationParameters(UserKeyAuthorizationParameters firstKeyAuthorizationParam, Guid? archiveId = null)
     {
         ArgCheck.IsValid(firstKeyAuthorizationParam);
 
         this.FirstKeyAuthorizationParams = firstKeyAuthorizationParam;
+        this.ArchiveId = archiveId ?? Guid.NewGuid();
     }
+
+    /// <summary>
+    /// Gets the unique identifier for the new archive.
+    /// </summary>
+    public Guid ArchiveId { get; }
 
     /// <summary>
     /// Gets or sets the security settings for the new archive.

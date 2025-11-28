@@ -13,7 +13,10 @@ public sealed class ArchiveUnlocker
     /// Initializes a new instance of the <see cref="ArchiveUnlocker"/> class.
     /// </summary>
     /// <param name="secretSelector">The secret selector user interface to use.</param>
-    /// <param name="secretProviders">The secret entry user interfaces to register.</param>
+    /// <param name="secretProviders">
+    ///   The secret entry user interfaces to register.
+    ///   Interfaces that do not support the current platform will be ignored.
+    /// </param>
     public ArchiveUnlocker(
         IUserSecretSelector secretSelector,
         params IUserSecretEntryInterface[] secretProviders)
@@ -25,7 +28,10 @@ public sealed class ArchiveUnlocker
 
         foreach (var provider in secretProviders)
         {
-            this.RegisterSecretEntryInterface(provider);
+            if (provider.IsCurrentPlatformSupported())
+            {
+                this.RegisterSecretEntryInterface(provider);
+            }
         }
     }
 
@@ -45,7 +51,7 @@ public sealed class ArchiveUnlocker
     /// </summary>
     /// <param name="secretEntryInterface">The interface to register.</param>
     /// <exception cref="ArgumentException">
-    /// A <see cref="IUserSecretEntryInterface"/> is already registered for the same <see cref="SecretKind"/>.
+    ///   A <see cref="IUserSecretEntryInterface"/> is already registered for the same <see cref="SecretKind"/>.
     /// </exception>
     public void RegisterSecretEntryInterface(IUserSecretEntryInterface secretEntryInterface)
     {
@@ -55,6 +61,13 @@ public sealed class ArchiveUnlocker
         {
             throw new ArgumentException(
                 $"Can't register secret interface for 'unknown' secret kind.",
+                nameof(secretEntryInterface));
+        }
+
+        if (!secretEntryInterface.IsCurrentPlatformSupported())
+        {
+            throw new ArgumentException(
+                $"Secret provider of type {secretEntryInterface.GetType()} does not support the current platform.",
                 nameof(secretEntryInterface));
         }
 
@@ -85,7 +98,7 @@ public sealed class ArchiveUnlocker
         var availableUserKeys = archive.GetUserKeyAuthorizations()
             .Where(key =>
                 this.SecretEntryInterfaces.ContainsKey(key.SecretMetadata.SecretKind)
-                && this.SecretEntryInterfaces[key.SecretMetadata.SecretKind].CanProvideSecret(key.SecretMetadata));
+                && this.SecretEntryInterfaces[key.SecretMetadata.SecretKind].CanProvideSecret(archive.Id, key.SecretMetadata));
 
         if (!availableUserKeys.Any())
         {
@@ -106,20 +119,21 @@ public sealed class ArchiveUnlocker
             .ToImmutableArray();
 
         // Finally, prompt to get the user secret and use it to unlock the archive.
-        using var userSecret = this.SecretEntryInterfaces[selectedSecretKind].GetUserSecret(selectedUserKeys);
+        using var userSecret = this.SecretEntryInterfaces[selectedSecretKind].GetUserSecret(archive.Id, selectedUserKeys);
         archive.Unlock(userSecret);
     }
 
     /// <summary>
     /// Prompts the user to provide the parameters for a new user key authorization.
     /// </summary>
+    /// <param name="archiveId">The unique identifier of the secure archive.</param>
     /// <returns>The new <see cref="UserKeyAuthorizationParameters"/>.</returns>
-    public UserKeyAuthorizationParameters GetNewUserKeyAuthorizationParams()
+    public UserKeyAuthorizationParameters GetNewUserKeyAuthorizationParams(Guid archiveId)
     {
         var newSecretKind = this.SecretEntryInterfaces.Count > 1
             ? this.SecretSelector.PromptSelectSecretKind(this.SecretEntryInterfaces.Keys.ToImmutableArray())
             : this.SecretEntryInterfaces.Keys.First();
 
-        return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters();
+        return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters(archiveId);
     }
 }

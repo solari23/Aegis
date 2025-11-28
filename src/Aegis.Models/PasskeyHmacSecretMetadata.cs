@@ -1,29 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using Aegis.Models.JsonConverters;
+
 namespace Aegis.Models;
 
 /// <summary>
-/// Metadata for secrets derived from certificate RSA keys.
+/// Metadata for password secrets.
 /// </summary>
-public class RsaKeyFromCertificateSecretMetadata : SecretMetadata
+public class PasskeyHmacSecretMetadata : SecretMetadata
 {
     /// <inheritdoc/>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public override SecretKind SecretKind => SecretKind.RsaKeyFromCertificate;
+    public override SecretKind SecretKind => SecretKind.PasskeyHmacSecret;
 
     /// <summary>
-    /// The thumbprint of the certificate.
+    /// The passkey's registered credential ID.
     /// </summary>
-    public string Thumbprint { get; set; }
+    [JsonConverter(typeof(ByteArrayBase64JsonConverter))]
+    public byte[] CredentialId { get; set; }
 
     /// <inheritdoc />
     public override IEnumerable<ValidationResult> Validate(ValidationContext ctx)
     {
-        if (string.IsNullOrWhiteSpace(this.Thumbprint))
+        if (this.CredentialId is null || this.CredentialId.Length == 0)
         {
             yield return new ValidationResult(
-                $"Property {nameof(this.Thumbprint)} is empty.");
+                $"Property {nameof(this.CredentialId)} is empty.");
         }
 
         foreach (var result in base.Validate(ctx))

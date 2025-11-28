@@ -25,4 +25,9 @@ public enum SecretKind
     /// The raw key used to protect the archive is the private exponent 'D' of the RSA key.
     /// </remarks>
     RsaKeyFromCertificate = 2,
+
+    /// <summary>
+    /// A key derived from a FIDO2/WebAuthn passkey using the HMAC-Secret extension.
+    /// </summary>
+    PasskeyHmacSecret = 3,
 }
