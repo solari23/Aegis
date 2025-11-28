@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Text;
 
 using Aegis.Core;
 using Aegis.Core.CredentialsInterface;
@@ -47,18 +48,58 @@ public class PasskeyInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters(Guid archiveId)
     {
-        // TODO: Implement PasskeyPickerInterface.GetNewKeyAuthorizationParameters
-        throw new NotImplementedException();
+        var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
+        var friendlyName = namePrompt.GetValue();
+
+        var rpId = PasskeyHelpers.GetRelyingPartyIdForIdentifier(archiveId);
+        var hmacSalt = PasskeyHelpers.IdentifierToHmacSalt(archiveId);
+
+        var makeCredentialResult = this.PasskeyManager.MakeCredentialWithHmacSecret(
+            new RelyingPartyInfo
+            {
+                Id = rpId,
+                Origin = rpId,
+                DisplayName = $"Aegis (Archive {archiveId:N})",
+            },
+            new UserEntityInfo
+            {
+                Id = new Identifier(Encoding.UTF8.GetBytes(friendlyName)),
+                Name = friendlyName,
+                DisplayName = friendlyName,
+            },
+            salt: new HmacSecret(hmacSalt));
+
+        var userSecret = RawUserSecret.CopyFromBytes(makeCredentialResult.FirstHmac.Secret);
+        return new UserKeyAuthorizationParameters(userSecret)
+        {
+            FriendlyName = friendlyName,
+            SecretMetadata = new PasskeyHmacSecretMetadata
+            {
+                CredentialId = makeCredentialResult.NewCredentialId.Value.ToArray(),
+            },
+        };
     }
 
     /// <inheritdoc />
     public RawUserSecret GetUserSecret(Guid archiveId, ImmutableArray<SecretMetadata> possibleSecretMetadata)
     {
         var possibleCredentialIds = possibleSecretMetadata
-            .Select(md => (md as PasskeyHmacSecretMetadata)?.CredentialId);
-        
+            .Select(md => new Identifier((md as PasskeyHmacSecretMetadata)?.CredentialId))
+            .ToArray();
 
+        var rpId = PasskeyHelpers.GetRelyingPartyIdForIdentifier(archiveId);
+        var hmacSalt = PasskeyHelpers.IdentifierToHmacSalt(archiveId);
 
-        throw new NotImplementedException();
+        var getHmacResult = this.PasskeyManager.GetHmacSecret(
+            new RelyingPartyInfo
+            {
+                Id = rpId,
+                Origin = rpId,
+                DisplayName = $"Aegis (Archive {archiveId:N})",
+            },
+            new HmacSecret(hmacSalt),
+            allowedCredentialIds: possibleCredentialIds);
+
+        return RawUserSecret.CopyFromBytes(getHmacResult.First.Secret);
     }
 }

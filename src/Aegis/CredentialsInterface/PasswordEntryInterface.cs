@@ -43,7 +43,7 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
         var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
         var friendlyName = namePrompt.GetValue();
 
-        var secret = this.GetUserSecret(archiveId, ImmutableArray<SecretMetadata>.Empty);
+        var secret = this.GetUserSecret(archiveId, []);
 
         return new UserKeyAuthorizationParameters(secret)
         {
