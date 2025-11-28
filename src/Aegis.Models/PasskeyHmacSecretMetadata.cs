@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using Aegis.Models.JsonConverters;
+
 namespace Aegis.Models;
 
 /// <summary>
@@ -12,12 +14,20 @@ public class PasskeyHmacSecretMetadata : SecretMetadata
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public override SecretKind SecretKind => SecretKind.PasskeyHmacSecret;
 
-    // TODO: properties
+    /// <summary>
+    /// The passkey's registered credential ID.
+    /// </summary>
+    [JsonConverter(typeof(ByteArrayBase64JsonConverter))]
+    public byte[] CredentialId { get; set; }
 
     /// <inheritdoc />
     public override IEnumerable<ValidationResult> Validate(ValidationContext ctx)
     {
-        // TODO: validation for properties
+        if (this.CredentialId is null || this.CredentialId.Length == 0)
+        {
+            yield return new ValidationResult(
+                $"Property {nameof(this.CredentialId)} is empty.");
+        }
 
         foreach (var result in base.Validate(ctx))
         {

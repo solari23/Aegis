@@ -54,7 +54,11 @@ public class PasskeyInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
     {
-        // TODO: Implement PasskeyPickerInterface.GetUserSecret
+        var possibleCredentialIds = possibleSecretMetadata
+            .Select(md => (md as PasskeyHmacSecretMetadata)?.CredentialId);
+        
+
+
         throw new NotImplementedException();
     }
 }
