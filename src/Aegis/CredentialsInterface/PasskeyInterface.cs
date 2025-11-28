@@ -42,17 +42,17 @@ public class PasskeyInterface : IUserSecretEntryInterface
     private PasskeyManager PasskeyManager { get; }
 
     /// <inheritdoc />
-    public bool CanProvideSecret(SecretMetadata secretMetadata) => this.PasskeyManager.IsHmacSecretSupported();
+    public bool CanProvideSecret(Guid archiveId, SecretMetadata secretMetadata) => this.PasskeyManager.IsHmacSecretSupported();
 
     /// <inheritdoc />
-    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
+    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters(Guid archiveId)
     {
         // TODO: Implement PasskeyPickerInterface.GetNewKeyAuthorizationParameters
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
+    public RawUserSecret GetUserSecret(Guid archiveId, ImmutableArray<SecretMetadata> possibleSecretMetadata)
     {
         var possibleCredentialIds = possibleSecretMetadata
             .Select(md => (md as PasskeyHmacSecretMetadata)?.CredentialId);

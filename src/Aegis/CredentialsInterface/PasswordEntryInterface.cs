@@ -35,15 +35,15 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
     private IOStreamSet IO { get; }
 
     /// <inheritdoc />
-    public bool CanProvideSecret(SecretMetadata secretMetadata) => true;
+    public bool CanProvideSecret(Guid archiveId, SecretMetadata secretMetadata) => true;
 
     /// <inheritdoc />
-    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
+    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters(Guid archiveId)
     {
         var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
         var friendlyName = namePrompt.GetValue();
 
-        var secret = this.GetUserSecret(ImmutableArray<SecretMetadata>.Empty);
+        var secret = this.GetUserSecret(archiveId, ImmutableArray<SecretMetadata>.Empty);
 
         return new UserKeyAuthorizationParameters(secret)
         {
@@ -53,7 +53,7 @@ public class PasswordEntryInterface : IUserSecretEntryInterface
     }
 
     /// <inheritdoc />
-    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> _)
+    public RawUserSecret GetUserSecret(Guid archiveId, ImmutableArray<SecretMetadata> _)
     {
         var passwordPrompt = new InputPrompt(this.IO, "Enter the password: ", isConfidentialInput: true);
         var password = passwordPrompt.GetValue();

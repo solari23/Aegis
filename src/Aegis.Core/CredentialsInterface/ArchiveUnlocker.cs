@@ -98,7 +98,7 @@ public sealed class ArchiveUnlocker
         var availableUserKeys = archive.GetUserKeyAuthorizations()
             .Where(key =>
                 this.SecretEntryInterfaces.ContainsKey(key.SecretMetadata.SecretKind)
-                && this.SecretEntryInterfaces[key.SecretMetadata.SecretKind].CanProvideSecret(key.SecretMetadata));
+                && this.SecretEntryInterfaces[key.SecretMetadata.SecretKind].CanProvideSecret(archive.Id, key.SecretMetadata));
 
         if (!availableUserKeys.Any())
         {
@@ -119,20 +119,21 @@ public sealed class ArchiveUnlocker
             .ToImmutableArray();
 
         // Finally, prompt to get the user secret and use it to unlock the archive.
-        using var userSecret = this.SecretEntryInterfaces[selectedSecretKind].GetUserSecret(selectedUserKeys);
+        using var userSecret = this.SecretEntryInterfaces[selectedSecretKind].GetUserSecret(archive.Id, selectedUserKeys);
         archive.Unlock(userSecret);
     }
 
     /// <summary>
     /// Prompts the user to provide the parameters for a new user key authorization.
     /// </summary>
+    /// <param name="archiveId">The unique identifier of the secure archive.</param>
     /// <returns>The new <see cref="UserKeyAuthorizationParameters"/>.</returns>
-    public UserKeyAuthorizationParameters GetNewUserKeyAuthorizationParams()
+    public UserKeyAuthorizationParameters GetNewUserKeyAuthorizationParams(Guid archiveId)
     {
         var newSecretKind = this.SecretEntryInterfaces.Count > 1
             ? this.SecretSelector.PromptSelectSecretKind(this.SecretEntryInterfaces.Keys.ToImmutableArray())
             : this.SecretEntryInterfaces.Keys.First();
 
-        return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters();
+        return this.SecretEntryInterfaces[newSecretKind].GetNewKeyAuthorizationParameters(archiveId);
     }
 }

@@ -37,10 +37,10 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
     private IOStreamSet IO { get; }
 
     /// <inheritdoc />
-    public bool CanProvideSecret(SecretMetadata secretMetadata) => true;
+    public bool CanProvideSecret(Guid archiveId, SecretMetadata secretMetadata) => true;
 
     /// <inheritdoc />
-    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters()
+    public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters(Guid archiveId)
     {
         var useExistingCertPrompt = new ConfirmationPrompt(this.IO, "Would you like to use an existing certificate?");
         var useExistingCert = useExistingCertPrompt.GetConfirmation();
@@ -62,7 +62,7 @@ public class CertificatePickerInterface : IUserSecretEntryInterface
     }
 
     /// <inheritdoc />
-    public RawUserSecret GetUserSecret(ImmutableArray<SecretMetadata> possibleSecretMetadata)
+    public RawUserSecret GetUserSecret(Guid archiveId, ImmutableArray<SecretMetadata> possibleSecretMetadata)
     {
         var possibleThumbprints = possibleSecretMetadata
             .Select(md => (md as RsaKeyFromCertificateSecretMetadata)?.Thumbprint)
