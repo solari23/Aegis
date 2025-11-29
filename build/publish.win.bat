@@ -1,0 +1,1 @@
+dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true %~dp0..\src\Aegis\Aegis.csproj
