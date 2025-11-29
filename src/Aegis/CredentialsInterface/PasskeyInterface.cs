@@ -48,7 +48,7 @@ public class PasskeyInterface : IUserSecretEntryInterface
     /// <inheritdoc />
     public UserKeyAuthorizationParameters GetNewKeyAuthorizationParameters(Guid archiveId)
     {
-        var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the new password: ");
+        var namePrompt = new InputPrompt(this.IO, "Enter a name to identify the passkey: ");
         var friendlyName = namePrompt.GetValue();
 
         var rpId = PasskeyHelpers.GetRelyingPartyIdForIdentifier(archiveId);
